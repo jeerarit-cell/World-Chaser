@@ -35,18 +35,25 @@
 
         /* Header & Wheel */
         header { margin-top: 20px; text-align: center; }
-        h1 { font-size: 2rem; margin: 0; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h1 { font-size: 2.5rem; margin: 0; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         
         .wheel-box { position: relative; margin: 20px 0; width: 160px; height: 160px; }
         .wheel-svg { width: 100%; height: 100%; animation: rotateWheel 20s linear infinite; filter: drop-shadow(0 0 10px rgba(0, 255, 163, 0.4)); }
         @keyframes rotateWheel { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* Game Cards */
-        .container { width: 90%; max-width: 400px; padding-bottom: 100px; }
-        .card { background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.05); }
+        .container { width: 90%; max-width: 400px; padding-bottom: 120px; }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; }
+        .card:hover { border-color: var(--primary); }
         .wld-val { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
+        .player-count-text { margin: 0; font-size: 0.85rem; color: var(--gray); }
         
-        .btn-join { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; padding: 10px 22px; border-radius: 12px; color: #000; font-weight: 700; cursor: pointer; }
+        .btn-join { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; padding: 10px 22px; border-radius: 12px; color: #000; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn-join:active { transform: scale(0.95); }
+
+        /* Footer Button */
+        .footer-action { position: fixed; bottom: 20px; width: 90%; max-width: 400px; left: 50%; transform: translateX(-50%); z-index: 10; }
+        .btn-worldid { width: 100%; background: #ffffff; color: #000; border: none; padding: 16px; border-radius: 50px; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2); }
 
         /* หน้า Waiting Room */
         .waiting-header { margin-top: 40px; text-align: center; }
@@ -92,49 +99,54 @@
             <div class="card">
                 <div class="info">
                     <span class="wld-val">0.001 WLD</span>
-                    <p style="margin:0; font-size: 0.8rem; color:var(--gray);">รางวัลสูงสุด 0.005 WLD</p>
+                    <p class="player-count-text">ผู้เล่นในห้อง: 2 / 5 คน</p>
                 </div>
-                <button class="btn-join" onclick="goToWaitingRoom('0.001')">JOIN</button>
+                <button class="btn-join" onclick="goToWaitingRoom('0.001', '2')">JOIN</button>
             </div>
             <div class="card">
                 <div class="info">
                     <span class="wld-val">0.01 WLD</span>
-                    <p style="margin:0; font-size: 0.8rem; color:var(--gray);">รางวัลสูงสุด 0.05 WLD</p>
+                    <p class="player-count-text">ผู้เล่นในห้อง: 4 / 5 คน</p>
                 </div>
-                <button class="btn-join" onclick="goToWaitingRoom('0.01')">JOIN</button>
+                <button class="btn-join" onclick="goToWaitingRoom('0.01', '4')">JOIN</button>
             </div>
+            <div class="card">
+                <div class="info">
+                    <span class="wld-val">0.1 WLD</span>
+                    <p class="player-count-text">ผู้เล่นในห้อง: 1 / 5 คน</p>
+                </div>
+                <button class="btn-join" onclick="goToWaitingRoom('0.1', '1')">JOIN</button>
+            </div>
+            <div class="card">
+                <div class="info">
+                    <span class="wld-val">1 WLD</span>
+                    <p class="player-count-text">ผู้เล่นในห้อง: 0 / 5 คน</p>
+                </div>
+                <button class="btn-join" onclick="goToWaitingRoom('1', '0')">JOIN</button>
+            </div>
+        </div>
+
+        <div class="footer-action">
+            <button class="btn-worldid" onclick="alert('ระบบกำลังเชื่อมต่อ World ID...')">
+                ID Verify with World ID
+            </button>
         </div>
     </div>
 
     <div id="waiting-view" class="view">
         <div class="waiting-header">
             <h2 style="color: var(--primary); margin:0;">ห้องรอผู้เล่น</h2>
-            <p id="selected-amount" style="color: var(--secondary);"></p>
+            <p id="selected-amount" style="color: var(--secondary); margin:5px 0;"></p>
         </div>
 
         <div class="room-status">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span>ผู้เล่นในวง (3 / 5)</span>
+                <span id="room-occupancy">ผู้เล่นในวง (3 / 5)</span>
                 <span class="loader"></span>
             </div>
             
-            <ul class="player-list">
-                <li class="player-item">
-                    <div class="avatar">👨‍💻</div>
-                    <span class="player-address">0x71C...4f2E</span>
-                    <span class="status-badge">READY</span>
-                </li>
-                <li class="player-item">
-                    <div class="avatar">🤖</div>
-                    <span class="player-address">0x32A...9b1C</span>
-                    <span class="status-badge">READY</span>
-                </li>
-                <li class="player-item" style="opacity: 0.5;">
-                    <div class="avatar">👤</div>
-                    <span class="player-address">คุณ (กำลังเชื่อมต่อ...)</span>
-                    <span class="status-badge" style="background: var(--secondary);">WAITING</span>
-                </li>
-            </ul>
+            <ul class="player-list" id="dynamic-player-list">
+                </ul>
 
             <p style="font-size: 0.8rem; color: var(--gray); text-align: center;">เมื่อครบ 5 คน ชิงช้าจะเริ่มหมุนทันที!</p>
         </div>
@@ -143,10 +155,32 @@
     </div>
 
     <script>
-        function goToWaitingRoom(amount) {
+        function goToWaitingRoom(amount, currentCount) {
             document.getElementById('lobby-view').classList.remove('active');
             document.getElementById('waiting-view').classList.add('active');
             document.getElementById('selected-amount').innerText = "วงเงินเดิมพัน: " + amount + " WLD";
+            
+            const nextCount = parseInt(currentCount) + 1;
+            document.getElementById('room-occupancy').innerText = `ผู้เล่นในวง (${nextCount} / 5)`;
+            
+            // จำลองรายชื่อผู้เล่น
+            const playerList = document.getElementById('dynamic-player-list');
+            playerList.innerHTML = '';
+            for(let i=0; i < currentCount; i++) {
+                playerList.innerHTML += `
+                    <li class="player-item">
+                        <div class="avatar">👤</div>
+                        <span class="player-address">0x${Math.random().toString(16).substr(2, 3)}...${Math.random().toString(16).substr(2, 4)}</span>
+                        <span class="status-badge">READY</span>
+                    </li>`;
+            }
+            playerList.innerHTML += `
+                <li class="player-item" style="border-color: var(--primary);">
+                    <div class="avatar" style="background:var(--primary); color:#000;">ME</div>
+                    <span class="player-address">คุณ (เชื่อมต่อแล้ว)</span>
+                    <span class="status-badge" style="background: var(--secondary); color:#000;">WAITING</span>
+                </li>`;
+
             window.scrollTo(0,0);
         }
 
