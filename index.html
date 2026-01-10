@@ -3,191 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Spin - ชิงช้าสวรรค์นำโชค</title>
+    <title>World Spin - Play Room</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #00ffa3;
-            --secondary: #00d1ff;
-            --bg: #0a0e14;
-            --card-bg: #161c24;
-            --text: #ffffff;
-            --gray: #8b949e;
+            --primary: #00ffa3; --secondary: #00d1ff; --bg: #0a0e14;
+            --card-bg: #161c24; --text: #ffffff; --gray: #8b949e; --danger: #ff4d4d;
         }
-
-        body {
-            font-family: 'Kanit', sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-
-        /* การจัดการหน้าจอ (Views) */
-        .view { display: none; flex-direction: column; align-items: center; min-height: 100vh; width: 100%; }
+        body { font-family: 'Kanit', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
+        .view { display: none; flex-direction: column; height: 100vh; width: 100%; }
         .view.active { display: flex; }
 
-        /* Ticker แถบวิ่ง */
-        .ticker-container { width: 100%; background: rgba(0, 255, 163, 0.1); border-bottom: 1px solid rgba(0, 255, 163, 0.2); padding: 8px 0; overflow: hidden; }
-        .ticker-text { display: inline-block; white-space: nowrap; animation: marquee 20s linear infinite; color: var(--primary); font-size: 0.8rem; }
+        /* Ticker แถบวิ่งผู้ชนะ */
+        .winner-ticker { background: rgba(0, 0, 0, 0.8); border-bottom: 1px solid var(--primary); padding: 5px 0; overflow: hidden; white-space: nowrap; }
+        .ticker-text { display: inline-block; animation: marquee 15s linear infinite; color: var(--primary); font-size: 0.8rem; }
         @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        /* Header & Wheel */
-        header { margin-top: 20px; text-align: center; }
-        h1 { font-size: 2.5rem; margin: 0; background: linear-gradient(90deg, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .wheel-box { position: relative; margin: 20px 0; width: 160px; height: 160px; }
-        .wheel-svg { width: 100%; height: 100%; animation: rotateWheel 20s linear infinite; filter: drop-shadow(0 0 10px rgba(0, 255, 163, 0.4)); }
-        @keyframes rotateWheel { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* ส่วนแสดงยอดเงินในกระเป๋า */
+        .wallet-bar { display: flex; justify-content: space-between; padding: 10px 20px; background: #1c252e; font-size: 0.9rem; border-bottom: 1px solid #30363d; }
+        .balance { color: var(--secondary); font-weight: bold; }
 
-        /* Game Cards */
-        .container { width: 90%; max-width: 400px; padding-bottom: 120px; }
-        .card { background: var(--card-bg); border-radius: 16px; padding: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255, 255, 255, 0.05); transition: 0.3s; }
-        .card:hover { border-color: var(--primary); }
-        .wld-val { font-size: 1.2rem; font-weight: 700; color: var(--primary); }
-        .player-count-text { margin: 0; font-size: 0.85rem; color: var(--gray); }
-        
-        .btn-join { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; padding: 10px 22px; border-radius: 12px; color: #000; font-weight: 700; cursor: pointer; transition: 0.2s; }
-        .btn-join:active { transform: scale(0.95); }
+        /* ส่วนแสดงผลเกม (บน) */
+        .game-display { text-align: center; padding: 20px; background: linear-gradient(to bottom, #161c24, #0a0e14); }
+        .timer-circle { width: 80px; height: 80px; border: 4px solid var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; font-size: 1.5rem; font-weight: bold; box-shadow: 0 0 15px var(--primary); }
+        .pot-box { background: rgba(0, 255, 163, 0.1); border: 1px dashed var(--primary); border-radius: 10px; padding: 10px; margin-top: 10px; }
+        .pot-amount { font-size: 1.4rem; color: #fbbf24; font-weight: bold; }
 
-        /* Footer Button */
-        .footer-action { position: fixed; bottom: 20px; width: 90%; max-width: 400px; left: 50%; transform: translateX(-50%); z-index: 10; }
-        .btn-worldid { width: 100%; background: #ffffff; color: #000; border: none; padding: 16px; border-radius: 50px; font-size: 1.1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 10px 30px rgba(255, 255, 255, 0.2); }
+        /* รายละเอียดผู้เล่น */
+        .player-stats { display: flex; justify-content: space-around; margin: 15px 0; font-size: 0.8rem; color: var(--gray); }
+        .stat-item b { color: white; font-size: 1rem; }
 
-        /* หน้า Waiting Room */
-        .waiting-header { margin-top: 40px; text-align: center; }
-        .room-status { background: var(--card-bg); width: 90%; max-width: 350px; border-radius: 20px; padding: 20px; margin-top: 20px; border: 1px solid var(--primary); }
-        .player-list { list-style: none; padding: 0; margin: 20px 0; }
-        .player-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .avatar { width: 30px; height: 30px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; border: 1px solid var(--secondary); }
-        .player-address { font-family: monospace; color: var(--gray); }
-        .status-badge { margin-left: auto; font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: rgba(0, 255, 163, 0.2); color: var(--primary); }
+        /* ช่องแชท (กลาง) */
+        .chat-container { flex-grow: 1; overflow-y: auto; padding: 15px; background: rgba(255,255,255,0.02); display: flex; flex-direction: column; gap: 8px; }
+        .chat-msg { font-size: 0.85rem; background: #1c252e; padding: 8px 12px; border-radius: 10px; max-width: 80%; border-left: 3px solid var(--secondary); }
+        .chat-msg b { color: var(--secondary); }
 
-        .btn-back { margin-top: 20px; background: transparent; border: 1px solid var(--gray); color: var(--gray); padding: 8px 20px; border-radius: 50px; cursor: pointer; }
-
-        .loader { width: 20px; height: 20px; border: 2px solid var(--primary); border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; margin-top: 10px; }
-        @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* ส่วนควบคุมด้านล่าง */
+        .control-panel { padding: 15px; background: #161c24; border-top: 1px solid #30363d; }
+        .chat-input-box { display: flex; gap: 8px; margin-bottom: 10px; }
+        .chat-input { flex-grow: 1; background: #0a0e14; border: 1px solid #30363d; border-radius: 20px; padding: 8px 15px; color: white; outline: none; }
+        .btn-play { width: 100%; background: linear-gradient(90deg, var(--primary), var(--secondary)); border: none; padding: 15px; border-radius: 50px; font-size: 1.2rem; font-weight: bold; color: #000; cursor: pointer; box-shadow: 0 5px 15px rgba(0, 255, 163, 0.4); }
+        .btn-play:disabled { background: #333; color: #666; box-shadow: none; }
     </style>
 </head>
 <body>
 
-    <div id="lobby-view" class="view active">
-        <div class="ticker-container">
-            <div class="ticker-text">⚡ ยินดีด้วยกับคุณ @Manoch ชนะ 0.05 WLD | 🎡 วง 0.01 WLD กำลังจะเต็มแล้ว | 🚀 ร่วมสนุกได้เลย!</div>
-        </div>
-
-        <header>
-            <h1>WORLD SPIN</h1>
-            <p style="color:var(--gray); font-size: 0.8rem;">วงล้อสุ่มผู้โชคดีบน World Chain</p>
-        </header>
-
-        <div class="wheel-box">
-            <svg class="wheel-svg" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="2" stroke-dasharray="5,5"/>
-                <circle cx="50" cy="50" r="5" fill="currentColor"/>
-                <line x1="50" y1="50" x2="50" y2="5" stroke="currentColor" stroke-width="1"/>
-                <line x1="50" y1="50" x2="50" y2="95" stroke="currentColor" stroke-width="1"/>
-                <line x1="50" y1="50" x2="5" y2="50" stroke="currentColor" stroke-width="1"/>
-                <line x1="50" y1="50" x2="95" y2="50" stroke="currentColor" stroke-width="1"/>
-                <circle cx="50" cy="5" r="3" fill="var(--primary)"/><circle cx="50" cy="95" r="3" fill="var(--primary)"/>
-                <circle cx="5" cy="50" r="3" fill="var(--primary)"/><circle cx="95" cy="50" r="3" fill="var(--primary)"/>
-            </svg>
-        </div>
-
-        <div class="container">
-            <div class="card">
-                <div class="info">
-                    <span class="wld-val">0.001 WLD</span>
-                    <p class="player-count-text">ผู้เล่นในห้อง: 2 / 5 คน</p>
-                </div>
-                <button class="btn-join" onclick="goToWaitingRoom('0.001', '2')">JOIN</button>
-            </div>
-            <div class="card">
-                <div class="info">
-                    <span class="wld-val">0.01 WLD</span>
-                    <p class="player-count-text">ผู้เล่นในห้อง: 4 / 5 คน</p>
-                </div>
-                <button class="btn-join" onclick="goToWaitingRoom('0.01', '4')">JOIN</button>
-            </div>
-            <div class="card">
-                <div class="info">
-                    <span class="wld-val">0.1 WLD</span>
-                    <p class="player-count-text">ผู้เล่นในห้อง: 1 / 5 คน</p>
-                </div>
-                <button class="btn-join" onclick="goToWaitingRoom('0.1', '1')">JOIN</button>
-            </div>
-            <div class="card">
-                <div class="info">
-                    <span class="wld-val">1 WLD</span>
-                    <p class="player-count-text">ผู้เล่นในห้อง: 0 / 5 คน</p>
-                </div>
-                <button class="btn-join" onclick="goToWaitingRoom('1', '0')">JOIN</button>
-            </div>
-        </div>
-
-        <div class="footer-action">
-            <button class="btn-worldid" onclick="alert('ระบบกำลังเชื่อมต่อ World ID...')">
-                ID Verify with World ID
-            </button>
+    <div id="lobby-view" class="view active" style="display: flex;">
+        <div style="padding: 50px 20px; text-align: center;">
+            <h1 style="color:var(--primary)">WORLD SPIN</h1>
+            <p>เลือกห้องเพื่อเริ่มสนุก</p>
+            <button class="btn-play" onclick="joinGame('0.01')">เข้าห้อง 0.01 WLD</button>
+            <p style="margin-top:20px; color:var(--gray)">*จำลองกดเข้าห้อง 0.01 WLD*</p>
         </div>
     </div>
 
-    <div id="waiting-view" class="view">
-        <div class="waiting-header">
-            <h2 style="color: var(--primary); margin:0;">ห้องรอผู้เล่น</h2>
-            <p id="selected-amount" style="color: var(--secondary); margin:5px 0;"></p>
+    <div id="play-view" class="view">
+        <div class="winner-ticker">
+            <div class="ticker-text">🏆 ผู้ชนะห้อง 0.1 WLD: 0x82...12A รับ 0.35 WLD | 🏆 ผู้ชนะห้อง 0.001 WLD: 0x14...55B รับ 0.0035 WLD</div>
         </div>
 
-        <div class="room-status">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span id="room-occupancy">ผู้เล่นในวง (3 / 5)</span>
-                <span class="loader"></span>
-            </div>
+        <div class="wallet-bar">
+            <span>Wallet: <span class="balance">0x71...4f2E</span></span>
+            <span>Balance: <span class="balance">1.250 WLD</span></span>
+        </div>
+
+        <div class="game-display">
+            <div class="timer-circle" id="timer">60</div>
+            <p style="margin:5px 0; font-size:0.8rem; color:var(--gray)">นับถอยหลังสุ่มรางวัล</p>
             
-            <ul class="player-list" id="dynamic-player-list">
-                </ul>
+            <div class="pot-box">
+                <span style="font-size:0.8rem">เงินรางวัลรวมในรอบนี้ (หักค่าธรรมเนียม 30% แล้ว)</span><br>
+                <span class="pot-amount" id="pot-display">0.035 WLD</span>
+            </div>
 
-            <p style="font-size: 0.8rem; color: var(--gray); text-align: center;">เมื่อครบ 5 คน ชิงช้าจะเริ่มหมุนทันที!</p>
+            <div class="player-stats">
+                <div class="stat-item">ผู้เข้าร่วม<br><b id="player-count">5</b> คน</div>
+                <div class="stat-item">ห้องระดับ<br><b id="room-level">0.01 WLD</b></div>
+            </div>
         </div>
 
-        <button class="btn-back" onclick="goToLobby()">← ออกจากห้อง</button>
+        <div class="chat-container" id="chat-box">
+            <div class="chat-msg"><b>System:</b> ยินดีต้อนรับเข้าสู่ห้อง 0.01 WLD</div>
+            <div class="chat-msg"><b>0x32...9b:</b> รอบนี้คนเยอะจัง</div>
+            <div class="chat-msg"><b>0x11...2c:</b> ลงไปแล้ว รอลุ้นนน</div>
+        </div>
+
+        <div class="control-panel">
+            <div class="chat-input-box">
+                <input type="text" class="chat-input" placeholder="พิมพ์ข้อความที่นี่...">
+                <button style="background:none; border:none; color:var(--primary); font-weight:bold;">ส่ง</button>
+            </div>
+            <button class="btn-play" id="play-action-btn" onclick="pressPlay()">
+                PLAY (0.01 WLD)
+            </button>
+        </div>
+        <button onclick="exitGame()" style="background:none; border:none; color:var(--gray); padding:10px; font-size:0.8rem;">← ออกจากห้อง</button>
     </div>
 
     <script>
-        function goToWaitingRoom(amount, currentCount) {
-            document.getElementById('lobby-view').classList.remove('active');
-            document.getElementById('waiting-view').classList.add('active');
-            document.getElementById('selected-amount').innerText = "วงเงินเดิมพัน: " + amount + " WLD";
-            
-            const nextCount = parseInt(currentCount) + 1;
-            document.getElementById('room-occupancy').innerText = `ผู้เล่นในวง (${nextCount} / 5)`;
-            
-            // จำลองรายชื่อผู้เล่น
-            const playerList = document.getElementById('dynamic-player-list');
-            playerList.innerHTML = '';
-            for(let i=0; i < currentCount; i++) {
-                playerList.innerHTML += `
-                    <li class="player-item">
-                        <div class="avatar">👤</div>
-                        <span class="player-address">0x${Math.random().toString(16).substr(2, 3)}...${Math.random().toString(16).substr(2, 4)}</span>
-                        <span class="status-badge">READY</span>
-                    </li>`;
-            }
-            playerList.innerHTML += `
-                <li class="player-item" style="border-color: var(--primary);">
-                    <div class="avatar" style="background:var(--primary); color:#000;">ME</div>
-                    <span class="player-address">คุณ (เชื่อมต่อแล้ว)</span>
-                    <span class="status-badge" style="background: var(--secondary); color:#000;">WAITING</span>
-                </li>`;
+        let timeLeft = 60;
+        let players = 5;
+        let entryFee = 0.01;
+        let timerInterval;
 
-            window.scrollTo(0,0);
+        function joinGame(amount) {
+            entryFee = parseFloat(amount);
+            document.getElementById('lobby-view').style.display = 'none';
+            document.getElementById('play-view').classList.add('active');
+            document.getElementById('room-level').innerText = amount + " WLD";
+            document.getElementById('play-action-btn').innerText = "PLAY (" + amount + " WLD)";
+            updatePot();
+            startTimer();
         }
 
-        function goToLobby() {
-            document.getElementById('waiting-view').classList.remove('active');
-            document.getElementById('lobby-view').classList.add('active');
-            window.scrollTo(0,0);
+        function updatePot() {
+            // สูตร: (จำนวนคน * ค่าเข้า) * 0.7 (หัก 30%)
+            let rawPot = players * entryFee;
+            let netPot = rawPot * 0.7;
+            document.getElementById('pot-display').innerText = netPot.toFixed(4) + " WLD";
+            document.getElementById('player-count').innerText = players;
+        }
+
+        function startTimer() {
+            if(timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if(timeLeft > 0) {
+                    timeLeft--;
+                    document.getElementById('timer').innerText = timeLeft;
+                    if(timeLeft <= 10) document.getElementById('timer').style.color = 'var(--danger)';
+                } else {
+                    alert("เริ่มการสุ่มรางวัล!");
+                    timeLeft = 60; // รีเซ็ตเพื่อจำลองใหม่
+                    document.getElementById('timer').style.color = 'var(--primary)';
+                }
+            }, 1000);
+        }
+
+        function pressPlay() {
+            players++;
+            updatePot();
+            const chat = document.getElementById('chat-box');
+            chat.innerHTML += `<div class="chat-msg"><b>You:</b> เข้าร่วมการหมุนแล้ว! 🎉</div>`;
+            chat.scrollTop = chat.scrollHeight;
+            document.getElementById('play-action-btn').disabled = true;
+            document.getElementById('play-action-btn').innerText = "WAITING FOR SPIN...";
+        }
+
+        function exitGame() {
+            clearInterval(timerInterval);
+            document.getElementById('play-view').classList.remove('active');
+            document.getElementById('lobby-view').style.display = 'flex';
         }
     </script>
 </body>
