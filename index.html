@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ชิงช้าสวรรค์ World Chain</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background: #f0f2f5; margin: 0; }
+        /* แถบวิ่งด้านบน */
+        .ticker { background: #000; color: #fbbf24; padding: 10px; overflow: hidden; white-space: nowrap; }
+        .ticker-text { display: inline-block; animation: marquee 15s linear infinite; }
+        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        
+        .wheel-container { margin: 50px auto; width: 200px; height: 200px; border: 5px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+        .row-container { padding: 20px; }
+        .row { background: white; margin: 10px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
+        .btn-join { background: #0070f3; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+    <div class="ticker">
+        <div class="ticker-text">🎉 ยินดีกับคุณ Manoch_World ชนะ 0.007 WLD! | 🎡 รอบใหม่กำลังจะเริ่มในวง 0.1 WLD...</div>
+    </div>
+
+    <h1>🎡 ชิงช้าสวรรค์</h1>
+    <div class="wheel-container">รูปชิงช้าสวรรค์</div>
+
+    <div class="row-container">
+        <div class="row">
+            <span>วง 0.001 WLD (2/5 คน)</span>
+            <button class="btn-join">เข้าร่วม</button>
+        </div>
+        <div class="row">
+            <span>วง 0.01 WLD (0/5 คน)</span>
+            <button class="btn-join">เข้าร่วม</button>
+        </div>
+    </div>
+
+    <script>
+        console.log("Mini App Ready!");
+    </script>
+</body>
+</html>
