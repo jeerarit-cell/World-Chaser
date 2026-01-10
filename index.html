@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>World Spin - Neon Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
@@ -27,66 +27,66 @@
         .view { display: none; flex-direction: column; height: 100%; width: 100%; }
         .view.active { display: flex; }
 
-        /* --- หน้า LOBBY (LOCKED) --- */
-        .lobby-header { 
-            padding: 40px 20px; text-align: center; 
-            background: linear-gradient(180deg, rgba(0,255,163,0.1) 0%, rgba(10,17,24,0) 100%);
-        }
-        .lobby-header h1 { font-size: 2.5rem; margin: 0; color: var(--primary); text-shadow: 0 0 15px rgba(0, 255, 163, 0.5); }
-        .room-list { padding: 15px; flex-grow: 1; overflow-y: auto; }
+        /* --- หน้า LOBBY --- */
+        .lobby-header { padding: 30px 20px 10px; text-align: center; }
+        .lobby-header h1 { font-size: 2.2rem; margin: 0; color: var(--primary); text-shadow: 0 0 15px rgba(0, 255, 163, 0.4); }
+        .room-list { padding: 10px 15px; flex-grow: 1; overflow-y: auto; }
         .room-card { 
-            background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 15px; 
+            background: var(--card-bg); border-radius: 18px; padding: 15px 20px; margin-bottom: 12px; 
             display: flex; justify-content: space-between; align-items: center;
             border: 1px solid rgba(255,255,255,0.05);
         }
-        .room-info b { font-size: 1.3rem; color: var(--primary); }
+        .room-info b { font-size: 1.2rem; color: var(--primary); }
+        .room-info p { margin: 4px 0 0; font-size: 0.8rem; color: var(--gray); }
         .btn-join { 
             background: linear-gradient(135deg, var(--primary), var(--secondary)); 
-            border: none; padding: 12px 25px; border-radius: 15px; 
+            border: none; padding: 10px 20px; border-radius: 12px; 
             font-weight: bold; color: #000; cursor: pointer;
         }
-
-        /* --- หน้า PLAY ROOM (ปรับปรุงใหม่) --- */
-        .ticker { background: rgba(0,0,0,0.5); color: var(--primary); padding: 8px; font-size: 0.75rem; text-align: center; }
-        .wallet-bar { padding: 10px 20px; display: flex; justify-content: space-between; font-size: 0.85rem; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.05); }
-        
-        .dash { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; }
-        .dash-item { background: rgba(0,255,163,0.05); border: 1px solid rgba(0,255,163,0.2); border-radius: 12px; padding: 8px; text-align: center; }
-        .dash-item span { font-size: 0.6rem; display: block; color: var(--gray); margin-bottom: 2px; }
-        .dash-item b { font-size: 0.9rem; color: var(--primary); }
-
-        /* Player Slide (แถวเดียวสไลด์วน) */
-        .player-slide-wrapper { padding: 5px 15px; }
-        .player-slide { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 10px; scroll-behavior: smooth; }
-        .player-slide::-webkit-scrollbar { height: 3px; }
-        .player-slide::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
-        .slot-circle { 
-            min-width: 50px; height: 50px; border-radius: 50%; background: rgba(255,255,255,0.03); 
-            border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+        .verify-section { padding: 15px; background: var(--bg); }
+        .btn-verify { 
+            width: 100%; padding: 15px; border-radius: 30px; border: none; 
+            background: #ffffff; color: #000; font-weight: bold; font-size: 1rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        .slot-circle.active { background: rgba(0,255,163,0.1); border: 1.5px solid var(--primary); box-shadow: 0 0 10px rgba(0,255,163,0.2); }
+
+        /* --- หน้า PLAY ROOM --- */
+        .ticker { background: rgba(0,0,0,0.5); color: var(--primary); padding: 6px; font-size: 0.7rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .wallet-bar { padding: 8px 15px; display: flex; justify-content: space-between; font-size: 0.8rem; background: rgba(255,255,255,0.02); }
+        
+        .dash { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 15px; }
+        .dash-item { background: rgba(0,255,163,0.03); border: 1px solid rgba(0,255,163,0.15); border-radius: 12px; padding: 6px; text-align: center; }
+        .dash-item span { font-size: 0.6rem; display: block; color: var(--gray); margin-bottom: 2px; }
+        .dash-item b { font-size: 0.85rem; color: var(--primary); }
+
+        .player-slide-wrapper { padding: 5px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .player-slide { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 8px; }
+        .slot-circle { 
+            min-width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.03); 
+            border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 1rem;
+        }
+        .slot-circle.active { background: rgba(0,255,163,0.1); border: 1.5px solid var(--primary); box-shadow: 0 0 8px rgba(0,255,163,0.2); }
 
         .chat-area { flex-grow: 1; margin: 10px 15px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 15px; overflow-y: auto; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.05); }
-        .msg { margin-bottom: 5px; }
+        .msg { margin-bottom: 4px; }
         .msg b { color: var(--secondary); }
 
-        /* แผงควบคุมด้านล่าง */
-        .controls-grid { 
-            background: var(--card-bg); padding: 15px 15px 30px; 
-            border-radius: 25px 25px 0 0; border-top: 1px solid rgba(0,255,163,0.2);
-            display: grid; grid-template-columns: 1fr 120px; gap: 10px; align-items: start;
-        }
-        .chat-input-box { display: flex; flex-direction: column; gap: 5px; }
-        .chat-input-box input { background: #0a1118; border: 1px solid #333; border-radius: 10px; padding: 12px; color: #fff; outline: none; font-family: 'Kanit'; }
+        /* แผงควบคุมด้านล่าง (Fix ปุ่มส่งและปุ่มย้อนกลับ) */
+        .bottom-controls { background: var(--card-bg); padding: 12px 15px 25px; border-radius: 20px 20px 0 0; }
+        .input-row { display: grid; grid-template-columns: 1fr 120px; gap: 10px; margin-bottom: 10px; }
         
-        .play-btn-box { display: flex; flex-direction: column; gap: 8px; }
-        .btn-play-action { 
+        .chat-input-wrap { position: relative; display: flex; align-items: center; }
+        .chat-input-wrap input { width: 100%; background: #0a1118; border: 1px solid #333; border-radius: 10px; padding: 12px 40px 12px 12px; color: #fff; font-family: 'Kanit'; font-size: 0.9rem; }
+        .btn-send-msg { position: absolute; right: 10px; background: none; border: none; color: var(--primary); font-size: 1.2rem; cursor: pointer; }
+
+        .action-column { display: flex; flex-direction: column; gap: 8px; }
+        .btn-play-main { 
             background: linear-gradient(135deg, var(--primary), var(--secondary)); 
-            border: none; padding: 15px 5px; border-radius: 12px; 
-            font-weight: bold; color: #000; cursor: pointer; font-size: 0.9rem;
-            box-shadow: 0 4px 12px rgba(0, 255, 163, 0.3);
+            border: none; padding: 12px; border-radius: 10px; 
+            font-weight: bold; color: #000; font-size: 0.9rem;
+            box-shadow: 0 4px 10px rgba(0, 255, 163, 0.2);
         }
-        .btn-back-lobby { background: none; border: 1px solid #444; color: var(--gray); padding: 5px; border-radius: 8px; font-size: 0.7rem; cursor: pointer; }
+        .btn-exit { background: rgba(255,255,255,0.05); border: 1px solid #333; color: var(--gray); padding: 6px; border-radius: 8px; font-size: 0.7rem; }
     </style>
 </head>
 <body>
@@ -94,7 +94,7 @@
     <div id="lobby-view" class="view active">
         <div class="lobby-header">
             <h1>WORLD SPIN</h1>
-            <p style="color: var(--gray)">หมุนวงล้อแห่งโชคบน World Chain</p>
+            <p style="color: var(--gray); font-size: 0.85rem;">หมุนวงล้อแห่งโชคบน World Chain</p>
         </div>
         <div class="room-list">
             <div class="room-card">
@@ -114,6 +114,11 @@
                 <button class="btn-join" onclick="enterRoom('1')">JOIN</button>
             </div>
         </div>
+        <div class="verify-section">
+            <button class="btn-verify">
+                <img src="https://worldcoin.org/icons/logo.svg" width="20"> ID Verify with World ID
+            </button>
+        </div>
     </div>
 
     <div id="play-view" class="view">
@@ -125,29 +130,31 @@
         </div>
 
         <div class="dash">
-            <div class="dash-item"><span>เงินรางวัลที่คุณจะได้รับ</span><b id="pot-txt">0.0000</b></div>
+            <div class="dash-item"><span>รางวัลที่ได้รับ</span><b id="pot-txt">0.0000</b></div>
             <div class="dash-item"><span>สถานะเวลา</span><b id="timer-txt">WAITING...</b></div>
             <div class="dash-item"><span>PLAYERS</span><b id="player-count">0</b></div>
         </div>
 
         <div class="player-slide-wrapper">
-            <div class="player-slide" id="player-slide">
-                </div>
+            <div class="player-slide" id="player-slide"></div>
         </div>
 
         <div class="chat-area" id="chat-box">
-            <div class="msg"><b>System:</b> ยินดีต้อนรับ! รอผู้เล่น 2 คนเพื่อเริ่มนับเวลา 🎡</div>
+            <div class="msg"><b>System:</b> ยินดีต้อนรับ! รอผู้เล่น 2 คนเพื่อเริ่ม 🎡</div>
         </div>
 
-        <div class="controls-grid">
-            <div class="chat-input-box">
-                <input type="text" placeholder="พิมพ์คุยกันที่นี่...">
-            </div>
-            <div class="play-btn-box">
-                <button class="btn-play-action" id="play-btn" onclick="handlePlay()">
-                    PLAY <span id="btn-amt">0.00</span>
-                </button>
-                <button class="btn-back-lobby" onclick="goHome()">← กลับหน้าแรก</button>
+        <div class="bottom-controls">
+            <div class="input-row">
+                <div class="chat-input-wrap">
+                    <input type="text" id="chat-input" placeholder="พิมพ์คุยกัน...">
+                    <button class="btn-send-msg" onclick="sendChat()">🚀</button>
+                </div>
+                <div class="action-column">
+                    <button class="btn-play-main" onclick="handlePlay()">
+                        PLAY <span id="btn-amt">0.00</span>
+                    </button>
+                    <button class="btn-exit" onclick="goHome()">← เปลี่ยนห้อง</button>
+                </div>
             </div>
         </div>
     </div>
@@ -157,55 +164,45 @@
 
         function enterRoom(amount) {
             roomAmt = parseFloat(amount);
-            currentPlayers = 0; // เริ่มต้นห้องใหม่
+            currentPlayers = 0;
             document.getElementById('lobby-view').classList.remove('active');
             document.getElementById('play-view').classList.add('active');
             document.getElementById('btn-amt').innerText = amount;
-            
             resetGame();
             renderSlide();
             updateStats();
         }
 
-        function resetGame() {
-            if(gameInterval) clearInterval(gameInterval);
-            gameInterval = null;
-            timeSec = 60;
-            document.getElementById('timer-txt').innerText = "WAITING...";
-            document.getElementById('timer-txt').style.color = "var(--gray)";
-        }
-
         function renderSlide() {
             const slide = document.getElementById('player-slide');
             slide.innerHTML = '';
-            // จำลองสล็อต 15 ช่องให้สไลด์ได้
-            for(let i=0; i<15; i++) {
+            for(let i=0; i<10; i++) {
                 const isActive = i < currentPlayers;
-                slide.innerHTML += `
-                    <div class="slot-circle ${isActive ? 'active' : ''}">
-                        ${isActive ? '👤' : ''}
-                    </div>`;
+                slide.innerHTML += `<div class="slot-circle ${isActive ? 'active' : ''}">${isActive ? '👤' : ''}</div>`;
             }
         }
 
         function updateStats() {
-            // โชว์เงินรางวัลที่ได้รับจริง (หัก 30% ในใจแล้ว)
             let netWin = (currentPlayers * roomAmt) * 0.7;
             document.getElementById('pot-txt').innerText = netWin.toFixed(4) + " WLD";
             document.getElementById('player-count').innerText = currentPlayers;
         }
 
+        function handlePlay() {
+            currentPlayers++;
+            renderSlide();
+            updateStats();
+            if(currentPlayers >= 2 && !gameInterval) startCountdown();
+            addChat("You", "เข้าร่วมแล้ว! 🚀");
+        }
+
         function startCountdown() {
-            if(gameInterval) return; // ถ้าเริ่มแล้วไม่ต้องเริ่มซ้ำ
-            
             document.getElementById('timer-txt').style.color = "var(--primary)";
             gameInterval = setInterval(() => {
                 timeSec--;
-                let display = timeSec < 10 ? "0"+timeSec : timeSec;
-                document.getElementById('timer-txt').innerText = "00:" + display;
-                
+                document.getElementById('timer-txt').innerText = "00:" + (timeSec < 10 ? "0"+timeSec : timeSec);
                 if(timeSec <= 0) {
-                    alert("สุ่มผู้ชนะ!");
+                    alert("จับรางวัล!");
                     currentPlayers = 0;
                     resetGame();
                     renderSlide();
@@ -214,21 +211,25 @@
             }, 1000);
         }
 
-        function handlePlay() {
-            currentPlayers++;
-            renderSlide();
-            updateStats();
-            
-            // ถ้ามี 2 คนขึ้นไป ให้เริ่มนับเวลา
-            if(currentPlayers >= 2 && !gameInterval) {
-                startCountdown();
-                const cb = document.getElementById('chat-box');
-                cb.innerHTML += `<div class="msg" style="color:var(--primary)"><b>System:</b> ผู้เล่นครบ 2 คน เริ่มนับถอยหลัง!</div>`;
+        function sendChat() {
+            const input = document.getElementById('chat-input');
+            if(input.value.trim() != "") {
+                addChat("You", input.value);
+                input.value = "";
             }
+        }
 
+        function addChat(user, text) {
             const cb = document.getElementById('chat-box');
-            cb.innerHTML += `<div class="msg"><b>You:</b> เข้าร่วมแล้ว! 🚀</div>`;
+            cb.innerHTML += `<div class="msg"><b>${user}:</b> ${text}</div>`;
             cb.scrollTop = cb.scrollHeight;
+        }
+
+        function resetGame() {
+            if(gameInterval) clearInterval(gameInterval);
+            gameInterval = null;
+            timeSec = 60;
+            document.getElementById('timer-txt').innerText = "WAITING...";
         }
 
         function goHome() {
