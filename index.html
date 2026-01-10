@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>World Spin - Neon Edition</title>
+    <title>World Spin - Compact Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,78 +15,59 @@
             --gray: #8b949e;
         }
 
-        body {
-            font-family: 'Kanit', sans-serif;
-            margin: 0; padding: 0;
-            background-color: var(--bg);
-            color: var(--text);
-            display: flex; flex-direction: column; height: 100vh;
-            overflow: hidden;
+        /* ล็อคความสูงหน้าจอ 100% ไม่ให้มี Scroll */
+        html, body { 
+            height: 100%; margin: 0; padding: 0; overflow: hidden; 
+            background-color: var(--bg); color: var(--text); font-family: 'Kanit', sans-serif;
         }
 
-        .view { display: none; flex-direction: column; height: 100%; width: 100%; }
+        .view { display: none; flex-direction: column; height: 100vh; width: 100%; }
         .view.active { display: flex; }
 
-        /* --- หน้า LOBBY --- */
-        .lobby-header { padding: 30px 20px 10px; text-align: center; }
-        .lobby-header h1 { font-size: 2.2rem; margin: 0; color: var(--primary); text-shadow: 0 0 15px rgba(0, 255, 163, 0.4); }
-        .room-list { padding: 10px 15px; flex-grow: 1; overflow-y: auto; }
-        .room-card { 
-            background: var(--card-bg); border-radius: 18px; padding: 15px 20px; margin-bottom: 12px; 
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .room-info b { font-size: 1.2rem; color: var(--primary); }
-        .room-info p { margin: 4px 0 0; font-size: 0.8rem; color: var(--gray); }
-        .btn-join { 
-            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
-            border: none; padding: 10px 20px; border-radius: 12px; 
-            font-weight: bold; color: #000; cursor: pointer;
-        }
-        .verify-section { padding: 15px; background: var(--bg); }
-        .btn-verify { 
-            width: 100%; padding: 15px; border-radius: 30px; border: none; 
-            background: #ffffff; color: #000; font-weight: bold; font-size: 1rem;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-
-        /* --- หน้า PLAY ROOM --- */
-        .ticker { background: rgba(0,0,0,0.5); color: var(--primary); padding: 6px; font-size: 0.7rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .wallet-bar { padding: 8px 15px; display: flex; justify-content: space-between; font-size: 0.8rem; background: rgba(255,255,255,0.02); }
+        /* --- LOBBY (Compact) --- */
+        .lobby-header { padding: 20px 0 10px; text-align: center; flex-shrink: 0; }
+        .lobby-header h1 { font-size: 2rem; margin: 0; color: var(--primary); }
         
-        .dash { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 15px; }
-        .dash-item { background: rgba(0,255,163,0.03); border: 1px solid rgba(0,255,163,0.15); border-radius: 12px; padding: 6px; text-align: center; }
-        .dash-item span { font-size: 0.6rem; display: block; color: var(--gray); margin-bottom: 2px; }
-        .dash-item b { font-size: 0.85rem; color: var(--primary); }
-
-        .player-slide-wrapper { padding: 5px 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .player-slide { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 8px; }
-        .slot-circle { 
-            min-width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.03); 
-            border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 1rem;
+        .room-list { padding: 10px; flex-grow: 1; overflow-y: auto; }
+        .room-card { 
+            background: var(--card-bg); border-radius: 15px; padding: 12px 20px; margin-bottom: 10px; 
+            display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05);
         }
-        .slot-circle.active { background: rgba(0,255,163,0.1); border: 1.5px solid var(--primary); box-shadow: 0 0 8px rgba(0,255,163,0.2); }
+        .room-info b { font-size: 1.1rem; color: var(--primary); }
+        .room-info p { margin: 2px 0 0; font-size: 0.75rem; color: var(--gray); }
+        .btn-join { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; padding: 8px 18px; border-radius: 10px; font-weight: bold; color: #000; }
 
-        .chat-area { flex-grow: 1; margin: 10px 15px; padding: 12px; background: rgba(0,0,0,0.2); border-radius: 15px; overflow-y: auto; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.05); }
+        .verify-section { padding: 15px; flex-shrink: 0; }
+        .btn-verify { width: 100%; padding: 12px; border-radius: 25px; border: none; background: #fff; color: #000; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 0.9rem; }
+
+        /* --- PLAY ROOM (Compact & No-Overflow) --- */
+        .ticker { background: rgba(0,0,0,0.5); color: var(--primary); padding: 5px; font-size: 0.65rem; text-align: center; flex-shrink: 0; }
+        .wallet-bar { padding: 8px 15px; display: flex; justify-content: space-between; font-size: 0.75rem; background: rgba(255,255,255,0.02); flex-shrink: 0; }
+        
+        .dash { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; flex-shrink: 0; }
+        .dash-item { background: rgba(0,255,163,0.03); border: 1px solid rgba(0,255,163,0.15); border-radius: 10px; padding: 5px; text-align: center; }
+        .dash-item span { font-size: 0.55rem; display: block; color: var(--gray); }
+        .dash-item b { font-size: 0.8rem; color: var(--primary); }
+
+        .player-slide-wrapper { padding: 5px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0; }
+        .player-slide { display: flex; overflow-x: auto; gap: 8px; padding-bottom: 5px; }
+        .slot-circle { min-width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,0.03); border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+        .slot-circle.active { background: rgba(0,255,163,0.1); border: 1px solid var(--primary); color: var(--primary); }
+
+        /* ช่องแชทจะยืดหยุ่นตามพื้นที่ที่เหลือ */
+        .chat-area { flex-grow: 1; margin: 5px 10px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 12px; overflow-y: auto; font-size: 0.75rem; border: 1px solid rgba(255,255,255,0.05); }
         .msg { margin-bottom: 4px; }
-        .msg b { color: var(--secondary); }
 
-        /* แผงควบคุมด้านล่าง (Fix ปุ่มส่งและปุ่มย้อนกลับ) */
-        .bottom-controls { background: var(--card-bg); padding: 12px 15px 25px; border-radius: 20px 20px 0 0; }
-        .input-row { display: grid; grid-template-columns: 1fr 120px; gap: 10px; margin-bottom: 10px; }
+        .bottom-controls { background: var(--card-bg); padding: 10px 10px 20px; border-radius: 20px 20px 0 0; flex-shrink: 0; }
+        .input-row { display: grid; grid-template-columns: 1fr 110px; gap: 8px; }
         
         .chat-input-wrap { position: relative; display: flex; align-items: center; }
-        .chat-input-wrap input { width: 100%; background: #0a1118; border: 1px solid #333; border-radius: 10px; padding: 12px 40px 12px 12px; color: #fff; font-family: 'Kanit'; font-size: 0.9rem; }
-        .btn-send-msg { position: absolute; right: 10px; background: none; border: none; color: var(--primary); font-size: 1.2rem; cursor: pointer; }
+        .chat-input-wrap input { width: 100%; background: #0a1118; border: 1px solid #333; border-radius: 10px; padding: 10px 35px 10px 10px; color: #fff; font-size: 0.85rem; outline: none; }
+        .btn-send-msg { position: absolute; right: 8px; background: none; border: none; color: var(--primary); font-size: 1rem; }
 
-        .action-column { display: flex; flex-direction: column; gap: 8px; }
-        .btn-play-main { 
-            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
-            border: none; padding: 12px; border-radius: 10px; 
-            font-weight: bold; color: #000; font-size: 0.9rem;
-            box-shadow: 0 4px 10px rgba(0, 255, 163, 0.2);
-        }
-        .btn-exit { background: rgba(255,255,255,0.05); border: 1px solid #333; color: var(--gray); padding: 6px; border-radius: 8px; font-size: 0.7rem; }
+        .action-column { display: flex; flex-direction: column; gap: 6px; }
+        .btn-play-main { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; padding: 10px; border-radius: 10px; font-weight: bold; color: #000; font-size: 0.85rem; }
+        .btn-exit { background: rgba(255,255,255,0.05); border: 1px solid #333; color: var(--gray); padding: 4px; border-radius: 6px; font-size: 0.65rem; text-align: center; text-decoration: none; }
     </style>
 </head>
 <body>
@@ -94,7 +75,7 @@
     <div id="lobby-view" class="view active">
         <div class="lobby-header">
             <h1>WORLD SPIN</h1>
-            <p style="color: var(--gray); font-size: 0.85rem;">หมุนวงล้อแห่งโชคบน World Chain</p>
+            <p style="color: var(--gray); font-size: 0.75rem;">หมุนวงล้อแห่งโชคบน World Chain</p>
         </div>
         <div class="room-list">
             <div class="room-card">
@@ -116,44 +97,39 @@
         </div>
         <div class="verify-section">
             <button class="btn-verify">
-                <img src="https://worldcoin.org/icons/logo.svg" width="20"> ID Verify with World ID
+                <img src="https://worldcoin.org/icons/logo.svg" width="16"> ID Verify with World ID
             </button>
         </div>
     </div>
 
     <div id="play-view" class="view">
         <div class="ticker">🏆 LAST WINNER: 0x82...12A WON 0.035 WLD</div>
-        
         <div class="wallet-bar">
             <span>💰 <b>1.250 WLD</b></span>
             <span style="color: var(--primary)">0x71...4f2E</span>
         </div>
-
         <div class="dash">
-            <div class="dash-item"><span>รางวัลที่ได้รับ</span><b id="pot-txt">0.0000</b></div>
-            <div class="dash-item"><span>สถานะเวลา</span><b id="timer-txt">WAITING...</b></div>
+            <div class="dash-item"><span>รางวัลที่ได้</span><b id="pot-txt">0.0000</b></div>
+            <div class="dash-item"><span>เวลา</span><b id="timer-txt">WAITING...</b></div>
             <div class="dash-item"><span>PLAYERS</span><b id="player-count">0</b></div>
         </div>
-
         <div class="player-slide-wrapper">
             <div class="player-slide" id="player-slide"></div>
         </div>
-
         <div class="chat-area" id="chat-box">
-            <div class="msg"><b>System:</b> ยินดีต้อนรับ! รอผู้เล่น 2 คนเพื่อเริ่ม 🎡</div>
+            <div class="msg" style="color:var(--primary)"><b>System:</b> ยินดีต้อนรับ! รอผู้เล่น 2 คน 🎡</div>
         </div>
-
         <div class="bottom-controls">
             <div class="input-row">
                 <div class="chat-input-wrap">
-                    <input type="text" id="chat-input" placeholder="พิมพ์คุยกัน...">
+                    <input type="text" id="chat-input" placeholder="พิมพ์คุย...">
                     <button class="btn-send-msg" onclick="sendChat()">🚀</button>
                 </div>
                 <div class="action-column">
                     <button class="btn-play-main" onclick="handlePlay()">
                         PLAY <span id="btn-amt">0.00</span>
                     </button>
-                    <button class="btn-exit" onclick="goHome()">← เปลี่ยนห้อง</button>
+                    <a href="javascript:void(0)" class="btn-exit" onclick="goHome()">← เปลี่ยนห้อง</a>
                 </div>
             </div>
         </div>
@@ -184,7 +160,7 @@
 
         function updateStats() {
             let netWin = (currentPlayers * roomAmt) * 0.7;
-            document.getElementById('pot-txt').innerText = netWin.toFixed(4) + " WLD";
+            document.getElementById('pot-txt').innerText = netWin.toFixed(4);
             document.getElementById('player-count').innerText = currentPlayers;
         }
 
@@ -230,6 +206,7 @@
             gameInterval = null;
             timeSec = 60;
             document.getElementById('timer-txt').innerText = "WAITING...";
+            document.getElementById('timer-txt').style.color = "var(--gray)";
         }
 
         function goHome() {
