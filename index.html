@@ -3,81 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World Spin - Next Block Style</title>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;700&display=swap" rel="stylesheet">
+    <title>World Spin - Lucky Ferris Wheel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #FFCC33; /* เหลืองทอง */
-            --secondary: #88B04B; /* เขียวสดใส */
-            --bg: #F5F7FA;
-            --text: #4A4A4A;
-            --white: #FFFFFF;
+            --primary: #FFCC33; /* เหลือง */
+            --secondary: #88B04B; /* เขียว */
+            --bg: #F8F9FA;
+            --text: #333;
         }
 
         body {
             font-family: 'Kanit', sans-serif;
+            margin: 0; padding: 0;
             background-color: var(--bg);
             color: var(--text);
-            margin: 0;
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+            display: flex; flex-direction: column; height: 100vh;
         }
 
+        /* การสลับหน้า */
         .view { display: none; flex-direction: column; height: 100%; width: 100%; }
         .view.active { display: flex; }
 
-        /* --- สไตล์หน้าแรก (Lobby) --- */
-        .lobby-header { background: var(--secondary); color: white; padding: 30px 20px; text-align: center; border-radius: 0 0 30px 30px; }
-        .room-list { padding: 20px; flex-grow: 1; overflow-y: auto; }
-        .room-card { 
-            background: var(--white); border-radius: 20px; padding: 20px; margin-bottom: 15px; 
+        /* --- หน้า LOBBY --- */
+        .header { background: var(--secondary); color: white; padding: 25px; text-align: center; border-radius: 0 0 25px 25px; }
+        .room-list { padding: 15px; flex-grow: 1; overflow-y: auto; }
+        .card { 
+            background: white; border-radius: 15px; padding: 20px; margin-bottom: 12px;
             display: flex; justify-content: space-between; align-items: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05); border: 2px solid transparent;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .room-card:hover { border-color: var(--secondary); }
-        .room-info b { font-size: 1.2rem; color: #333; }
-        .room-info p { margin: 5px 0 0; font-size: 0.85rem; color: #888; }
-        .btn-enter { background: var(--primary); border: none; padding: 10px 20px; border-radius: 12px; font-weight: bold; cursor: pointer; color: #855b32; }
+        .btn-enter { background: var(--primary); border: none; padding: 10px 18px; border-radius: 10px; font-weight: bold; color: #855b32; cursor: pointer; }
 
-        /* --- สไตล์หน้าสอง (Play Room) อิง Next Block --- */
-        .winner-ticker { background: #333; color: var(--primary); padding: 8px; font-size: 0.75rem; text-align: center; white-space: nowrap; overflow: hidden; }
-        .ticker-move { display: inline-block; animation: marquee 15s linear infinite; }
-        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-        .wallet-bar { background: var(--white); padding: 10px 20px; display: flex; justify-content: space-between; font-size: 0.85rem; border-bottom: 1px solid #eee; }
+        /* --- หน้า PLAY ROOM --- */
+        .ticker { background: #333; color: var(--primary); padding: 6px; font-size: 0.7rem; text-align: center; }
+        .wallet { background: white; padding: 10px 15px; display: flex; justify-content: space-between; font-size: 0.8rem; border-bottom: 1px solid #eee; }
         
-        .game-dashboard { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 15px; }
-        .dash-item { background: #fdf2d0; color: #855b32; border-radius: 15px; padding: 10px; text-align: center; border: 2px solid #e7c38f; }
-        .dash-item span { display: block; font-size: 0.7rem; }
-        .dash-item b { font-size: 1rem; }
+        .dash { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; }
+        .dash-item { background: #FEF9E7; border: 1.5px solid #FAD7A0; border-radius: 12px; padding: 8px; text-align: center; }
+        .dash-item span { font-size: 0.65rem; display: block; color: #855b32; }
+        .dash-item b { font-size: 0.9rem; }
 
-        .players-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; }
-        .player-slot { 
-            aspect-ratio: 1/1.2; border-radius: 12px; background: #eee; border: 2px dashed #ccc;
-            display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 0.6rem; color: #999;
-        }
-        .player-slot.active { background: #E3F2FD; border: 2px solid #2196F3; color: #2196F3; border-style: solid; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px; }
+        .slot { aspect-ratio: 1/1; border-radius: 10px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; color: #bbb; border: 1px dashed #ccc; }
+        .slot.on { background: #D5F5E3; border: 1px solid #2ECC71; color: #28B463; border-style: solid; font-weight: bold; }
 
-        .notif-banner { background: #7b61ff; color: white; margin: 0 15px; padding: 6px 15px; border-radius: 20px; font-size: 0.75rem; font-weight: 300; }
+        .chat { flex-grow: 1; margin: 10px; padding: 12px; background: #fdfdfd; border-radius: 12px; overflow-y: auto; font-size: 0.8rem; }
+        .msg { margin-bottom: 6px; }
 
-        .chat-section { flex-grow: 1; padding: 15px; overflow-y: auto; background: #f9f9f9; margin: 10px 15px; border-radius: 15px; }
-        .msg { margin-bottom: 8px; font-size: 0.8rem; }
-        .msg b { color: var(--secondary); }
-
-        .controls-area { background: var(--secondary); padding: 20px; border-radius: 30px 30px 0 0; }
-        .bet-box { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 15px; color: white; font-weight: bold; }
-        .btn-main-play { 
-            width: 100%; padding: 18px; border-radius: 20px; border: none; background: var(--primary); 
-            color: #855b32; font-size: 1.6rem; font-weight: 900; box-shadow: 0 6px 0 #d4a017; cursor: pointer;
-        }
-        .btn-main-play:active { transform: translateY(4px); box-shadow: 0 2px 0 #d4a017; }
-        
-        .chat-input-row { display: flex; gap: 10px; margin-top: 15px; }
-        .chat-input-row input { flex-grow: 1; border-radius: 20px; border: none; padding: 10px 15px; outline: none; }
+        .controls { background: var(--secondary); padding: 15px; border-radius: 20px 20px 0 0; }
+        .btn-main { width: 100%; padding: 15px; border: none; border-radius: 15px; background: var(--primary); color: #855b32; font-size: 1.4rem; font-weight: bold; box-shadow: 0 4px 0 #D4A017; cursor: pointer; }
+        .btn-main:active { transform: translateY(3px); box-shadow: 0 1px 0 #D4A017; }
     </style>
 </head>
 <body>
 
-    
+    <div id="lobby" class="view active">
+        <div class="header">
+            <h1 style="margin:0; font-size: 1.8rem;">WORLD SPIN</h1>
+            <p style="margin:5px 0 0; opacity: 0.9; font-weight: 300;">เลือกห้องสุ่มรางวัล WLD</p>
+        </div>
+        <div class="room-list">
+            <div class="card">
+                <div><b>0.001 WLD</b><br><small style="color:#888">ตอนนี้มี 12 คน</small></div>
+                <button class="btn-enter" onclick="goPlay('0.001', 12)">เข้าร่วม</button>
+            </div>
+            <div class="card">
+                <div><b>0.01 WLD</b><br><small style="color:#888">ตอนนี้มี 5 คน</small></div>
+                <button class="btn-enter" onclick="goPlay('0.01', 5)">เข้าร่วม</button>
+            </div>
+            <div class="card">
+                <div><b>0.1 WLD</b><br><small style="color:#888">ตอนนี้มี 2 คน</small></div>
+                <button class="btn-enter" onclick="goPlay('0.1', 2)">เข้าร่วม</button>
+            </div>
+            <div class="card">
+                <div><b>1 WLD</b><br><small style="color:#888">ตอนนี้มี 0 คน</small></div>
+                <button class="btn-enter" onclick="goPlay('1', 0)">เข้าร่วม</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="play" class="view">
+        <div class="ticker">🏆 ล่าสุด 0x82... รับ 0.035 WLD | รอบใหม่กำลังเริ่ม...</div>
+        <div class="wallet">
+            <span>💰 <b>1.25 WLD</b></span>
+            <span style="color:#999">ID: 0x71...4f2E</span>
+        </div>
+
+        <div class="dash">
+            <div class="dash-item"><span>รางวัลรวม(-30%)</span><b id="pot">0.000</b></div>
+            <div class="dash-item"><span>เวลา</span><b id="timer">01:00</b></div>
+            <div class="dash-item"><span>โอกาสชนะ</span><b id="pct">0%</b></div>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <div class="chat" id="chat">
+            <div class="msg"><b>System:</b> ยินดีต้อนรับ! แชทคุยกันได้ที่นี่</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-main" onclick="joinAction()">PLAY</button>
+            <button onclick="goHome()" style="background:none; border:none; color:white; margin-top:10px; width:100%; font-size:0.7rem;">← กลับหน้าแรก</button>
+        </div>
+    </div>
+
+    <script>
+        let amt = 0, count = 0, time = 60, timer;
+
+        function goPlay(a, c) {
+            amt = parseFloat(a); count = c;
+            document.getElementById('lobby').classList.remove('active');
+            document.getElementById('play').classList.add('active');
+            updateUI();
+            startTimer();
+        }
+
+        function updateUI() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for(let i=0; i<12; i++) {
+                grid.innerHTML += `<div class="slot ${i < count ? 'on' : ''}">${i < count ? '👤' : '...'}</div>`;
+            }
+            document.getElementById('pot').innerText = (count * amt * 0.7).toFixed(4);
+            document.getElementById('pct').innerText = count > 0 ? ((1/count)*100).toFixed(1) + "%" : "0%";
+        }
+
+        function startTimer() {
+            time = 60;
+            if(timer) clearInterval(timer);
+            timer = setInterval(() => {
+                time--;
+                document.getElementById('timer').innerText = "00:" + (time < 10 ? "0"+time : time);
+                if(time <= 0) { alert("สุ่มผู้ชนะ!"); time = 60; }
+            }, 1000);
+        }
+
+        function joinAction() {
+            count++; updateUI();
+            document.getElementById('chat').innerHTML += `<div class="msg"><b>คุณ:</b> เข้าร่วมแล้ว! 🚀</div>`;
+        }
+
+        function goHome() {
+            clearInterval(timer);
+            document.getElementById('play').classList.remove('active');
+            document.getElementById('lobby').classList.add('active');
+        }
+    </script>
+</body>
+</html>
