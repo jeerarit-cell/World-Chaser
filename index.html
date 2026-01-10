@@ -1,53 +1,188 @@
-<style>
-    /* เพิ่มสไตล์แถบนับถอยหลัง */
-    .progress-container {
-        width: 100%;
-        background: #1a232e;
-        height: 6px;
-        margin-top: 5px;
-    }
-    .progress-bar {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, var(--primary), var(--secondary));
-        box-shadow: 0 0 10px var(--primary);
-        transition: width 1s linear;
-    }
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World Spin - Neon Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00ffa3;
+            --secondary: #00d1ff;
+            --bg: #0a1118;
+            --card-bg: #1a232e;
+            --text: #ffffff;
+            --gray: #8b949e;
+        }
 
-    /* ปรับปรุงแชทให้ดูเป็นระเบียบ */
-    .msg-system { color: var(--primary); font-weight: bold; border-left: 2px solid var(--primary); padding-left: 8px; }
-    .msg-player { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 4px 0; }
-</style>
+        body {
+            font-family: 'Kanit', sans-serif;
+            margin: 0; padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex; flex-direction: column; height: 100vh;
+            overflow: hidden;
+        }
 
-<div id="play-view" class="view">
-    <div class="ticker">🏆 LAST WINNER: 0x82...12A WON 0.035 WLD | NEXT SPIN IN 45s</div>
-    <div class="progress-container">
-        <div id="p-bar" class="progress-bar"></div>
+        .view { display: none; flex-direction: column; height: 100%; width: 100%; }
+        .view.active { display: flex; }
+
+        /* --- Header Lobby --- */
+        .lobby-header { 
+            padding: 40px 20px; text-align: center; 
+            background: linear-gradient(180deg, rgba(0,255,163,0.1) 0%, rgba(10,17,24,0) 100%);
+        }
+        .lobby-header h1 { font-size: 2.5rem; margin: 0; color: var(--primary); text-shadow: 0 0 15px rgba(0, 255, 163, 0.5); }
+
+        /* --- Room Cards --- */
+        .room-list { padding: 15px; flex-grow: 1; overflow-y: auto; }
+        .room-card { 
+            background: var(--card-bg); border-radius: 20px; padding: 20px; margin-bottom: 15px; 
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .room-info b { font-size: 1.3rem; color: var(--primary); }
+        .room-info p { margin: 5px 0 0; font-size: 0.85rem; color: var(--gray); }
+        .btn-join { 
+            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
+            border: none; padding: 12px 25px; border-radius: 15px; 
+            font-weight: bold; color: #000; cursor: pointer;
+        }
+
+        /* --- Play Room Elements --- */
+        .ticker { background: rgba(0,0,0,0.5); color: var(--primary); padding: 8px; font-size: 0.75rem; text-align: center; }
+        .progress-container { width: 100%; background: #1a232e; height: 4px; }
+        .progress-bar { width: 100%; height: 100%; background: var(--primary); box-shadow: 0 0 10px var(--primary); transition: width 1s linear; }
+
+        .wallet-bar { padding: 12px 20px; display: flex; justify-content: space-between; font-size: 0.9rem; background: rgba(255,255,255,0.03); }
+        
+        .dash { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 15px; }
+        .dash-item { background: rgba(0,255,163,0.05); border: 1px solid rgba(0,255,163,0.2); border-radius: 15px; padding: 10px; text-align: center; }
+        .dash-item span { font-size: 0.6rem; display: block; color: var(--gray); margin-bottom: 4px; }
+        .dash-item b { font-size: 0.9rem; color: var(--primary); }
+
+        .players-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; }
+        .slot { 
+            aspect-ratio: 1/1.1; border-radius: 15px; background: rgba(255,255,255,0.03); 
+            border: 1px dashed #333; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #555;
+        }
+        .slot.active { background: rgba(0,255,163,0.1); border: 1px solid var(--primary); color: var(--primary); }
+
+        .chat-area { 
+            flex-grow: 1; margin: 0 15px 15px; padding: 15px; 
+            background: rgba(0,0,0,0.2); border-radius: 20px; overflow-y: auto; 
+            font-size: 0.85rem; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .msg { margin-bottom: 8px; }
+        .msg b { color: var(--secondary); }
+
+        .controls { background: var(--card-bg); padding: 20px 20px 30px; border-radius: 30px 30px 0 0; border-top: 1px solid rgba(0,255,163,0.2); }
+        .btn-play-big { 
+            width: 100%; padding: 18px; border-radius: 20px; border: none;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #000; font-size: 1.5rem; font-weight: bold; cursor: pointer;
+        }
+        .back-link { display: block; text-align: center; margin-top: 15px; color: var(--gray); font-size: 0.8rem; text-decoration: none; }
+    </style>
+</head>
+<body>
+
+    <div id="lobby-view" class="view active">
+        <div class="lobby-header">
+            <h1>WORLD SPIN</h1>
+            <p style="color: var(--gray)">หมุนวงล้อแห่งโชคบน World Chain</p>
+        </div>
+        <div class="room-list">
+            <div class="room-card">
+                <div class="room-info"><b>0.001 WLD</b><p>ตอนนี้มี 12 คน</p></div>
+                <button class="btn-join" onclick="enterRoom('0.001', 12)">JOIN</button>
+            </div>
+            <div class="room-card">
+                <div class="room-info"><b>0.01 WLD</b><p>ตอนนี้มี 5 คน</p></div>
+                <button class="btn-join" onclick="enterRoom('0.01', 5)">JOIN</button>
+            </div>
+            <div class="room-card">
+                <div class="room-info"><b>0.1 WLD</b><p>ตอนนี้มี 2 คน</p></div>
+                <button class="btn-join" onclick="enterRoom('0.1', 2)">JOIN</button>
+            </div>
+            <div class="room-card">
+                <div class="room-info"><b>1 WLD</b><p>ตอนนี้มี 0 คน</p></div>
+                <button class="btn-join" onclick="enterRoom('1', 0)">JOIN</button>
+            </div>
+        </div>
     </div>
-    
+
+    <div id="play-view" class="view">
+        <div class="ticker">🏆 LAST WINNER: 0x82...12A WON 0.035 WLD</div>
+        <div class="progress-container">
+            <div id="p-bar" class="progress-bar"></div>
+        </div>
+        
+        <div class="wallet-bar">
+            <span>💰 <b>1.250 WLD</b></span>
+            <span style="color: var(--primary)">0x71...4f2E</span>
+        </div>
+
+        <div class="dash">
+            <div class="dash-item"><span>POT (-30%)</span><b id="pot-txt">0.000</b></div>
+            <div class="dash-item"><span>TIME</span><b id="timer-txt">01:00</b></div>
+            <div class="dash-item"><span>WIN %</span><b id="chance-txt">0%</b></div>
+        </div>
+
+        <div class="players-grid" id="grid"></div>
+
+        <div class="chat-area" id="chat">
+            <div class="msg"><b>System:</b> ยินดีต้อนรับสู่ห้องสุ่มรางวัล! 🎡</div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-play-big" onclick="doPlay()">PLAY</button>
+            <a href="#" class="back-link" onclick="goHome()">← เปลี่ยนห้องเล่น</a>
+        </div>
     </div>
 
-<script>
-    // ปรับปรุงฟังก์ชันนับถอยหลังให้หลอดลดลงด้วย
-    function startCountdown() {
-        timeSec = 60;
-        const bar = document.getElementById('p-bar');
-        if(gameInterval) clearInterval(gameInterval);
-        gameInterval = setInterval(() => {
-            timeSec--;
-            let display = timeSec < 10 ? "0"+timeSec : timeSec;
-            document.getElementById('timer-txt').innerText = "00:" + display;
-            
-            // ปรับความยาวหลอด (Progress Bar)
-            let widthPercent = (timeSec / 60) * 100;
-            bar.style.width = widthPercent + "%";
+    <script>
+        let roomAmt = 0, players = 0, time = 60, timer;
 
-            if(timeSec <= 0) {
-                // เอฟเฟกต์ตอนจบเวลา
-                alert("Spinning... 🎡");
-                timeSec = 60;
-                bar.style.width = "100%";
+        function enterRoom(a, c) {
+            roomAmt = parseFloat(a); players = c;
+            document.getElementById('lobby-view').classList.remove('active');
+            document.getElementById('play-view').classList.add('active');
+            refreshUI();
+            startTimer();
+        }
+
+        function refreshUI() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            for(let i=0; i<12; i++) {
+                grid.innerHTML += `<div class="slot ${i < players ? 'active' : ''}">${i < players ? '👤' : ''}</div>`;
             }
-        }, 1000);
-    }
-</script>
+            document.getElementById('pot-txt').innerText = (players * roomAmt * 0.7).toFixed(4) + " WLD";
+            document.getElementById('chance-txt').innerText = players > 0 ? ((1/players)*100).toFixed(1) + "%" : "0%";
+        }
+
+        function startTimer() {
+            time = 60;
+            if(timer) clearInterval(timer);
+            timer = setInterval(() => {
+                time--;
+                document.getElementById('timer-txt').innerText = "00:" + (time < 10 ? "0"+time : time);
+                document.getElementById('p-bar').style.width = (time / 60 * 100) + "%";
+                if(time <= 0) { alert("สุ่มรางวัล!"); time = 60; }
+            }, 1000);
+        }
+
+        function doPlay() {
+            players++; refreshUI();
+            document.getElementById('chat').innerHTML += `<div class="msg"><b>You:</b> เข้าร่วมแล้ว! 🚀</div>`;
+        }
+
+        function goHome() {
+            clearInterval(timer);
+            document.getElementById('play-view').classList.remove('active');
+            document.getElementById('lobby-view').classList.add('active');
+        }
+    </script>
+</body>
+</html>
