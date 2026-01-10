@@ -5,16 +5,162 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ชิงช้าสวรรค์ World Chain</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f0f2f5; margin: 0; }
-        /* แถบวิ่งด้านบน */
-        .ticker { background: #000; color: #fbbf24; padding: 10px; overflow: hidden; white-space: nowrap; }
-        .ticker-text { display: inline-block; animation: marquee 15s linear infinite; }
-        @keyframes marquee { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+        body {
+            font-family: 'Inter', sans-serif; /* ใช้ฟอนต์ที่ทันสมัย */
+            text-align: center;
+            background: #f0f2f5; /* สีพื้นหลังอ่อนๆ */
+            margin: 0;
+            padding: 0;
+            color: #333;
+            overflow-x: hidden; /* ป้องกันการเลื่อนแนวนอน */
+        }
+
+        /* แถบวิ่งด้านบน (Ticker) */
+        .ticker {
+            background: #000;
+            color: #fbbf24; /* สีทองอร่าม */
+            padding: 10px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            font-size: 0.9em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        .ticker-text {
+            display: inline-block;
+            animation: marquee 15s linear infinite; /* ความเร็วในการวิ่ง */
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
         
-        .wheel-container { margin: 50px auto; width: 200px; height: 200px; border: 5px solid #333; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .row-container { padding: 20px; }
-        .row { background: white; margin: 10px; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .btn-join { background: #0070f3; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; }
+        h1 {
+            color: #0070f3; /* สีฟ้าสดใส */
+            margin-top: 30px;
+            font-size: 2em;
+        }
+
+        /* รูปชิงช้าสวรรค์ */
+        .ferris-wheel {
+            width: 150px;
+            height: 150px;
+            margin: 40px auto;
+            border: 3px solid #0070f3;
+            border-radius: 50%;
+            position: relative;
+            background-color: transparent;
+            animation: spin 15s linear infinite; /* หมุนช้าๆ */
+        }
+        .ferris-wheel::before, .ferris-wheel::after { /* แกนกลาง */
+            content: '';
+            position: absolute;
+            background: #0070f3;
+            border-radius: 50%;
+        }
+        .ferris-wheel::before { /* แกนนอน */
+            width: 80%; height: 2px; top: 50%; left: 10%; transform: translateY(-50%);
+        }
+        .ferris-wheel::after { /* แกนตั้ง */
+            width: 2px; height: 80%; top: 10%; left: 50%; transform: translateX(-50%);
+        }
+        .spoke { /* ซี่ล้อ */
+            position: absolute;
+            width: 2px;
+            height: 50%;
+            background: #0070f3;
+            top: 25%;
+            left: 50%;
+            transform-origin: bottom;
+            transform: translateX(-50%) rotate(var(--angle));
+        }
+        /* กำหนดมุมซี่ล้อ 8 ซี่ */
+        .spoke:nth-child(1) { --angle: 0deg; }
+        .spoke:nth-child(2) { --angle: 45deg; }
+        .spoke:nth-child(3) { --angle: 90deg; }
+        .spoke:nth-child(4) { --angle: 135deg; }
+        .spoke:nth-child(5) { --angle: 180deg; }
+        .spoke:nth-child(6) { --angle: 225deg; }
+        .spoke:nth-child(7) { --angle: 270deg; }
+        .spoke:nth-child(8) { --angle: 315deg; }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* กล่องเลือกวงเงิน (Game Rooms) */
+        .game-rooms-container {
+            margin: 20px auto;
+            max-width: 350px; /* จำกัดความกว้างให้ดูดีบนมือถือ */
+            padding: 0 15px;
+        }
+        .game-room-card {
+            background: white;
+            margin-bottom: 15px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+            border: 1px solid #e0e0e0;
+        }
+        .room-details span {
+            display: block;
+            text-align: left;
+        }
+        .room-details .wld-amount {
+            font-weight: bold;
+            color: #0070f3;
+            font-size: 1.2em;
+        }
+        .room-details .players-count {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .btn-join {
+            background: #0070f3; /* ปุ่มสีฟ้า */
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        .btn-join:hover {
+            background: #005bb5; /* สีเข้มขึ้นเมื่อเม้าส์ชี้ */
+        }
+        .btn-join.disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        /* ปุ่ม Verify World ID */
+        .world-id-btn-container {
+            margin-top: 40px;
+            padding: 0 15px;
+        }
+        .btn-world-id {
+            background: #000; /* ปุ่มสีดำ */
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: bold;
+            width: 100%;
+            max-width: 300px; /* จำกัดความกว้าง */
+            transition: background 0.3s ease;
+        }
+        .btn-world-id:hover {
+            background: #333;
+        }
     </style>
 </head>
 <body>
@@ -23,22 +169,65 @@
         <div class="ticker-text">🎉 ยินดีกับคุณ Manoch_World ชนะ 0.007 WLD! | 🎡 รอบใหม่กำลังจะเริ่มในวง 0.1 WLD...</div>
     </div>
 
-    <h1>🎡 ชิงช้าสวรรค์</h1>
-    <div class="wheel-container">รูปชิงช้าสวรรค์</div>
+    <h1>ชิงช้าสวรรค์</h1>
 
-    <div class="row-container">
-        <div class="row">
-            <span>วง 0.001 WLD (2/5 คน)</span>
+    <div class="ferris-wheel">
+        <div class="spoke" style="--angle: 0deg;"></div>
+        <div class="spoke" style="--angle: 45deg;"></div>
+        <div class="spoke" style="--angle: 90deg;"></div>
+        <div class="spoke" style="--angle: 135deg;"></div>
+        <div class="spoke" style="--angle: 180deg;"></div>
+        <div class="spoke" style="--angle: 225deg;"></div>
+        <div class="spoke" style="--angle: 270deg;"></div>
+        <div class="spoke" style="--angle: 315deg;"></div>
+    </div>
+
+    <div class="game-rooms-container">
+        <div class="game-room-card">
+            <div class="room-details">
+                <span class="wld-amount">0.001 WLD</span>
+                <span class="players-count">2/5 คน</span>
+            </div>
             <button class="btn-join">เข้าร่วม</button>
         </div>
-        <div class="row">
-            <span>วง 0.01 WLD (0/5 คน)</span>
+        <div class="game-room-card">
+            <div class="room-details">
+                <span class="wld-amount">0.01 WLD</span>
+                <span class="players-count">0/5 คน</span>
+            </div>
             <button class="btn-join">เข้าร่วม</button>
+        </div>
+        <div class="game-room-card">
+            <div class="room-details">
+                <span class="wld-amount">1.0 WLD</span>
+                <span class="players-count">เต็ม (5/5 คน)</span>
+            </div>
+            <button class="btn-join disabled" disabled>กำลังหมุน</button>
         </div>
     </div>
 
+    <div class="world-id-btn-container">
+        <button class="btn-world-id">ยืนยันตัวตนด้วย World ID</button>
+    </div>
+
     <script>
-        console.log("Mini App Ready!");
+        // นี่คือส่วนของ JavaScript ที่จะใช้ในการเชื่อมต่อ World ID และระบบเกมจริงในอนาคต
+        // ตอนนี้ยังไม่มีฟังก์ชันการทำงานจริง แต่เตรียมโครงสร้างไว้แล้ว
+        console.log("Ferris Wheel Mini App Loaded!");
+
+        document.querySelectorAll('.btn-join').forEach(button => {
+            button.addEventListener('click', () => {
+                if (!button.disabled) {
+                    alert('คุณกดเข้าร่วมวง ' + button.previousElementSibling.querySelector('.wld-amount').textContent);
+                    // ในอนาคตจะเรียกฟังก์ชันเชื่อมต่อ Smart Contract
+                }
+            });
+        });
+
+        document.querySelector('.btn-world-id').addEventListener('click', () => {
+            alert('กำลังเชื่อมต่อกับ World ID...');
+            // ในอนาคตจะเรียก World ID SDK
+        });
     </script>
 </body>
 </html>
