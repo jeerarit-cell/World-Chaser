@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WORLD SPIN - Pro UI</title>
+    <title>WORLD SPIN - optimized</title>
     <style>
         :root {
             --neon-green: #00ffaa;
@@ -14,106 +14,68 @@
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            background-color: var(--dark-bg);
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            overflow: hidden; /* ป้องกันการเลื่อนทั้งหน้าจอ */
-            display: flex;
-            justify-content: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .screen { display: none; width: 100%; height: 100%; flex-direction: column; padding: 20px; }
+        body { background-color: var(--dark-bg); color: white; font-family: 'Segoe UI', sans-serif; margin: 0; overflow: hidden; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 400px; height: 100vh; display: flex; flex-direction: column; }
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; padding: 15px; }
         .screen.active { display: flex; }
 
-        /* --- [LOBBY SCREEN] --- */
-        .lobby-content { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        
-        .wheel-area {
-            width: 200px; height: 200px; border: 1px dashed var(--border);
-            border-radius: 50%; display: flex; justify-content: center;
-            align-items: center; position: relative; margin-bottom: 30px;
-        }
-        .arrow-main {
-            font-size: 50px; color: #ffcf40; text-shadow: 0 0 15px rgba(255, 207, 64, 0.7);
-            animation: spin 2s linear infinite;
-        }
+        /* --- [LOBBY] --- */
+        .wheel-area { width: 180px; height: 180px; border: 1px dashed var(--border); border-radius: 50%; display: flex; justify-content: center; align-items: center; position: relative; margin: 20px auto; }
+        .arrow-main { font-size: 40px; color: #ffcf40; text-shadow: 0 0 15px rgba(255, 207, 64, 0.7); animation: spin 3s linear infinite; }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .dot { position: absolute; width: 5px; height: 5px; background: white; border-radius: 50%; top: 50%; left: 50%; transform-origin: 0 0; }
+        /* วางจุด 10 จุดรอบวง */
+        .dot:nth-child(1) { transform: rotate(0deg) translate(75px); }
+        .dot:nth-child(2) { transform: rotate(36deg) translate(75px); }
+        .dot:nth-child(3) { transform: rotate(72deg) translate(75px); }
+        .dot:nth-child(4) { transform: rotate(108deg) translate(75px); }
+        .dot:nth-child(5) { transform: rotate(144deg) translate(75px); }
+        .dot:nth-child(6) { transform: rotate(180deg) translate(75px); }
+        .dot:nth-child(7) { transform: rotate(216deg) translate(75px); }
+        .dot:nth-child(8) { transform: rotate(252deg) translate(75px); }
+        .dot:nth-child(9) { transform: rotate(288deg) translate(75px); }
+        .dot:nth-child(10) { transform: rotate(324deg) translate(75px); }
 
-        .dots-wrap { position: absolute; width: 100%; height: 100%; }
-        .dot {
-            position: absolute; width: 6px; height: 6px; background: white;
-            border-radius: 50%; top: 50%; left: 50%; box-shadow: 0 0 8px white;
-        }
-        /* วางจุด 10 จุด */
-        .dot:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translate(85px); }
-        .dot:nth-child(2) { transform: translate(-50%, -50%) rotate(36deg) translate(85px); }
-        .dot:nth-child(3) { transform: translate(-50%, -50%) rotate(72deg) translate(85px); }
-        .dot:nth-child(4) { transform: translate(-50%, -50%) rotate(108deg) translate(85px); }
-        .dot:nth-child(5) { transform: translate(-50%, -50%) rotate(144deg) translate(85px); }
-        .dot:nth-child(6) { transform: translate(-50%, -50%) rotate(180deg) translate(85px); }
-        .dot:nth-child(7) { transform: translate(-50%, -50%) rotate(216deg) translate(85px); }
-        .dot:nth-child(8) { transform: translate(-50%, -50%) rotate(252deg) translate(85px); }
-        .dot:nth-child(9) { transform: translate(-50%, -50%) rotate(288deg) translate(85px); }
-        .dot:nth-child(10) { transform: translate(-50%, -50%) rotate(324deg) translate(85px); }
-
-        .lobby-card {
-            width: 100%; background: var(--card-bg); padding: 18px;
-            border-radius: 16px; margin-top: 12px; display: flex;
-            justify-content: space-between; align-items: center; border: 1px solid var(--border);
-        }
+        .lobby-card { width: 100%; background: var(--card-bg); padding: 15px; border-radius: 16px; margin-top: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .join-btn { background: linear-gradient(135deg, var(--neon-green), #00d2ff); border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         /* --- [GAME SCREEN] --- */
-        .header-bar { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .back-btn { background: none; border: 1px solid var(--border); color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
+        .header-bar { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 5px; margin-bottom: 15px; }
+        .back-btn { position: absolute; left: 15px; top: 15px; background: none; border: 1px solid var(--border); color: white; padding: 5px 10px; border-radius: 8px; font-size: 0.8rem; }
+        
+        /* กระเป๋าเงินกลางจอ */
+        .wallet-display { text-align: center; background: rgba(0,0,0,0.3); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--border); }
+        .wallet-amt { font-size: 1.1rem; font-weight: bold; color: white; }
+        .wallet-addr { font-size: 0.7rem; color: var(--neon-green); font-family: monospace; }
 
-        .stats-grid { flex-shrink: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .stat-box { background: var(--card-bg); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
-        .stat-box small { display: block; font-size: 0.65rem; color: #8b949e; margin-bottom: 4px; }
-        .stat-box b { color: var(--neon-green); font-size: 0.9rem; }
+        .stats-grid { flex-shrink: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+        .stat-box { background: var(--card-bg); padding: 8px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+        .stat-box small { display: block; font-size: 0.6rem; color: #8b949e; }
+        .stat-box b { color: var(--neon-green); font-size: 0.85rem; }
 
         /* Infinite Slider */
-        .slider-box {
-            flex-shrink: 0; width: 100%; overflow: hidden; 
-            padding: 10px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-            margin-bottom: 15px;
-        }
-        .track { display: flex; gap: 15px; width: max-content; animation: slide 20s linear infinite; }
-        @keyframes slide { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        
-        .avatar {
-            min-width: 45px; height: 45px; background: #21262d; border: 2px solid var(--border);
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-        }
+        .slider-box { flex-shrink: 0; width: 100%; overflow: hidden; padding: 8px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); margin-bottom: 10px; }
+        .track { display: flex; gap: 12px; width: max-content; animation: slide 15s linear infinite; }
+        @keyframes slide { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+        .avatar { min-width: 40px; height: 40px; background: #21262d; border: 2px solid var(--border); border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.2rem; }
         .avatar.active { border-color: var(--neon-green); box-shadow: var(--glow); color: var(--neon-green); }
 
-        .chat-box {
-            flex-grow: 1; background: rgba(22, 27, 34, 0.6); border: 1px solid var(--neon-green);
-            box-shadow: var(--glow); border-radius: 12px; padding: 12px; font-size: 0.85rem;
-            overflow-y: auto; margin-bottom: 15px;
-        }
+        .chat-box { flex-grow: 1; background: rgba(22, 27, 34, 0.6); border: 1px solid var(--neon-green); box-shadow: var(--glow); border-radius: 12px; padding: 12px; font-size: 0.85rem; overflow-y: auto; margin-bottom: 10px; }
 
-        .action-area { flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; padding-bottom: 10px; }
-        .input-row { display: flex; gap: 8px; }
-        .input-row input {
-            flex: 1; background: #161b22; border: 1px solid var(--border);
-            color: white; padding: 12px; border-radius: 10px; outline: none;
+        /* แก้ไขปัญหาปุ่ม PLAY ล้นจอ โดยการย้ายมาด้านข้าง */
+        .action-area { flex-shrink: 0; display: flex; gap: 8px; align-items: flex-end; padding-bottom: 5px; }
+        .input-group { flex-grow: 1; display: flex; flex-direction: column; gap: 5px; }
+        .msg-input { width: 100%; background: #161b22; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 12px; outline: none; font-size: 0.9rem; }
+        
+        .play-btn-side { 
+            width: 100px; height: 48px; 
+            background: linear-gradient(135deg, var(--neon-green), #00d2ff); 
+            border: none; border-radius: 12px; 
+            color: #000; font-weight: 900; font-size: 0.85rem; 
+            cursor: pointer; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            line-height: 1; flex-shrink: 0;
         }
-        .play-btn {
-            background: linear-gradient(135deg, var(--neon-green), #00d2ff);
-            border: none; padding: 16px; border-radius: 15px;
-            color: #000; font-weight: 800; font-size: 1.1rem; cursor: pointer;
-        }
+        .play-btn-side small { font-size: 0.6rem; opacity: 0.8; margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -121,64 +83,64 @@
 <div class="container">
     
     <div id="lobbyScreen" class="screen active">
-        <div class="lobby-content">
-            <h1 style="color: var(--neon-green); margin: 0;">WORLD SPIN</h1>
-            <p style="color: #8b949e; font-size: 0.9rem; margin-bottom: 25px;">วงล้อสุ่มผู้โชคดีบน World Chain</p>
+        <h1 style="color: var(--neon-green); text-align: center; margin-bottom: 0;">WORLD SPIN</h1>
+        <p style="color: #8b949e; text-align: center; font-size: 0.8rem; margin-top: 5px;">วงล้อสุ่มผู้โชคดีบน World Chain</p>
 
-            <div class="wheel-area">
-                <div class="arrow-main">➤</div>
-                <div class="dots-wrap">
-                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                </div>
-            </div>
+        <div class="wheel-area">
+            <div class="arrow-main">➤</div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
 
+        <div style="overflow-y: auto; flex-grow: 1;">
             <div class="lobby-card">
-                <div><b style="color: var(--neon-green); font-size: 1.2rem;">0.001 WLD</b><br>
-                     <small style="color:#8b949e">ผู้เล่นในห้อง: 2 คน</small></div>
-                <button class="back-btn" style="border-color: var(--neon-green); color: var(--neon-green); padding: 8px 20px;" onclick="joinGame('0.001')">JOIN</button>
+                <div><b style="color: var(--neon-green);">0.001 WLD</b><br><small style="color:#8b949e">ผู้เล่นในห้อง: 2 คน</small></div>
+                <button class="join-btn" onclick="joinGame('0.001')">JOIN</button>
             </div>
-            
             <div class="lobby-card">
-                <div><b style="color: var(--neon-green); font-size: 1.2rem;">0.01 WLD</b><br>
-                     <small style="color:#8b949e">ผู้เล่นในห้อง: 4 คน</small></div>
-                <button class="back-btn" style="border-color: var(--neon-green); color: var(--neon-green); padding: 8px 20px;" onclick="joinGame('0.01')">JOIN</button>
+                <div><b style="color: var(--neon-green);">0.01 WLD</b><br><small style="color:#8b949e">ผู้เล่นในห้อง: 4 คน</small></div>
+                <button class="join-btn" onclick="joinGame('0.01')">JOIN</button>
             </div>
         </div>
     </div>
 
     <div id="gameScreen" class="screen">
+        <button class="back-btn" onclick="exitGame()">← Back</button>
+        
         <div class="header-bar">
-            <button class="back-btn" onclick="exitGame()">← Back</button>
-            <div style="text-align: right;">
-                <div style="font-size: 0.9rem; font-weight: bold;">1.250 WLD</div>
-                <div style="font-size: 0.7rem; color: var(--neon-green);">0x71...4f2E</div>
+            <div class="wallet-display">
+                <div class="wallet-amt">💰 1.250 WLD</div>
+                <div class="wallet-addr">0x71...4f2E</div>
             </div>
         </div>
 
         <div class="stats-grid">
-            <div class="stat-box"><small>รางวัล</small><b id="prize">0.0014</b></div>
+            <div class="stat-box"><small>รางวัลที่จะได้</small><b id="prize">0.0014</b></div>
             <div class="stat-box"><small>เวลา</small><b>00:25</b></div>
-            <div class="stat-box"><small>ผู้เล่น</small><b>2</b></div>
+            <div class="stat-box"><small>PLAYERS</small><b>2</b></div>
         </div>
 
         <div class="slider-box">
             <div class="track">
-                <div class="avatar active">👤</div><div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
-                <div class="avatar active">👤</div><div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
+                <div class="avatar active">👤</div><div class="avatar active">👤</div>
+                <div class="avatar"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
+                <div class="avatar active">👤</div><div class="avatar active">👤</div>
+                <div class="avatar"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
             </div>
         </div>
 
         <div class="chat-box" id="chatBox">
-            <p style="margin: 0 0 8px 0; color: #00d2ff;"><b>System:</b> รอนับถอยหลัง...</p>
+            <p style="margin: 0 0 8px 0; color: var(--neon-green);"><b>System:</b> ยินดีต้อนรับ! รอผู้เล่น 2 คน 🎡</p>
         </div>
 
         <div class="action-area">
-            <div class="input-row">
-                <input type="text" id="msgInput" placeholder="พิมพ์ข้อความ...">
-                <button class="back-btn" onclick="sendMsg()">ส่ง</button>
+            <div class="input-group">
+                <input type="text" id="msgInput" class="msg-input" placeholder="พิมพ์ข้อความ...">
             </div>
-            <button class="play-btn" id="mainPlayBtn">PLAY 0.001</button>
+            <button class="play-btn-side" id="mainPlayBtn" onclick="sendMsg()">
+                <small>PLAY</small>
+                <span id="playAmt">0.001</span>
+            </button>
         </div>
     </div>
 
@@ -188,8 +150,8 @@
     function joinGame(amt) {
         document.getElementById('lobbyScreen').classList.remove('active');
         document.getElementById('gameScreen').classList.add('active');
-        document.getElementById('mainPlayBtn').innerText = 'PLAY ' + amt;
-        document.getElementById('prize').innerText = (amt * 1.4).toFixed(4);
+        document.getElementById('playAmt').innerText = amt;
+        document.getElementById('prize').innerText = (amt * 1.4).toFixed(4) + " WLD";
     }
 
     function exitGame() {
