@@ -2,53 +2,50 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WORLD SPIN - Arrow Edition</title>
     <style>
-        body {
-            background-color: #0d1117;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
+        /* --- 1. การตั้งค่าพื้นฐาน (ป้องกันการล้น) --- */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        html, body { 
+            height: 100%; margin: 0; padding: 0; overflow: hidden; 
+            background-color: #0d1117; color: white; font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* ใช้ Flex จัดระเบียบหน้าจอ 100% */
+        .lobby-wrapper {
             display: flex;
             flex-direction: column;
+            height: 100vh;
+            padding: 15px 20px 20px;
             align-items: center;
-            margin: 0;
-            padding: 20px;
         }
 
-        h1 {
-            color: #00ffaa;
-            font-size: 2.5rem;
-            margin: 20px 0 5px;
-            text-transform: uppercase;
-        }
+        /* --- 2. ส่วนหัว --- */
+        .header-section { flex-shrink: 0; text-align: center; }
+        h1 { color: #00ffaa; font-size: 2.2rem; margin: 10px 0 5px; text-transform: uppercase; }
+        .subtitle { color: #8b949e; font-size: 0.85rem; margin-bottom: 10px; }
 
-        .subtitle {
-            color: #8b949e;
-            font-size: 0.9rem;
-            margin-bottom: 40px;
-        }
-
-        /* พื้นที่วงล้อ */
+        /* --- 3. วงล้อ (ปรับขนาดให้ฟิตพอดี) --- */
         .wheel-container {
-            width: 250px;
-            height: 250px;
+            flex-shrink: 0;
+            width: 200px;
+            height: 200px;
             border: 1px dashed #30363d;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            margin-bottom: 50px;
+            margin: 10px 0 25px;
         }
 
-        /* ลูกศรตรงกลาง */
         .arrow {
-            font-size: 50px;
+            font-size: 45px;
             color: #ffcf40;
             text-shadow: 0 0 15px rgba(255, 207, 64, 0.7);
             z-index: 10;
-            /* สั่งให้หมุนเฉพาะลูกศร */
             animation: arrow-spin 2s linear infinite;
             display: inline-block;
         }
@@ -58,132 +55,127 @@
             to { transform: rotate(360deg); }
         }
 
-        /* กลุ่มจุดขาว (อยู่กับที่ ไม่ต้องมี animation) */
-        .dots-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
+        .dots-container { position: absolute; width: 100%; height: 100%; }
         .dot {
             position: absolute;
-            width: 6px;
-            height: 6px;
-            background-color: white;
-            border-radius: 50%;
-            top: 50%;
-            left: 50%;
+            width: 6px; height: 6px;
+            background-color: white; border-radius: 50%;
+            top: 50%; left: 50%;
             box-shadow: 0 0 8px white;
         }
 
-        /* วางจุด 10 จุดไว้กับที่ล้อมรอบวงกลม */
-        .dot:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translate(90px); }
-        .dot:nth-child(2) { transform: translate(-50%, -50%) rotate(36deg) translate(90px); }
-        .dot:nth-child(3) { transform: translate(-50%, -50%) rotate(72deg) translate(90px); }
-        .dot:nth-child(4) { transform: translate(-50%, -50%) rotate(108deg) translate(90px); }
-        .dot:nth-child(5) { transform: translate(-50%, -50%) rotate(144deg) translate(90px); }
-        .dot:nth-child(6) { transform: translate(-50%, -50%) rotate(180deg) translate(90px); }
-        .dot:nth-child(7) { transform: translate(-50%, -50%) rotate(216deg) translate(90px); }
-        .dot:nth-child(8) { transform: translate(-50%, -50%) rotate(252deg) translate(90px); }
-        .dot:nth-child(9) { transform: translate(-50%, -50%) rotate(288deg) translate(90px); }
-        .dot:nth-child(10) { transform: translate(-50%, -50%) rotate(324deg) translate(90px); }
+        /* ระยะห่างของจุดขาว (รัศมี 80px เพื่อให้ไม่เบียดเส้นประมากเกินไป) */
+        .dot:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translate(80px); }
+        .dot:nth-child(2) { transform: translate(-50%, -50%) rotate(36deg) translate(80px); }
+        .dot:nth-child(3) { transform: translate(-50%, -50%) rotate(72deg) translate(80px); }
+        .dot:nth-child(4) { transform: translate(-50%, -50%) rotate(108deg) translate(80px); }
+        .dot:nth-child(5) { transform: translate(-50%, -50%) rotate(144deg) translate(80px); }
+        .dot:nth-child(6) { transform: translate(-50%, -50%) rotate(180deg) translate(80px); }
+        .dot:nth-child(7) { transform: translate(-50%, -50%) rotate(216deg) translate(80px); }
+        .dot:nth-child(8) { transform: translate(-50%, -50%) rotate(252deg) translate(80px); }
+        .dot:nth-child(9) { transform: translate(-50%, -50%) rotate(288deg) translate(80px); }
+        .dot:nth-child(10) { transform: translate(-50%, -50%) rotate(324deg) translate(80px); }
 
-        /* รายการห้องสุ่ม */
+        /* --- 4. รายการห้อง (ส่วนที่อนุญาตให้ Scroll ได้) --- */
         .room-list {
+            flex-grow: 1;
             width: 100%;
             max-width: 400px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            padding-right: 5px;
         }
 
         .room-card {
             background-color: #161b22;
             border-radius: 16px;
-            padding: 18px 20px;
-            margin-bottom: 12px;
+            padding: 15px 20px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border: 1px solid #30363d;
         }
 
-        .room-info h2 {
-            margin: 0;
-            color: #00ffaa;
-            font-size: 1.2rem;
-        }
-
-        .room-info p {
-            margin: 4px 0 0;
-            color: #8b949e;
-            font-size: 0.8rem;
-        }
+        .room-info h2 { margin: 0; color: #00ffaa; font-size: 1.1rem; }
+        .room-info p { margin: 4px 0 0; color: #8b949e; font-size: 0.75rem; }
 
         .join-btn {
             background: linear-gradient(135deg, #00ffaa 0%, #00d2ff 100%);
-            border: none;
-            border-radius: 10px;
-            color: #000;
-            padding: 10px 25px;
-            font-weight: 800;
-            cursor: pointer;
-            transition: 0.2s;
+            border: none; border-radius: 10px;
+            color: #000; padding: 10px 22px;
+            font-weight: 800; cursor: pointer;
         }
 
-        .join-btn:hover {
-            transform: scale(1.05);
-            filter: brightness(1.1);
+        /* --- 5. ปุ่ม Verify ด้านล่างสุด --- */
+        .footer-section {
+            width: 100%;
+            max-width: 400px;
+            flex-shrink: 0;
+        }
+
+        .verify-btn {
+            width: 100%;
+            padding: 15px;
+            border-radius: 30px;
+            border: none;
+            background: #ffffff;
+            color: #000;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <h1>WORLD SPIN</h1>
-    <div class="subtitle">วงล้อสุ่มผู้โชคดีบน World Chain</div>
+    <div class="lobby-wrapper">
+        <div class="header-section">
+            <h1>WORLD SPIN</h1>
+            <div class="subtitle">วงล้อสุ่มผู้โชคดีบน World Chain</div>
+        </div>
 
-    <div class="wheel-container">
-        <div class="arrow">➤</div>
-        
-        <div class="dots-container">
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
-            <div class="dot"></div>
+        <div class="wheel-container">
+            <div class="arrow">➤</div>
+            <div class="dots-container">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
         </div>
-    </div>
 
-    <div class="room-list">
-        <div class="room-card">
-            <div class="room-info">
-                <h2>0.001 WLD</h2>
-                <p>ผู้เล่นในห้อง: 2 คน</p>
+        <div class="room-list">
+            <div class="room-card">
+                <div class="room-info">
+                    <h2>0.001 WLD</h2>
+                    <p>ผู้เล่นในห้อง: 2 คน</p>
+                </div>
+                <button class="join-btn">JOIN</button>
             </div>
-            <button class="join-btn">JOIN</button>
+            <div class="room-card">
+                <div class="room-info">
+                    <h2>0.01 WLD</h2>
+                    <p>ผู้เล่นในห้อง: 4 คน</p>
+                </div>
+                <button class="join-btn">JOIN</button>
+            </div>
+            <div class="room-card">
+                <div class="room-info">
+                    <h2>0.1 WLD</h2>
+                    <p>ผู้เล่นในห้อง: 1 คน</p>
+                </div>
+                <button class="join-btn">JOIN</button>
+            </div>
+            <div class="room-card">
+                <div class="room-info">
+                    <h2>1 WLD</h2>
+                    <p>ผู้เล่นในห้อง: 0 คน</p>
+                </div>
+                <button class="join-btn">JOIN</button>
+            </div>
         </div>
-        <div class="room-card">
-            <div class="room-info">
-                <h2>0.01 WLD</h2>
-                <p>ผู้เล่นในห้อง: 4 คน</p>
-            </div>
-            <button class="join-btn">JOIN</button>
-        </div>
-        <div class="room-card">
-            <div class="room-info">
-                <h2>0.1 WLD</h2>
-                <p>ผู้เล่นในห้อง: 1 คน</p>
-            </div>
-            <button class="join-btn">JOIN</button>
-        </div>
-        <div class="room-card">
-            <div class="room-info">
-                <h2>1 WLD</h2>
-                <p>ผู้เล่นในห้อง: 0 คน</p>
-            </div>
-            <button class="join-btn">JOIN</button>
+
+        <div class="footer-section">
+            <button class="verify-btn">ID Verify with World ID</button>
         </div>
     </div>
 
