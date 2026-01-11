@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - FIXED SOUND</title>
+    <title>WORLD CHASER - NO BOTS EDITION</title>
     <style>
         :root { 
             --neon: #FF9500; 
@@ -15,7 +15,6 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         html, body { position: fixed; overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: white; font-family: -apple-system, sans-serif; }
 
-        /* Ticker */
         .news-ticker { background: #000; color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon-hot); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
         .ticker-text { display: inline-block; animation: ticker 25s linear infinite; padding-left: 100%; }
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
@@ -23,48 +22,38 @@
         .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; background: radial-gradient(circle at top, #2b1a0a 0%, #0a0a0c 100%); position: relative; }
         .active { display: flex; }
 
-        /* Lobby Room Selection */
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
         .room-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #555; cursor: pointer; text-align: center; }
         .room-btn b { display: block; font-size: 1.2rem; }
         .room-btn span { font-size: 0.6rem; letter-spacing: 1px; }
         .room-btn.selected { border-color: var(--neon); background: rgba(255,149,0,0.15); color: var(--neon); box-shadow: 0 0 15px rgba(255,149,0,0.1); }
 
-        /* Navigation & Stats */
         .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(0,0,0,0.8); align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 15px; flex-shrink: 0; }
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; font-size: 0.65rem; color: #777; }
         .stat-card b { color: var(--neon); font-size: 0.85rem; display: block; margin-top: 2px; }
 
-        /* Board 2x6 */
         .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; flex-shrink: 0; }
-        .slot { aspect-ratio: 1/1; background: #0e0e10; border: 1px solid #1f1f23; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #333; transition: 0.3s; }
+        .slot { aspect-ratio: 1/1; background: #0e0e10; border: 1px solid #1f1f23; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #333; transition: 0.3s; overflow: hidden; }
         .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 12px var(--neon-hot); background: rgba(255, 149, 0, 0.2); color: white !important; font-weight: bold; }
 
-        /* Main Game Layout */
         .main-content { display: flex; padding: 0 15px 10px 15px; gap: 10px; align-items: flex-start; }
         .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 6px; }
-        .status-row { display: flex; gap: 6px; }
-        .status-pill { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 5px; text-align: center; font-size: 0.6rem; color: #666; }
-
-        /* Fixed Heights */
-        .chat-section { height: 400px; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-section { height: 320px; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; }
         #chatBox { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.8rem; scroll-behavior: smooth; }
         .chat-input-row { padding: 8px 12px; background: #000; border-top: 1px solid var(--border); }
         .chat-input-row input { width: 100%; background: transparent; border: none; color: var(--neon); font-size: 13px; }
 
         .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 360px; }
         .btn-play-action { flex: 2; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; cursor: pointer; }
+        .btn-play-action:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
         .btn-menu-sub { flex: 0.7; background: var(--card); border: 1px solid var(--border); color: #ccc; border-radius: 10px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
-
-        /* Overlay */
-        .overlay-panel { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 500; padding: 20px; flex-direction: column; }
     </style>
 </head>
 <body>
 
 <div class="news-ticker">
-    <div class="ticker-text" id="tickerText">🔥 WELCOME TO WORLD CHASER: เลือกห้องและเริ่มล่ารางวัลได้ทันที!</div>
+    <div class="ticker-text" id="tickerText">🔥 WELCOME TO WORLD CHASER: รอผู้เล่นจริงเข้าร่วมและเริ่มล่ารางวัล!</div>
 </div>
 
 <div id="lobby" class="screen active">
@@ -86,28 +75,6 @@
 </div>
 
 <div id="game" class="screen">
-    <div id="historyPanel" class="overlay-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <b style="color:var(--neon)">HISTORY</b>
-            <button onclick="closeOverlay('historyPanel')" style="background:var(--card); color:white; padding:8px 15px; border-radius:8px;">ปิด</button>
-        </div>
-        <div id="historyContent" style="flex:1; overflow-y:auto;"></div>
-    </div>
-
-    <div id="leaderboardPanel" class="overlay-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <b style="color:var(--neon)">LEADERBOARD</b>
-            <button onclick="closeOverlay('leaderboardPanel')" style="background:var(--card); color:white; padding:8px 15px; border-radius:8px;">ปิด</button>
-        </div>
-        <div id="leaderboardContent" style="flex:1; overflow-y:auto;"></div>
-    </div>
-
-    <div id="earnPanel" class="overlay-panel" style="justify-content:center; align-items:center; text-align:center;">
-        <h1 style="color:var(--neon)">EARN</h1>
-        <p style="color:#555">Coming Soon</p>
-        <button onclick="closeOverlay('earnPanel')" style="background:var(--card); color:white; padding:12px 40px; border-radius:10px;">ย้อนกลับ</button>
-    </div>
-
     <div class="top-nav">
         <button onclick="location.reload()" style="background:none; border:1px solid var(--border); color:white; padding:4px 10px;">←</button>
         <b id="headerPlayerName">PLAYER</b>
@@ -126,7 +93,7 @@
         <div class="left-panel">
             <div class="status-row">
                 <div class="status-pill">ROUND <b id="roundNum" style="color:var(--neon)">#125</b></div>
-                <div class="status-pill">ONLINE <b id="onlineCount" style="color:var(--neon)">17</b></div>
+                <div class="status-pill">ONLINE <b id="onlineCount" style="color:var(--neon)">1</b></div>
             </div>
             <div class="chat-section">
                 <div id="chatBox"></div>
@@ -137,25 +104,23 @@
         </div>
         <div class="menu-section">
             <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY</button>
-            <button class="btn-menu-sub" onclick="openOverlay('historyPanel')">ประวัติ</button>
-            <button class="btn-menu-sub" onclick="openOverlay('leaderboardPanel')">อันดับ</button>
-            <button class="btn-menu-sub" onclick="openOverlay('earnPanel')" style="color:var(--neon)">EARN</button>
+            <button class="btn-menu-sub" onclick="alert('เร็วๆ นี้')">ประวัติ</button>
+            <button class="btn-menu-sub" onclick="alert('เร็วๆ นี้')">อันดับ</button>
+            <button class="btn-menu-sub" style="color:var(--neon)">EARN</button>
         </div>
     </div>
 </div>
 
 <script>
     let currentPlayerName = "GUEST", players = [], hasJoined = false, timerStarted = false;
-    let round = 125, gameHistory = [], leaderData = {}, ENTRY_FEE = 0.001, audioCtx;
+    let round = 125, ENTRY_FEE = 0.001, audioCtx;
     const HOUSE_FEE = 0.15, MAX_PLAYERS = 12;
 
-    // ฟังก์ชันปลุกเสียง
     function initAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    // ฟังก์ชันเล่นเสียงเดิม (Oscillator)
     function playSfx(f, type, d, v) {
         initAudio();
         const o = audioCtx.createOscillator();
@@ -168,25 +133,17 @@
     }
 
     function selectRoom(fee, btn) {
-        initAudio(); // ปลุกเสียงเมื่อเลือกห้อง
+        initAudio();
         ENTRY_FEE = fee;
         document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         playSfx(600, 'sine', 0.1, 0.1);
     }
 
-    function openOverlay(id) {
-        initAudio();
-        document.getElementById(id).style.display = 'flex';
-        if(id === 'leaderboardPanel') renderLeaderboard();
-        if(id === 'historyPanel') renderHistory();
-    }
-    function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
-
     function joinGame() {
-        initAudio(); // ปลุกเสียงเมื่อเข้าร่วม
+        initAudio();
         const name = document.getElementById('userNameInp').value.trim();
-        currentPlayerName = name || "USER_" + Math.floor(Math.random()*999);
+        currentPlayerName = name || "GUEST_" + Math.floor(Math.random()*999);
         document.getElementById('headerPlayerName').innerText = currentPlayerName.toUpperCase();
         document.getElementById('roomTag').innerText = "WLD " + ENTRY_FEE;
         document.getElementById('btnPlay').innerHTML = `PLAY<br><span style="font-size:0.65rem; font-weight:normal;">${ENTRY_FEE} WLD</span>`;
@@ -212,28 +169,38 @@
     }
 
     function play() {
-        initAudio(); // ปลุกเสียงเมื่อกดเล่น
+        initAudio();
         if(hasJoined) return;
         hasJoined = true;
-        players.push(currentPlayerName); updateBoard();
-        document.getElementById('btnPlay').disabled = true; document.getElementById('btnPlay').style.opacity = "0.5";
-        playSfx(400, 'sine', 0.1, 0.1);
         
-        let itv = setInterval(() => {
-            if(players.length < MAX_PLAYERS) {
-                players.push("BOT_" + Math.floor(Math.random()*99));
-                updateBoard();
-                playSfx(1000, 'sine', 0.03, 0.01); // เสียงบอทเข้า
-                if(players.length >= 2 && !timerStarted) startCountdown();
-            } else clearInterval(itv);
-        }, 800);
+        // เพิ่มตัวเองเข้าบอร์ด
+        players.push(currentPlayerName); 
+        updateBoard();
+        
+        // ปิดปุ่ม เพื่อรอคนอื่น (ไม่มีบอทแล้ว)
+        document.getElementById('btnPlay').disabled = true;
+        playSfx(400, 'sine', 0.1, 0.1);
+        addChat("SYSTEM", "รอผู้เล่นคนอื่นเข้าร่วม...", "color:#888");
+        
+        // หมายเหตุ: ในระบบจริง ขั้นตอนนี้จะรอข้อมูลจาก Backend
+    }
+
+    // ฟังก์ชันสำหรับจำลอง/รับข้อมูลผู้เล่นคนอื่นจาก Server
+    function addRemotePlayer(name) {
+        if(players.length < MAX_PLAYERS) {
+            players.push(name);
+            updateBoard();
+            playSfx(1000, 'sine', 0.03, 0.01); 
+            if(players.length >= 2 && !timerStarted) startCountdown();
+        }
     }
 
     function startCountdown() {
+        if(timerStarted) return;
         timerStarted = true; let sec = 15;
         const cItv = setInterval(() => {
             sec--; document.getElementById('timer').innerText = sec + "s";
-            if(sec <= 5 && sec > 0) playSfx(600, 'sine', 0.1, 0.05); // เสียงนับถอยหลัง
+            if(sec <= 5 && sec > 0) playSfx(600, 'sine', 0.1, 0.05);
             if(sec <= 0) { clearInterval(cItv); document.getElementById('timer').innerText = "LIVE"; runGame(); }
         }, 1000);
     }
@@ -241,13 +208,13 @@
     function runGame() {
         const slots = document.querySelectorAll('.slot');
         let cur = 0, speed = 60, steps = 0;
-        const winIdx = Math.floor(Math.random() * players.length);
+        const winIdx = Math.floor(Math.random() * players.length); // อนาคตรับค่าจาก Server
         const total = 36 + winIdx;
         function move() {
             slots.forEach(s => s.classList.remove('active-chaser'));
             cur = (cur + 1) % MAX_PLAYERS;
             slots[cur].classList.add('active-chaser');
-            playSfx(300 + (steps*3), 'triangle', 0.05, 0.05); // เสียงตอนหมุน
+            playSfx(300 + (steps*3), 'triangle', 0.05, 0.05);
             steps++;
             if(steps < total || cur !== winIdx) {
                 if(total - steps < 10) speed += 40;
@@ -260,31 +227,17 @@
     function finish(idx) {
         const winner = players[idx];
         const amount = parseFloat(document.getElementById('prizeDisplay').innerText);
-        gameHistory.unshift({ round: round, winner: winner, amount: amount.toFixed(4) });
-        leaderData[winner] = (leaderData[winner] || 0) + amount;
-        
-        playSfx(880, 'sine', 0.5, 0.1); // เสียงชนะ
+        playSfx(880, 'sine', 0.5, 0.1);
         document.getElementById('tickerText').innerText = `🎊 ROUND #${round} WINNER: ${winner} WON ${amount.toFixed(4)} WLD!`;
-        addChat("🏆 SYSTEM", `${winner} ชนะรับ ${amount.toFixed(4)} WLD`, "color:#000; background:var(--neon); font-weight:bold; padding:0 4px; border-radius:4px;");
+        addChat("🏆 SYSTEM", `${winner} ชนะรับ ${amount.toFixed(4)} WLD`, "color:#000; background:var(--neon); font-weight:bold;");
         setTimeout(reset, 5000);
-    }
-
-    function renderHistory() {
-        const h = document.getElementById('historyContent');
-        h.innerHTML = gameHistory.map(i => `<div style="padding:12px; border-bottom:1px solid #1a1a1e;">รอบ #${i.round} | <b>${i.winner}</b> <span style="color:var(--neon); float:right;">${i.amount} WLD</span></div>`).join('') || "ไม่มีประวัติ";
-    }
-
-    function renderLeaderboard() {
-        const l = document.getElementById('leaderboardContent');
-        const sorted = Object.entries(leaderData).sort((a,b) => b[1] - a[1]).slice(0, 100);
-        l.innerHTML = sorted.map((i, idx) => `<div style="padding:12px; border-bottom:1px solid #1a1a1e;">${idx+1}. <b>${i[0]}</b> <span style="color:var(--neon); float:right;">${i[1].toFixed(4)} WLD</span></div>`).join('') || "ไม่มีข้อมูล";
     }
 
     function reset() {
         round++; document.getElementById('roundNum').innerText = "#" + round;
         players = []; hasJoined = false; timerStarted = false;
         document.getElementById('timer').innerText = "WAIT"; updateBoard();
-        document.getElementById('btnPlay').disabled = false; document.getElementById('btnPlay').style.opacity = "1";
+        document.getElementById('btnPlay').disabled = false;
     }
 
     function addChat(u, m, s='') {
@@ -294,10 +247,9 @@
     }
 
     function sendMsg() {
-        initAudio();
         const i = document.getElementById('chatInp');
         if(i.value.trim()) { addChat(currentPlayerName, i.value, "color:var(--neon)"); i.value = ""; }
     }
 </script>
 </body>
-    </html>
+</html>
