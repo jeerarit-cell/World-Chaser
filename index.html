@@ -3,41 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WORLD SPIN - Fast & Fun</title>
+    <title>WORLD SPIN - Professional Edition</title>
     <style>
         :root { --neon: #00ffaa; --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #8b949e; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
+        
+        /* Layout */
         .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 450px; margin: 0 auto; position: relative; }
         .active { display: flex; }
 
-        /* Header & Stats */
+        /* UI Header & Stats */
         .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: #000; align-items: center; border-bottom: 1px solid var(--border); }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; }
         .stat-card b { color: var(--neon); font-size: 0.85rem; }
 
-        /* Animation Area */
+        /* Wheel Section */
         .slider-section { position: relative; padding: 25px 0 10px; overflow: hidden; background: rgba(0,0,0,0.3); }
         .pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); color: var(--neon); font-size: 24px; z-index: 10; text-shadow: 0 0 10px var(--neon); animation: bounce 0.5s infinite; }
         @keyframes bounce { 0%, 100% { top: 0; } 50% { top: 3px; } }
         .avatar-track { display: flex; gap: 12px; width: max-content; padding-left: 50%; }
-        .avatar { width: 50px; height: 50px; background: #222; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .avatar.winner-glow { border-color: #ffd700; box-shadow: 0 0 20px #ffd700; transform: scale(1.1); transition: 0.3s; }
+        .avatar { width: 50px; height: 50px; background: #222; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.3s; }
+        .avatar.winner-glow { border-color: #ffd700; box-shadow: 0 0 25px #ffd700; transform: scale(1.2); z-index: 15; }
         .scrolling { animation: scrollLoop 20s linear infinite; }
         @keyframes scrollLoop { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
         /* Chat Window (White Border) */
         .chat-container { flex: 1; margin: 5px 15px; border: 2.5px solid #ffffff; border-radius: 12px; background: rgba(0,0,0,0.6); padding: 10px; overflow-y: auto; font-size: 0.85rem; }
-        .chat-msg { margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .winner-msg { color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1); padding: 5px; border-radius: 5px; text-align: center; }
+        .chat-msg { margin-bottom: 6px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; }
+        .winner-msg { color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1); padding: 8px; border-radius: 8px; text-align: center; border: 1px solid #ffd700; }
 
-        /* Buttons */
+        /* Actions */
         .action-area { padding: 10px 15px; display: flex; gap: 10px; align-items: stretch; background: var(--bg); }
-        .btn-play-big { background: linear-gradient(135deg, var(--neon), #00d2ff); border: none; border-radius: 15px; width: 120px; color: #000; font-weight: 900; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,255,170,0.4); }
-        
+        .btn-play-big { background: linear-gradient(135deg, var(--neon), #00d2ff); border: none; border-radius: 15px; width: 120px; color: #000; font-weight: 900; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,255,170,0.4); transition: 0.2s; }
+        .btn-play-big:disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; opacity: 0.7; }
+
         .bottom-menu { height: 65px; background: #000; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
-        #fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; justify-content: center; align-items: center; font-size: 4rem; }
+        .menu-item { color: var(--text); font-size: 0.7rem; display: flex; flex-direction: column; justify-content: center; }
+        
+        #fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; justify-content: center; align-items: center; font-size: 5rem; }
     </style>
 </head>
 <body>
@@ -46,54 +51,64 @@
 
 <div id="lobby" class="screen active">
     <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
-        <h2 style="color:var(--neon)">WORLD SPIN</h2>
-        <button onclick="join(0.001)" style="width:100%; padding:20px; background:var(--card); color:white; border:1px solid var(--border); border-radius:15px; display:flex; justify-content:space-between; align-items:center;">
-            <b>0.001 WLD ROOM</b> <span style="background:var(--neon); color:black; padding:5px 12px; border-radius:5px;">JOIN</span>
+        <h1 style="color:var(--neon); letter-spacing: 2px;">WORLD SPIN</h1>
+        <p style="color:var(--text); margin-bottom:40px;">สุ่มโชคบน World Chain</p>
+        <button onclick="joinRoom(0.001)" style="width:100%; padding:20px; background:var(--card); color:white; border:1px solid var(--border); border-radius:15px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <b>0.001 WLD ROOM</b> <span style="background:var(--neon); color:black; padding:5px 15px; border-radius:5px; font-weight:bold;">JOIN</span>
+        </button>
+        <button onclick="joinRoom(0.01)" style="width:100%; padding:20px; background:var(--card); border:1px solid var(--border); color:white; border-radius:15px; display:flex; justify-content:space-between; align-items:center;">
+            <b>0.01 WLD ROOM</b> <span style="background:var(--neon); color:black; padding:5px 15px; border-radius:5px; font-weight:bold;">JOIN</span>
         </button>
     </div>
     <div class="bottom-menu">
-        <div style="color:var(--neon)">🏠<br>Home</div>
-        <div>💸<br>ธุรกรรม</div>
-        <div style="color:#ffd700">🎁<br>Earn</div>
+        <div class="menu-item" style="color:var(--neon)">🏠<br>Home</div>
+        <div class="menu-item">💸<br>ธุรกรรม</div>
+        <div class="menu-item" style="color:#ffd700">🎁<br>Earn</div>
     </div>
 </div>
 
 <div id="game" class="screen">
     <div class="top-nav">
-        <button onclick="location.reload()" style="background:none; border:1px solid var(--border); color:white; border-radius:5px;">←</button>
-        <b>WORLD SPIN</b>
-        <div style="color:var(--neon)">💰 1.250 WLD</div>
+        <button onclick="backToLobby()" style="background:none; border:1px solid var(--border); color:white; border-radius:5px; padding:4px 10px;">←</button>
+        <b id="roomTitle">ROOM: 0.001</b>
+        <div style="color:var(--neon); font-size:0.8rem;">💰 1.250 WLD</div>
     </div>
     <div class="stats-grid">
-        <div class="stat-card"><small>รางวัล</small><br><b id="pot">0.0000</b></div>
-        <div class="stat-card"><small>เวลา</small><br><b id="timer">WAITING</b></div>
-        <div class="stat-card"><small>ผู้เล่น</small><br><b id="pCount">0</b></div>
+        <div class="stat-card"><small>รางวัลรวม</small><br><b id="pot">0.0000</b></div>
+        <div class="stat-card"><small>เวลานับถอยหลัง</small><br><b id="timer">WAITING</b></div>
+        <div class="stat-card"><small>ผู้เล่นรวม</small><br><b id="pCount">0</b></div>
     </div>
     <div class="slider-section">
         <div class="pointer">▼</div>
         <div class="avatar-track scrolling" id="track"></div>
     </div>
-    <div class="chat-container" id="chatBox"></div>
+    <div class="chat-container" id="chatBox">
+        <div class="chat-msg" style="color:var(--neon)">System: ยินดีต้อนรับ! กด PLAY เพื่อเริ่ม</div>
+    </div>
     <div class="action-area">
         <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
-            <input type="text" id="chatInp" style="background:#1c2128; border:1px solid var(--border); color:white; padding:12px; border-radius:10px; outline:none;" placeholder="พิมพ์คุย...">
-            <button onclick="sendMsg()" style="background:#30363d; border:none; color:white; padding:8px; border-radius:8px;">ส่ง</button>
+            <input type="text" id="chatInp" style="background:#1c2128; border:1px solid var(--border); color:white; padding:12px; border-radius:10px; outline:none;" placeholder="พิมพ์ข้อความ...">
+            <button onclick="sendMsg()" style="background:#30363d; border:none; color:white; padding:8px; border-radius:8px; font-size:0.75rem;">ส่งข้อความ</button>
         </div>
-        <button class="btn-play-big" id="playBtn" onclick="play()">PLAY<br><span id="priceLabel">0.001</span></button>
+        <button class="btn-play-big" id="playBtn" onclick="playGame()">PLAY<br><span id="priceLabel">0.001</span></button>
     </div>
     <div class="bottom-menu">
-        <div>🏠<br>Home</div>
-        <div>💸<br>ธุรกรรม</div>
-        <div style="color:#ffd700">🎁<br>Earn</div>
+        <div class="menu-item" onclick="backToLobby()">🏠<br>Home</div>
+        <div class="menu-item">💸<br>ธุรกรรม</div>
+        <div class="menu-item" style="color:#ffd700">🎁<br>Earn</div>
     </div>
 </div>
 
 <script>
-    let price = 0.001;
+    let currentPrice = 0.001;
     let players = [];
+    let hasJoined = false;
+    let timerStarted = false;
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+    // Sound Engine
     function playSfx(f, type, d, v) {
+        if(audioCtx.state === 'suspended') audioCtx.resume();
         const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
         o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
         g.gain.setValueAtTime(v, audioCtx.currentTime);
@@ -102,16 +117,27 @@
         o.start(); o.stop(audioCtx.currentTime + d);
     }
 
+    // Init Avatars
     const track = document.getElementById('track');
-    for(let i=0; i<40; i++) {
-        track.innerHTML += `<div class="avatar">${i%2===0?'👤':'🤖'}</div>`;
+    function setupTrack() {
+        track.innerHTML = "";
+        for(let i=0; i<40; i++) {
+            track.innerHTML += `<div class="avatar">${i%2===0?'👤':'🤖'}</div>`;
+        }
     }
+    setupTrack();
 
-    function join(p) {
-        price = p; document.getElementById('priceLabel').innerText = p;
+    function joinRoom(p) {
+        currentPrice = p;
+        document.getElementById('priceLabel').innerText = p;
+        document.getElementById('roomTitle').innerText = "ROOM: " + p;
         document.getElementById('lobby').classList.remove('active');
         document.getElementById('game').classList.add('active');
         if(audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function backToLobby() {
+        location.reload(); // กลับหน้าแรกสุด
     }
 
     function sendMsg() {
@@ -127,25 +153,47 @@
         b.scrollTop = b.scrollHeight;
     }
 
-    function play() {
-        players.push("You", "Bot_"+Math.floor(Math.random()*99));
-        document.getElementById('pCount').innerText = players.length;
-        document.getElementById('pot').innerText = (players.length * price * 0.95).toFixed(4);
-        if(players.length >= 2) startTimer();
+    function playGame() {
+        if(hasJoined) return;
+        
+        hasJoined = true;
+        const btn = document.getElementById('playBtn');
+        btn.disabled = true;
+        btn.innerHTML = "<small>JOINED</small><span>รอลุ้น</span>";
+
+        players.push("You (0x71...)");
+        // จำลองผู้เล่นอื่น
+        players.push("Bot_" + Math.floor(Math.random()*99));
+        players.push("Player_" + Math.floor(Math.random()*99));
+
+        updateStats();
+        playSfx(800, 'sine', 0.1, 0.1);
+
+        if(!timerStarted) {
+            timerStarted = true;
+            startCountdown();
+        }
     }
 
-    function startTimer() {
+    function updateStats() {
+        document.getElementById('pCount').innerText = players.length;
+        document.getElementById('pot').innerText = (players.length * currentPrice * 0.95).toFixed(4);
+    }
+
+    function startCountdown() {
         let sec = 10;
         const itv = setInterval(() => {
-            sec--; playSfx(600, 'sine', 0.1, 0.1);
+            sec--;
+            playSfx(600, 'sine', 0.1, 0.1); // Tick sound
             document.getElementById('timer').innerText = `00:${sec<10?'0'+sec:sec}`;
-            if(sec<=0) { clearInterval(itv); finish(); }
+            if(sec <= 0) { clearInterval(itv); finishGame(); }
         }, 1000);
     }
 
-    function finish() {
+    function finishGame() {
         const spinTime = 2000;
         let sItv = setInterval(() => playSfx(200, 'triangle', 0.05, 0.05), 60);
+        
         track.classList.remove('scrolling');
         const stopIdx = Math.floor(Math.random()*20)+5;
         track.style.transition = `transform ${spinTime}ms cubic-bezier(0.1, 0, 0.3, 1)`;
@@ -153,12 +201,45 @@
 
         setTimeout(() => {
             clearInterval(sItv);
+            // Win sound (Ta-da!)
             [523, 659, 783].forEach((f, i) => setTimeout(() => playSfx(f, 'square', 0.4, 0.1), i*100));
+            
             const winner = players[Math.floor(Math.random()*players.length)];
-            document.getElementById('fireworks').style.display='flex';
-            addChat("🏆 WINNER", `${winner} WON!`, "winner-msg");
-            setTimeout(() => location.reload(), 3000);
+            const totalWin = document.getElementById('pot').innerText;
+            
+            document.getElementById('fireworks').style.display = 'flex';
+            addChat("🏆 WINNER", `${winner} ชนะรางวัล ${totalWin} WLD!`, "winner-msg");
+            
+            const allAvatars = document.querySelectorAll('.avatar');
+            if(allAvatars[stopIdx + 2]) allAvatars[stopIdx + 2].classList.add('winner-glow');
+
+            setTimeout(resetRoom, 4000); // 4 วินาทีแล้วเริ่มใหม่
         }, spinTime);
+    }
+
+    function resetRoom() {
+        // Reset Logic
+        hasJoined = false;
+        timerStarted = false;
+        players = [];
+        
+        // Reset UI
+        document.getElementById('fireworks').style.display = 'none';
+        document.getElementById('pCount').innerText = "0";
+        document.getElementById('pot').innerText = "0.0000";
+        document.getElementById('timer').innerText = "WAITING";
+        
+        const btn = document.getElementById('playBtn');
+        btn.disabled = false;
+        btn.innerHTML = `PLAY<br><span>${currentPrice}</span>`;
+        
+        // Reset Wheel
+        track.style.transition = "none";
+        track.style.transform = "translateX(0)";
+        setupTrack();
+        setTimeout(() => { track.classList.add('scrolling'); }, 50);
+
+        addChat("System", "เริ่มรอบใหม่! ขอให้โชคดี", "chat-msg");
     }
 </script>
 </body>
