@@ -13,36 +13,38 @@
             background-color: #0d1117; color: white; font-family: 'Segoe UI', sans-serif;
         }
 
-        /* ใช้ Flex จัดระเบียบหน้าจอ 100% */
+        .view { display: none; flex-direction: column; height: 100vh; width: 100%; position: relative; }
+        .view.active { display: flex; }
+
+        /* --- 2. หน้า LOBBY (อ้างอิงโค้ดที่คุณส่งมา) --- */
         .lobby-wrapper {
             display: flex;
             flex-direction: column;
             height: 100vh;
-            padding: 15px 20px 20px;
+            padding: 20px;
             align-items: center;
         }
 
-        /* --- 2. ส่วนหัว --- */
         .header-section { flex-shrink: 0; text-align: center; }
-        h1 { color: #00ffaa; font-size: 2.2rem; margin: 10px 0 5px; text-transform: uppercase; }
-        .subtitle { color: #8b949e; font-size: 0.85rem; margin-bottom: 10px; }
+        h1 { color: #00ffaa; font-size: 2.5rem; margin: 20px 0 5px; text-transform: uppercase; }
+        .subtitle { color: #8b949e; font-size: 0.9rem; margin-bottom: 20px; }
 
-        /* --- 3. วงล้อ (ปรับขนาดให้ฟิตพอดี) --- */
+        /* พื้นที่วงล้อลูกศร */
         .wheel-container {
             flex-shrink: 0;
-            width: 200px;
-            height: 200px;
+            width: 250px;
+            height: 250px;
             border: 1px dashed #30363d;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            margin: 10px 0 25px;
+            margin-bottom: 30px;
         }
 
         .arrow {
-            font-size: 45px;
+            font-size: 50px;
             color: #ffcf40;
             text-shadow: 0 0 15px rgba(255, 207, 64, 0.7);
             z-index: 10;
@@ -64,120 +66,123 @@
             box-shadow: 0 0 8px white;
         }
 
-        /* ระยะห่างของจุดขาว (รัศมี 80px เพื่อให้ไม่เบียดเส้นประมากเกินไป) */
-        .dot:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translate(80px); }
-        .dot:nth-child(2) { transform: translate(-50%, -50%) rotate(36deg) translate(80px); }
-        .dot:nth-child(3) { transform: translate(-50%, -50%) rotate(72deg) translate(80px); }
-        .dot:nth-child(4) { transform: translate(-50%, -50%) rotate(108deg) translate(80px); }
-        .dot:nth-child(5) { transform: translate(-50%, -50%) rotate(144deg) translate(80px); }
-        .dot:nth-child(6) { transform: translate(-50%, -50%) rotate(180deg) translate(80px); }
-        .dot:nth-child(7) { transform: translate(-50%, -50%) rotate(216deg) translate(80px); }
-        .dot:nth-child(8) { transform: translate(-50%, -50%) rotate(252deg) translate(80px); }
-        .dot:nth-child(9) { transform: translate(-50%, -50%) rotate(288deg) translate(80px); }
-        .dot:nth-child(10) { transform: translate(-50%, -50%) rotate(324deg) translate(80px); }
+        /* ตำแหน่งจุดขาวรอบวงล้อ */
+        .dot:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translate(90px); }
+        .dot:nth-child(2) { transform: translate(-50%, -50%) rotate(36deg) translate(90px); }
+        .dot:nth-child(3) { transform: translate(-50%, -50%) rotate(72deg) translate(90px); }
+        .dot:nth-child(4) { transform: translate(-50%, -50%) rotate(108deg) translate(90px); }
+        .dot:nth-child(5) { transform: translate(-50%, -50%) rotate(144deg) translate(90px); }
+        .dot:nth-child(6) { transform: translate(-50%, -50%) rotate(180deg) translate(90px); }
+        .dot:nth-child(7) { transform: translate(-50%, -50%) rotate(216deg) translate(90px); }
+        .dot:nth-child(8) { transform: translate(-50%, -50%) rotate(252deg) translate(90px); }
+        .dot:nth-child(9) { transform: translate(-50%, -50%) rotate(288deg) translate(90px); }
+        .dot:nth-child(10) { transform: translate(-50%, -50%) rotate(324deg) translate(90px); }
 
-        /* --- 4. รายการห้อง (ส่วนที่อนุญาตให้ Scroll ได้) --- */
+        /* รายการห้อง */
         .room-list {
             flex-grow: 1;
             width: 100%;
             max-width: 400px;
             overflow-y: auto;
-            margin-bottom: 15px;
-            padding-right: 5px;
         }
 
         .room-card {
             background-color: #161b22;
             border-radius: 16px;
-            padding: 15px 20px;
-            margin-bottom: 10px;
+            padding: 18px 20px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border: 1px solid #30363d;
         }
 
-        .room-info h2 { margin: 0; color: #00ffaa; font-size: 1.1rem; }
-        .room-info p { margin: 4px 0 0; color: #8b949e; font-size: 0.75rem; }
+        .room-info h2 { margin: 0; color: #00ffaa; font-size: 1.2rem; }
+        .room-info p { margin: 4px 0 0; color: #8b949e; font-size: 0.8rem; }
 
         .join-btn {
             background: linear-gradient(135deg, #00ffaa 0%, #00d2ff 100%);
             border: none; border-radius: 10px;
-            color: #000; padding: 10px 22px;
+            color: #000; padding: 10px 25px;
             font-weight: 800; cursor: pointer;
         }
 
-        /* --- 5. ปุ่ม Verify ด้านล่างสุด --- */
-        .footer-section {
-            width: 100%;
-            max-width: 400px;
-            flex-shrink: 0;
-        }
-
-        .verify-btn {
-            width: 100%;
-            padding: 15px;
-            border-radius: 30px;
-            border: none;
-            background: #ffffff;
-            color: #000;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
+        /* --- 3. หน้า PLAY ROOM (เตรียมพื้นที่ไว้สำหรับขั้นตอนถัดไป) --- */
+        .play-wrapper {
+            padding: 20px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div class="lobby-wrapper">
-        <div class="header-section">
-            <h1>WORLD SPIN</h1>
-            <div class="subtitle">วงล้อสุ่มผู้โชคดีบน World Chain</div>
-        </div>
+    <div id="lobby-view" class="view active">
+        <div class="lobby-wrapper">
+            <div class="header-section">
+                <h1>WORLD SPIN</h1>
+                <div class="subtitle">วงล้อสุ่มผู้โชคดีบน World Chain</div>
+            </div>
 
-        <div class="wheel-container">
-            <div class="arrow">➤</div>
-            <div class="dots-container">
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
-                <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            <div class="wheel-container">
+                <div class="arrow">➤</div>
+                <div class="dots-container">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
             </div>
-        </div>
 
-        <div class="room-list">
-            <div class="room-card">
-                <div class="room-info">
-                    <h2>0.001 WLD</h2>
-                    <p>ผู้เล่นในห้อง: 2 คน</p>
+            <div class="room-list">
+                <div class="room-card">
+                    <div class="room-info">
+                        <h2>0.001 WLD</h2>
+                        <p>ผู้เล่นในห้อง: 2 คน</p>
+                    </div>
+                    <button class="join-btn" onclick="enterRoom('0.001')">JOIN</button>
                 </div>
-                <button class="join-btn">JOIN</button>
-            </div>
-            <div class="room-card">
-                <div class="room-info">
-                    <h2>0.01 WLD</h2>
-                    <p>ผู้เล่นในห้อง: 4 คน</p>
+                <div class="room-card">
+                    <div class="room-info">
+                        <h2>0.01 WLD</h2>
+                        <p>ผู้เล่นในห้อง: 4 คน</p>
+                    </div>
+                    <button class="join-btn" onclick="enterRoom('0.01')">JOIN</button>
                 </div>
-                <button class="join-btn">JOIN</button>
-            </div>
-            <div class="room-card">
-                <div class="room-info">
-                    <h2>0.1 WLD</h2>
-                    <p>ผู้เล่นในห้อง: 1 คน</p>
+                <div class="room-card">
+                    <div class="room-info">
+                        <h2>0.1 WLD</h2>
+                        <p>ผู้เล่นในห้อง: 1 คน</p>
+                    </div>
+                    <button class="join-btn" onclick="enterRoom('0.1')">JOIN</button>
                 </div>
-                <button class="join-btn">JOIN</button>
-            </div>
-            <div class="room-card">
-                <div class="room-info">
-                    <h2>1 WLD</h2>
-                    <p>ผู้เล่นในห้อง: 0 คน</p>
+                <div class="room-card">
+                    <div class="room-info">
+                        <h2>1 WLD</h2>
+                        <p>ผู้เล่นในห้อง: 0 คน</p>
+                    </div>
+                    <button class="join-btn" onclick="enterRoom('1')">JOIN</button>
                 </div>
-                <button class="join-btn">JOIN</button>
             </div>
-        </div>
-
-        <div class="footer-section">
-            <button class="verify-btn">ID Verify with World ID</button>
         </div>
     </div>
+
+    <div id="play-view" class="view">
+        <div class="play-wrapper">
+            <h2>ห้อง <span id="room-price"></span> WLD</h2>
+            <button onclick="goBack()" style="background:#444; color:#fff; border:none; padding:10px; border-radius:10px; margin-top:20px;">กลับหน้าหลัก</button>
+        </div>
+    </div>
+
+    <script>
+        function enterRoom(amount) {
+            document.getElementById('room-price').innerText = amount;
+            document.getElementById('lobby-view').classList.remove('active');
+            document.getElementById('play-view').classList.add('active');
+        }
+
+        function goBack() {
+            document.getElementById('play-view').classList.remove('active');
+            document.getElementById('lobby-view').classList.add('active');
+        }
+    </script>
 
 </body>
 </html>
