@@ -30,27 +30,28 @@
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 12px; text-align: center; font-size: 0.7rem; color: #888; }
         .stat-card b { color: var(--neon); font-size: 0.9rem; display: block; margin-top: 3px; }
 
-        /* Board 2x6 */
+        /* Board 2x6 - Fixed Size เพื่อความนิ่ง */
         .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; flex-shrink: 0; }
         .slot { aspect-ratio: 1/1; background: #111; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #444; transition: 0.2s; overflow: hidden; text-align: center; }
         .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 15px var(--neon-hot); background: rgba(255, 149, 0, 0.2); color: white !important; font-weight: bold; }
 
-        /* Main Content - Responsive Fix */
-        .main-content { flex: 1; display: flex; padding: 5px 15px; gap: 10px; margin-bottom: 15px; min-height: 0; }
-        .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
+        /* Main Content - Fixed Height เพื่อป้องกันหน้าจอตก */
+        .main-content { display: flex; padding: 5px 15px; gap: 12px; align-items: flex-start; margin-bottom: 30px; }
         
+        .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 8px; }
         .status-row { display: flex; gap: 6px; flex-shrink: 0; }
         .status-pill { flex: 1; background: rgba(255,149,0,0.1); border: 1px solid var(--border); border-radius: 8px; padding: 6px; text-align: center; font-size: 0.65rem; color: #888; }
 
-        .chat-section { flex: 1; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; min-height: 0; }
+        /* ล็อคความสูงช่องแชท */
+        .chat-section { height: 320px; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; overflow: hidden; }
         #chatBox { flex: 1; padding: 12px; overflow-y: auto; font-size: 0.8rem; -webkit-overflow-scrolling: touch; }
         .chat-input-row { padding: 10px; background: rgba(255, 149, 0, 0.05); border-top: 1px solid rgba(255,255,255,0.1); }
         .chat-input-row input { width: 100%; background: transparent; border: none; color: var(--neon); outline: none; font-size: 14px; }
 
-        /* Right Menu */
-        .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 100%; }
-        .btn-play-action { flex: 2.5; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 18px; font-size: 1.3rem; font-weight: 900; box-shadow: 0 5px 15px rgba(255, 94, 0, 0.4); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .btn-menu-sub { flex: 1; background: #1a1a1e; border: 1px solid var(--border); color: #eee; border-radius: 10px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+        /* ล็อคความสูงเมนูทางขวา */
+        .menu-section { flex: 1; display: flex; flex-direction: column; gap: 10px; height: 365px; }
+        .btn-play-action { flex: 2.2; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 18px; font-size: 1.3rem; font-weight: 900; box-shadow: 0 5px 15px rgba(255, 94, 0, 0.4); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .btn-menu-sub { height: 45px; background: #1a1a1e; border: 1px solid var(--border); color: #eee; border-radius: 10px; font-size: 0.75rem; font-weight: bold; cursor: pointer; flex-shrink: 0; }
 
         /* Overlay Panels */
         .overlay-panel { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 200; padding: 20px; flex-direction: column; }
@@ -68,8 +69,8 @@
     <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px;">
         <h1 style="color:#fff; font-size: 2.8rem; margin: 0;">WORLD</h1>
         <h1 style="color:var(--neon); font-size: 2.8rem; margin: 0 0 30px 0;">CHASER</h1>
-        <input type="text" id="userNameInp" placeholder="ระบุชื่อผู้เล่น..." style="width:100%; padding:18px; border-radius:15px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:white; margin-bottom:20px; text-align:center; font-size: 1.1rem;">
-        <button onclick="joinGame()" style="width:100%; padding:20px; background:var(--neon); border:none; border-radius:15px; font-weight:900; font-size: 1.2rem;">START GAME</button>
+        <input type="text" id="userNameInp" placeholder="ระบุชื่อผู้เล่น..." style="width:100%; padding:18px; border-radius:15px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:white; margin-bottom:20px; text-align:center;">
+        <button onclick="joinGame()" style="width:100%; padding:20px; background:var(--neon); border:none; border-radius:15px; font-weight:900;">START GAME</button>
     </div>
 </div>
 
@@ -92,8 +93,8 @@
 
     <div id="earnPanel" class="overlay-panel" style="justify-content:center; align-items:center;">
         <h2 style="color:var(--neon); margin:0;">COMING SOON</h2>
-        <p style="color:#666; margin: 10px 0 20px 0;">ระบบกำลังพัฒนา...</p>
-        <button onclick="closeOverlay('earnPanel')" style="background:var(--card); border:1px solid var(--border); color:white; padding:10px 40px; border-radius:8px;">ย้อนกลับ</button>
+        <p style="color:#666;">ระบบกำลังพัฒนา...</p>
+        <button onclick="closeOverlay('earnPanel')" style="margin-top:20px; background:var(--card); border:1px solid var(--border); color:white; padding:10px 40px; border-radius:8px;">ย้อนกลับ</button>
     </div>
 
     <div class="top-nav">
