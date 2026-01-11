@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WORLD SPIN - Star Edition</title>
+    <title>WORLD SPIN - Arrow Edition</title>
     <style>
         body {
             background-color: #0d1117;
@@ -42,26 +42,27 @@
             margin-bottom: 50px;
         }
 
-        /* รูปดาวตรงกลาง */
-        .star {
-            font-size: 60px;
+        /* ลูกศรตรงกลาง */
+        .arrow {
+            font-size: 50px;
             color: #ffcf40;
-            text-shadow: 0 0 20px rgba(255, 207, 64, 0.8);
+            text-shadow: 0 0 15px rgba(255, 207, 64, 0.7);
             z-index: 10;
-            animation: star-spin 4s linear infinite;
+            /* สั่งให้หมุนเฉพาะลูกศร */
+            animation: arrow-spin 2s linear infinite;
+            display: inline-block;
         }
 
-        @keyframes star-spin {
+        @keyframes arrow-spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
 
-        /* จุดขาว 10 จุดที่หมุนรอบ */
-        .dots-orbit {
+        /* กลุ่มจุดขาว (อยู่กับที่ ไม่ต้องมี animation) */
+        .dots-container {
             position: absolute;
             width: 100%;
             height: 100%;
-            animation: orbit-spin 6s linear infinite;
         }
 
         .dot {
@@ -72,25 +73,20 @@
             border-radius: 50%;
             top: 50%;
             left: 50%;
-            box-shadow: 0 0 10px white;
+            box-shadow: 0 0 8px white;
         }
 
-        /* คำนวณตำแหน่งจุดทั้ง 10 จุดให้กระจายเป็นวงกลม */
-        .dot:nth-child(1) { transform: rotate(0deg) translate(90px); }
-        .dot:nth-child(2) { transform: rotate(36deg) translate(90px); }
-        .dot:nth-child(3) { transform: rotate(72deg) translate(90px); }
-        .dot:nth-child(4) { transform: rotate(108deg) translate(90px); }
-        .dot:nth-child(5) { transform: rotate(144deg) translate(90px); }
-        .dot:nth-child(6) { transform: rotate(180deg) translate(90px); }
-        .dot:nth-child(7) { transform: rotate(216deg) translate(90px); }
-        .dot:nth-child(8) { transform: rotate(252deg) translate(90px); }
-        .dot:nth-child(9) { transform: rotate(288deg) translate(90px); }
-        .dot:nth-child(10) { transform: rotate(324deg) translate(90px); }
-
-        @keyframes orbit-spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
+        /* วางจุด 10 จุดไว้กับที่ล้อมรอบวงกลม */
+        .dot:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translate(90px); }
+        .dot:nth-child(2) { transform: translate(-50%, -50%) rotate(36deg) translate(90px); }
+        .dot:nth-child(3) { transform: translate(-50%, -50%) rotate(72deg) translate(90px); }
+        .dot:nth-child(4) { transform: translate(-50%, -50%) rotate(108deg) translate(90px); }
+        .dot:nth-child(5) { transform: translate(-50%, -50%) rotate(144deg) translate(90px); }
+        .dot:nth-child(6) { transform: translate(-50%, -50%) rotate(180deg) translate(90px); }
+        .dot:nth-child(7) { transform: translate(-50%, -50%) rotate(216deg) translate(90px); }
+        .dot:nth-child(8) { transform: translate(-50%, -50%) rotate(252deg) translate(90px); }
+        .dot:nth-child(9) { transform: translate(-50%, -50%) rotate(288deg) translate(90px); }
+        .dot:nth-child(10) { transform: translate(-50%, -50%) rotate(324deg) translate(90px); }
 
         /* รายการห้องสุ่ม */
         .room-list {
@@ -144,9 +140,9 @@
     <div class="subtitle">วงล้อสุ่มผู้โชคดีบน World Chain</div>
 
     <div class="wheel-container">
-        <div class="star">★</div>
+        <div class="arrow">➤</div>
         
-        <div class="dots-orbit">
+        <div class="dots-container">
             <div class="dot"></div>
             <div class="dot"></div>
             <div class="dot"></div>
@@ -168,7 +164,6 @@
             </div>
             <button class="join-btn">JOIN</button>
         </div>
-
         <div class="room-card">
             <div class="room-info">
                 <h2>0.01 WLD</h2>
@@ -176,7 +171,6 @@
             </div>
             <button class="join-btn">JOIN</button>
         </div>
-
         <div class="room-card">
             <div class="room-info">
                 <h2>0.1 WLD</h2>
@@ -184,7 +178,6 @@
             </div>
             <button class="join-btn">JOIN</button>
         </div>
-
         <div class="room-card">
             <div class="room-info">
                 <h2>1 WLD</h2>
