@@ -19,7 +19,7 @@
         .ticker-text { display: inline-block; animation: ticker 20s linear infinite; padding-left: 100%; }
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
-        .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; background: radial-gradient(circle at top, #2b1a0a 0%, #0a0a0c 100%); }
+        .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; background: radial-gradient(circle at top, #2b1a0a 0%, #0a0a0c 100%); position: relative; }
         .active { display: flex; }
 
         .top-nav { display: flex; justify-content: space-between; padding: 12px 15px; background: rgba(0,0,0,0.8); align-items: center; border-bottom: 1px solid var(--border); }
@@ -27,8 +27,9 @@
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 12px; text-align: center; font-size: 0.7rem; color: #888; }
         .stat-card b { color: var(--neon); font-size: 0.9rem; display: block; margin-top: 3px; }
 
-        .board-container { padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; scrollbar-width: none; }
-        .slot { aspect-ratio: 1/1; background: #111; border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #444; transition: 0.2s; }
+        /* Board 2 แถว แถวละ 6 */
+        .board-container { padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; min-height: 140px; }
+        .slot { aspect-ratio: 1/1; background: #111; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #444; transition: 0.2s; overflow: hidden; }
         .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 15px var(--neon-hot); background: rgba(255, 149, 0, 0.2); color: white !important; font-weight: bold; }
 
         .main-content { flex: 1; display: flex; padding: 10px 15px; gap: 12px; margin-bottom: 35px; overflow: hidden; }
@@ -36,8 +37,9 @@
         .chat-section { flex: 1; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; overflow: hidden; }
         #chatBox { flex: 1; padding: 12px; overflow-y: auto; font-size: 0.85rem; }
         
-        /* History Overlay */
-        #historyPanel { display: none; position: absolute; top: 120px; left: 15px; right: 15px; bottom: 80px; background: #000; border: 2px solid var(--neon); border-radius: 15px; z-index: 50; padding: 15px; }
+        /* Overlay Panels */
+        .overlay-panel { display: none; position: absolute; top: 60px; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 100; padding: 20px; flex-direction: column; }
+        .panel-content { flex: 1; overflow-y: auto; margin-top: 15px; }
 
         .menu-section { flex: 1; display: flex; flex-direction: column; gap: 10px; }
         .btn-play-action { flex: 2.5; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 18px; font-size: 1.4rem; font-weight: 900; box-shadow: 0 5px 15px rgba(255, 94, 0, 0.4); cursor: pointer; }
@@ -47,7 +49,7 @@
 <body>
 
 <div class="news-ticker">
-    <div class="ticker-text" id="tickerText">🔥 WORLD CHASER: รอผู้เล่นขั้นต่ำ 2 คนเพื่อเริ่มรอบใหม่...</div>
+    <div class="ticker-text" id="tickerText">🔥 WORLD CHASER: ต้องการ 2 ผู้เล่นเพื่อเริ่มรอบใหม่...</div>
 </div>
 
 <div id="lobby" class="screen active">
@@ -60,12 +62,26 @@
 </div>
 
 <div id="game" class="screen">
-    <div id="historyPanel">
-        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
-            <b style="color:var(--neon)">HISTORY (5 ล่าสุด)</b>
-            <button onclick="toggleHistory()" style="background:none; border:none; color:white;">✖</button>
+    <div id="historyPanel" class="overlay-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b style="color:var(--neon); font-size:1.2rem;">HISTORY (100 ล่าสุด)</b>
+            <button onclick="closeOverlay('historyPanel')" style="background:var(--card); border:1px solid var(--border); color:white; padding:5px 15px; border-radius:8px;">ย้อนกลับ</button>
         </div>
-        <div id="historyContent" style="font-size: 0.8rem; color:#ccc;">ยังไม่มีข้อมูล...</div>
+        <div id="historyContent" class="panel-content"></div>
+    </div>
+
+    <div id="leaderboardPanel" class="overlay-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <b style="color:var(--neon); font-size:1.2rem;">TOP 100 PLAYERS</b>
+            <button onclick="closeOverlay('leaderboardPanel')" style="background:var(--card); border:1px solid var(--border); color:white; padding:5px 15px; border-radius:8px;">ย้อนกลับ</button>
+        </div>
+        <div id="leaderboardContent" class="panel-content"></div>
+    </div>
+
+    <div id="earnPanel" class="overlay-panel" style="justify-content:center; align-items:center; text-align:center;">
+        <h2 style="color:var(--neon); margin:0;">COMING SOON</h2>
+        <p style="color:#666;">ระบบกำลังพัฒนา...</p>
+        <button onclick="closeOverlay('earnPanel')" style="margin-top:20px; background:var(--card); border:1px solid var(--border); color:white; padding:10px 30px; border-radius:8px;">ย้อนกลับ</button>
     </div>
 
     <div class="top-nav">
@@ -86,32 +102,33 @@
         <div class="left-panel">
             <div class="chat-section">
                 <div id="chatBox"></div>
-                <div class="chat-input-row" style="padding:10px; background:rgba(0,0,0,0.5)">
-                    <input type="text" id="chatInp" placeholder="คุยกับคนอื่น..." onkeydown="if(event.key==='Enter') sendMsg()" style="width:100%; background:none; border:none; color:var(--neon); outline:none;">
+                <div class="chat-input-row">
+                    <input type="text" id="chatInp" placeholder="คุยกับเพื่อน..." onkeydown="if(event.key==='Enter') sendMsg()">
                 </div>
             </div>
         </div>
-
         <div class="menu-section">
             <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY<br><span style="font-size:0.7rem">0.001 WLD</span></button>
-            <button class="btn-menu-sub" onclick="toggleHistory()">ประวัติ</button>
-            <button class="btn-menu-sub">กระเป๋า</button>
-            <button class="btn-menu-sub" style="color:var(--neon)">EARN</button>
+            <button class="btn-menu-sub" onclick="openOverlay('historyPanel')">ประวัติ</button>
+            <button class="btn-menu-sub" onclick="openOverlay('leaderboardPanel')">อันดับ</button>
+            <button class="btn-menu-sub" onclick="openOverlay('earnPanel')" style="color:var(--neon)">EARN</button>
         </div>
     </div>
 </div>
 
 <script>
     let currentPlayerName = "GUEST";
-    let players = [];
-    let hasJoined = false;
-    let timerStarted = false;
-    let audioCtx;
-    let round = 125;
-    let gameHistory = [];
+    let players = [], hasJoined = false, timerStarted = false, audioCtx;
+    let round = 125, gameHistory = [], leaderData = {};
 
-    const ENTRY_FEE = 0.001;
-    const HOUSE_FEE = 0.15;
+    const ENTRY_FEE = 0.001, HOUSE_FEE = 0.15, MAX_PLAYERS = 12;
+
+    function openOverlay(id) { 
+        document.getElementById(id).style.display = 'flex'; 
+        if(id === 'leaderboardPanel') renderLeaderboard();
+        if(id === 'historyPanel') renderHistory();
+    }
+    function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
 
     function initAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -137,27 +154,10 @@
         updateBoard();
     }
 
-    function toggleHistory() {
-        const p = document.getElementById('historyPanel');
-        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
-        renderHistory();
-    }
-
-    function renderHistory() {
-        const h = document.getElementById('historyContent');
-        if (gameHistory.length === 0) return;
-        h.innerHTML = gameHistory.map(item => `
-            <div style="border-bottom:1px solid #333; padding:5px 0;">
-                <span style="color:var(--neon)">#${item.round}</span> : <b>${item.winner}</b> ชนะ <b>${item.amount}</b> WLD
-            </div>
-        `).join('');
-    }
-
     function updateBoard() {
         const b = document.getElementById('board');
         b.innerHTML = "";
-        const displayCount = Math.max(players.length, 10);
-        for(let i=0; i<displayCount; i++){
+        for(let i=0; i < MAX_PLAYERS; i++){
             const s = document.createElement('div');
             s.className = 'slot';
             if(players[i]) {
@@ -176,24 +176,22 @@
 
     function play() {
         if(hasJoined) return;
-        initAudio();
-        hasJoined = true;
+        initAudio(); hasJoined = true;
         players.push(currentPlayerName);
         updateBoard();
         document.getElementById('btnPlay').disabled = true;
         document.getElementById('btnPlay').style.opacity = "0.5";
         playSfx(400, 'sine', 0.1, 0.1);
 
-        // ทดสอบบอท 12 คน
         let count = 0;
         let itv = setInterval(() => {
-            count++;
-            players.push("BOT_" + Math.floor(Math.random()*999));
-            updateBoard();
-            playSfx(800, 'sine', 0.03, 0.02);
-            if(players.length >= 2 && !timerStarted) startCountdown();
-            if(count >= 11) clearInterval(itv);
-        }, 600);
+            if(players.length < MAX_PLAYERS) {
+                players.push("BOT_" + Math.floor(Math.random()*999));
+                updateBoard();
+                playSfx(800, 'sine', 0.03, 0.01);
+                if(players.length >= 2 && !timerStarted) startCountdown();
+            } else clearInterval(itv);
+        }, 500);
     }
 
     function startCountdown() {
@@ -203,11 +201,7 @@
             sec--;
             document.getElementById('timer').innerText = sec + "s";
             if(sec <= 5 && sec > 0) playSfx(600, 'sine', 0.1, 0.1);
-            if(sec <= 0) {
-                clearInterval(cItv);
-                document.getElementById('timer').innerText = "LIVE";
-                runGame();
-            }
+            if(sec <= 0) { clearInterval(cItv); document.getElementById('timer').innerText = "LIVE"; runGame(); }
         }, 1000);
     }
 
@@ -216,7 +210,6 @@
         let currentIdx = 0, speed = 50, steps = 0;
         const winIdx = Math.floor(Math.random() * players.length);
         const total = 40 + winIdx;
-
         function move() {
             slots.forEach(s => s.classList.remove('active-chaser'));
             currentIdx = (currentIdx + 1) % slots.length;
@@ -234,23 +227,34 @@
     function finish(idx) {
         playSfx(880, 'sine', 0.5, 0.1);
         const winner = players[idx];
-        const amount = document.getElementById('prizeDisplay').innerText;
+        const amount = parseFloat(document.getElementById('prizeDisplay').innerText);
         
         // บันทึกประวัติ
-        gameHistory.unshift({ round: round, winner: winner, amount: amount });
-        if(gameHistory.length > 5) gameHistory.pop();
+        gameHistory.unshift({ round: round, winner: winner, amount: amount.toFixed(4) });
+        if(gameHistory.length > 100) gameHistory.pop();
 
-        document.getElementById('tickerText').innerText = `🎊 รอบที่ #${round} ผู้ชนะคือ ${winner} รับ ${amount} WLD! 🎊`;
-        addChat("🏆 WINNER", `${winner} ชนะ ${amount} WLD`, "color:black; background:var(--neon); font-weight:bold;");
-        
+        // บันทึกอันดับ
+        leaderData[winner] = (leaderData[winner] || 0) + amount;
+
+        document.getElementById('tickerText').innerText = `🎊 รอบที่ #${round} ผู้ชนะคือ ${winner} รับ ${amount.toFixed(4)} WLD! 🎊`;
+        addChat("🏆 WINNER", `${winner} ชนะ ${amount.toFixed(4)} WLD`, "color:black; background:var(--neon); font-weight:bold;");
         setTimeout(reset, 5000);
     }
 
+    function renderHistory() {
+        const h = document.getElementById('historyContent');
+        h.innerHTML = gameHistory.map(i => `<div style="padding:8px; border-bottom:1px solid #222;">#${i.round} | <b>${i.winner}</b>: <span style="color:var(--neon)">${i.amount} WLD</span></div>`).join('') || "ยังไม่มีประวัติ";
+    }
+
+    function renderLeaderboard() {
+        const l = document.getElementById('leaderboardContent');
+        const sorted = Object.entries(leaderData).sort((a,b) => b[1] - a[1]).slice(0,100);
+        l.innerHTML = sorted.map((i, idx) => `<div style="padding:8px; border-bottom:1px solid #222;">${idx+1}. <b>${i[0]}</b>: <span style="color:var(--neon)">${i[1].toFixed(4)} WLD</span></div>`).join('') || "ยังไม่มีข้อมูล";
+    }
+
     function reset() {
-        round++;
-        players = []; hasJoined = false; timerStarted = false;
+        round++; players = []; hasJoined = false; timerStarted = false;
         document.getElementById('timer').innerText = "WAIT";
-        document.getElementById('tickerText').innerText = `🔥 รอบที่ #${round} กำลังจะเริ่ม • ต้องการ 2 ผู้เล่นเพื่อเริ่ม!`;
         updateBoard();
         document.getElementById('btnPlay').disabled = false;
         document.getElementById('btnPlay').style.opacity = "1";
@@ -258,7 +262,7 @@
 
     function addChat(u, m, s='') {
         const b = document.getElementById('chatBox');
-        b.innerHTML += `<div><b style="${s}">${u}:</b> <span style="color:#eee">${m}</span></div>`;
+        b.innerHTML += `<div style="margin-bottom:5px;"><b style="${s}">${u}:</b> <span style="color:#eee">${m}</span></div>`;
         b.scrollTop = b.scrollHeight;
     }
 
