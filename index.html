@@ -6,215 +6,144 @@
     <title>WORLD SPIN - Pro Layout</title>
     <style>
         :root {
-            --neon: #00ffaa; 
-            --bg: #0d1117; 
-            --card: #161b22; 
-            --border: #30363d;
-            --text-gray: #8b949e;
+            --neon: #00ffaa; --bg: #0d1117; --card: #161b22; --border: #30363d; --text-gray: #8b949e;
         }
-        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body { 
-            margin: 0; 
-            background: var(--bg); 
-            color: white; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden; 
-        }
-        
+        body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
         .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 450px; margin: 0 auto; }
         .active { display: flex; }
 
-        /* Top Nav */
+        /* Navigation & Ticker */
         .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: #000; align-items: center; border-bottom: 1px solid var(--border); }
-        .ticker { background: #050505; color: var(--neon); font-size: 0.7rem; padding: 5px; overflow: hidden; white-space: nowrap; }
+        .ticker { background: #050505; color: var(--neon); font-size: 0.7rem; padding: 6px; overflow: hidden; }
 
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 12px; text-align: center; }
-        .stat-card small { display: block; font-size: 0.65rem; color: var(--text-gray); margin-bottom: 4px; }
-        .stat-card b { color: var(--neon); font-size: 0.9rem; letter-spacing: 0.5px; }
+        /* Stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; }
+        .stat-card small { display: block; font-size: 0.6rem; color: var(--text-gray); }
+        .stat-card b { color: var(--neon); font-size: 0.85rem; }
 
-        /* Animation Slider */
-        .slider-section { position: relative; padding: 20px 0; overflow: hidden; background: rgba(0,0,0,0.2); margin: 10px 0; }
-        .pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); color: var(--neon); font-size: 20px; z-index: 5; text-shadow: 0 0 5px var(--neon); }
+        /* Animation Slider with Neon Arrow */
+        .slider-section { position: relative; padding: 25px 0 10px; overflow: hidden; background: rgba(0,0,0,0.3); }
+        .pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); color: var(--neon); font-size: 24px; z-index: 10; filter: drop-shadow(0 0 8px var(--neon)); animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { top: 0; } 50% { top: 5px; } }
         .avatar-track { display: flex; gap: 12px; width: max-content; padding-left: 50%; }
-        .avatar { width: 50px; height: 50px; background: #222; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .avatar.active { border-color: var(--neon); box-shadow: 0 0 15px rgba(0, 255, 170, 0.4); background: #2d333b; }
-        
+        .avatar { width: 48px; height: 48px; background: #222; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .avatar.active { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); }
         .scrolling { animation: scrollLoop 20s linear infinite; }
         @keyframes scrollLoop { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
-        .online-tag { background: rgba(0, 77, 51, 0.5); color: var(--neon); padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; margin: 5px auto; width: fit-content; border: 1px solid var(--neon); }
+        /* Chat Window (White Border) */
+        .chat-container { flex: 1; margin: 5px 15px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 12px; background: rgba(0,0,0,0.5); padding: 12px; overflow-y: auto; font-size: 0.85rem; box-shadow: inset 0 0 10px rgba(255,255,255,0.1); }
+        .chat-msg { margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 3px; }
 
-        /* Chat & Actions */
-        .chat-container { flex: 1; margin: 10px 15px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.3); padding: 12px; overflow-y: auto; font-size: 0.85rem; }
-        .chat-msg { margin-bottom: 6px; border-left: 2px solid var(--neon); padding-left: 8px; }
-        
-        .action-area { padding: 15px; display: flex; gap: 10px; align-items: flex-end; background: #0d1117; }
-        .input-box-wrap { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        .msg-input { background: #1c2128; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; outline: none; font-size: 0.9rem; }
-        .btn-send { background: #30363d; border: none; color: white; padding: 10px; border-radius: 8px; font-size: 0.8rem; cursor: pointer; align-self: flex-end; width: 60px; }
-        
+        /* New Action Area (Redesigned) */
+        .action-area { padding: 10px 15px; display: flex; gap: 10px; align-items: stretch; background: var(--bg); }
+        .input-group { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+        .msg-input { background: #1c2128; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; outline: none; }
+        .btn-send { background: #30363d; border: none; color: white; padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; border: 1px solid #444; }
+
+        /* Extra Large Play Button */
         .btn-play-big { 
             background: linear-gradient(135deg, var(--neon), #00d2ff); 
-            border: none; border-radius: 15px; width: 110px; height: 75px;
-            color: #000; font-weight: 800; display: flex; flex-direction: column; 
+            border: none; border-radius: 15px; width: 120px;
+            color: #000; font-weight: 900; display: flex; flex-direction: column; 
             align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 255, 170, 0.3);
-            transition: transform 0.1s;
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.4);
         }
-        .btn-play-big:active { transform: scale(0.95); }
-
-        /* Lobby Styles */
-        .lobby-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 25px; }
-        .wheel-lobby { position: relative; width: 160px; height: 160px; border: 2px dashed var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 30px; animation: spin 10s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-        .star-center { color: #ffcf40; font-size: 45px; filter: drop-shadow(0 0 10px #ffcf40); }
-        
-        .lobby-room { width: 100%; background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); transition: 0.2s; }
-        .lobby-room:active { background: #21262d; }
-        .btn-join { background: var(--neon); border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; color: #000; cursor: pointer; }
+        .btn-play-big span { font-size: 1.2rem; margin-top: -2px; }
 
         /* Bottom Menu */
-        .bottom-menu { height: 70px; background: #050505; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; }
-        .menu-item { text-align: center; color: var(--text-gray); font-size: 0.75rem; cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+        .bottom-menu { height: 65px; background: #000; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(3, 1fr); }
+        .menu-item { text-align: center; color: var(--text-gray); font-size: 0.75rem; display: flex; flex-direction: column; justify-content: center; }
         .menu-item.active { color: var(--neon); }
-        .menu-icon { font-size: 1.2rem; }
+        .menu-item.earn { color: #ffd700; font-weight: bold; } /* Earn Highlight */
+
+        /* Lobby Room */
+        .lobby-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .lobby-room { width: 100%; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <div id="lobby" class="screen active">
     <div class="lobby-main">
-        <h2 style="color:var(--neon); margin:0; letter-spacing: 2px;">WORLD SPIN</h2>
-        <p style="color:var(--text-gray); font-size:0.85rem; margin-top:5px; margin-bottom:30px;">วงล้อสุ่มผู้โชคดีบน World Chain</p>
+        <h1 style="color:var(--neon); margin:0;">WORLD SPIN</h1>
+        <p style="color:var(--text-gray); margin-bottom:30px;">สุ่มโชคบน World Chain</p>
         
-        <div class="wheel-lobby" id="wheelDots">
-            <div class="star-center">★</div>
-        </div>
-
-        <div style="width:100%">
+        <div id="roomList" style="width:100%">
             <div class="lobby-room">
-                <div>
-                    <div style="font-size: 0.7rem; color: var(--text-gray);">Entry Fee</div>
-                    <b style="font-size: 1.1rem;">0.001 WLD</b>
-                </div>
-                <button class="btn-join" onclick="goToGame(0.001)">JOIN</button>
+                <div><small style="color:var(--text-gray)">Room Fee</small><br><b>0.001 WLD</b></div>
+                <button onclick="joinGame(0.001)" style="background:var(--neon); border:none; padding:8px 20px; border-radius:8px; font-weight:bold;">JOIN</button>
             </div>
-            <div class="lobby-room">
-                <div>
-                    <div style="font-size: 0.7rem; color: var(--text-gray);">Entry Fee</div>
-                    <b style="font-size: 1.1rem;">0.01 WLD</b>
-                </div>
-                <button class="btn-join" onclick="goToGame(0.01)">JOIN</button>
             </div>
-            <div class="lobby-room">
-                <div>
-                    <div style="font-size: 0.7rem; color: var(--text-gray);">Entry Fee</div>
-                    <b style="font-size: 1.1rem;">0.1 WLD</b>
-                </div>
-                <button class="btn-join" onclick="goToGame(0.1)">JOIN</button>
-            </div>
-        </div>
     </div>
-
     <div class="bottom-menu">
-        <div class="menu-item active">
-            <span class="menu-icon">🏠</span><span>Home</span>
-        </div>
-        <div class="menu-item">
-            <span class="menu-icon">💸</span><span>ธุรกรรม</span>
-        </div>
-        <div class="menu-item">
-            <span class="menu-icon">🎁</span><span>Earn</span>
-        </div>
+        <div class="menu-item active">🏠<br>Home</div>
+        <div class="menu-item">💸<br>ธุรกรรม</div>
+        <div class="menu-item earn">🎁<br>Earn</div>
     </div>
 </div>
 
 <div id="game" class="screen">
     <div class="top-nav">
-        <button onclick="backToLobby()" style="background:none; border:1px solid var(--border); color:white; border-radius:8px; padding:6px 12px; font-size: 0.8rem;">← Back</button>
-        <div style="font-size:0.9rem; font-weight: bold;">ROOM: <span id="roomName">0.001</span></div>
-        <div style="color:var(--neon); font-size:0.85rem; text-align: right;">
-            💰 1.250<br><span style="font-size:0.6rem; color:var(--text-gray);">0x71...4F2E</span>
-        </div>
-    </div>
-    
-    <div class="ticker">
-        <marquee scrollamount="5">🏆 LAST WINNER: 0x82... WON 0.035 WLD | NEXT ROUND STARTING IN 15 SECONDS...</marquee>
+        <button onclick="exitGame()" style="background:none; border:1px solid var(--border); color:white; border-radius:5px; padding:4px 10px;">← Back</button>
+        <div style="text-align:center;"><b>WORLD SPIN</b></div>
+        <div style="color:var(--neon); font-size:0.9rem;">💰 1.250</div>
     </div>
 
+    <div class="ticker"><marquee scrollamount="4">🏆 LAST WINNER: 0x82... WON 0.035 WLD | NEXT ROUND STARTING...</marquee></div>
+
     <div class="stats-grid">
-        <div class="stat-card"><small>รางวัลสะสม</small><b id="pot">0.0000</b></div>
-        <div class="stat-card"><small>เวลานับถอยหลัง</small><b id="timer">WAITING</b></div>
+        <div class="stat-card"><small>รางวัลรวม</small><b id="pot">0.0000</b></div>
+        <div class="stat-card"><small>เวลาเริ่ม</small><b id="timer">WAITING</b></div>
         <div class="stat-card"><small>ผู้เล่นรวม</small><b id="pCount">0</b></div>
     </div>
 
     <div class="slider-section">
         <div class="pointer">▼</div>
         <div class="avatar-track scrolling" id="track">
-            <div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
-            <div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
+            <div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div>
+            <div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div>
         </div>
     </div>
 
-    <div class="online-tag">● 00 ONLINE</div>
+    <div style="background:#004d33; color:var(--neon); padding:2px 10px; border-radius:15px; font-size:0.65rem; margin:5px auto; width:fit-content; border:1px solid var(--neon);">● 24 ONLINE</div>
 
     <div class="chat-container" id="chatBox">
-        <div class="chat-msg" style="color:var(--neon);">System: ยินดีต้อนรับ! รอนับถอยหลังเพื่อเริ่มเกม...</div>
+        <div class="chat-msg" style="color:var(--neon);">System: ยินดีต้อนรับ! รอนับถอยหลัง...</div>
     </div>
 
     <div class="action-area">
-        <div class="input-box-wrap">
-            <input type="text" id="chatInp" class="msg-input" placeholder="พิมพ์ข้อความคุยกับเพื่อน...">
-            <button class="btn-send" onclick="sendMsg()">ส่ง</button>
+        <div class="input-group">
+            <input type="text" id="chatInp" class="msg-input" placeholder="พิมพ์คุย...">
+            <button class="btn-send" onclick="sendMsg()">ส่งข้อความ</button>
         </div>
         <button class="btn-play-big" onclick="playGame()">
-            PLAY<br><span id="playVal" style="font-size:0.85rem; opacity: 0.9;">0.001</span>
+            <small style="font-size:0.6rem; margin-bottom:2px;">กดเข้าเล่น</small>
+            <span id="priceLabel">0.001</span>
         </button>
     </div>
 
     <div class="bottom-menu">
-        <div class="menu-item" onclick="backToLobby()">
-            <span class="menu-icon">🏠</span><span>Home</span>
-        </div>
-        <div class="menu-item">
-            <span class="menu-icon">💸</span><span>ธุรกรรม</span>
-        </div>
-        <div class="menu-item">
-            <span class="menu-icon">🎁</span><span>Earn</span>
-        </div>
+        <div class="menu-item" onclick="exitGame()">🏠<br>Home</div>
+        <div class="menu-item">💸<br>ธุรกรรม</div>
+        <div class="menu-item earn">🎁<br>Earn</div>
     </div>
 </div>
 
 <script>
-    let currentPrice = 0.001;
-    let playerCount = 0;
-    let isTimerRunning = false;
+    let price = 0.001;
+    let players = 0;
 
-    // สร้างจุดรอบวงล้อในหน้า Lobby
-    const wheel = document.getElementById('wheelDots');
-    for(let i=0; i<12; i++){
-        let d = document.createElement('div');
-        d.style.position = 'absolute';
-        d.style.width = '6px'; d.style.height = '6px';
-        d.style.background = i % 3 === 0 ? 'var(--neon)' : 'white'; 
-        d.style.borderRadius = '50%';
-        d.style.transform = `rotate(${i*30}deg) translate(75px)`;
-        wheel.appendChild(d);
-    }
-
-    function goToGame(p) {
-        currentPrice = p;
-        document.getElementById('roomName').innerText = p + " WLD";
-        document.getElementById('playVal').innerText = p;
+    function joinGame(p) {
+        price = p;
+        document.getElementById('priceLabel').innerText = p;
         document.getElementById('lobby').classList.remove('active');
         document.getElementById('game').classList.add('active');
     }
 
-    function backToLobby() {
+    function exitGame() {
         document.getElementById('game').classList.remove('active');
         document.getElementById('lobby').classList.add('active');
     }
@@ -223,38 +152,25 @@
         const inp = document.getElementById('chatInp');
         if(inp.value.trim()){
             const box = document.getElementById('chatBox');
-            const newMsg = document.createElement('div');
-            newMsg.className = 'chat-msg';
-            newMsg.innerHTML = `<b>You:</b> ${inp.value}`;
-            box.appendChild(newMsg);
+            box.innerHTML += `<div class="chat-msg"><b>You:</b> ${inp.value}</div>`;
             inp.value = "";
             box.scrollTop = box.scrollHeight;
         }
     }
 
     function playGame() {
-        playerCount++;
-        document.getElementById('pCount').innerText = playerCount;
-        // คำนวณรางวัลสะสม (สมมติหักค่าธรรมเนียม 5%)
-        document.getElementById('pot').innerText = (playerCount * currentPrice * 0.95).toFixed(4);
-        
-        if(playerCount >= 2 && !isTimerRunning) {
-            startTimer();
-        }
+        players++;
+        document.getElementById('pCount').innerText = players;
+        document.getElementById('pot').innerText = (players * price * 0.95).toFixed(4);
+        if(players >= 2) startTimer();
     }
 
     function startTimer() {
-        isTimerRunning = true;
         let sec = 15;
-        document.getElementById('timer').style.color = "#ff4d4d";
-        
-        let itv = setInterval(() => {
+        const itv = setInterval(() => {
             sec--;
             document.getElementById('timer').innerText = `00:${sec < 10 ? '0'+sec : sec}`;
-            if(sec <= 0) {
-                clearInterval(itv);
-                finishGame();
-            }
+            if(sec <= 0) { clearInterval(itv); finishGame(); }
         }, 1000);
     }
 
@@ -262,16 +178,10 @@
         const track = document.getElementById('track');
         track.classList.remove('scrolling');
         track.style.transition = "transform 4s cubic-bezier(0.15, 0, 0.15, 1)";
-        
-        // สุ่มตำแหน่งหยุด
-        const stopPos = Math.floor(Math.random() * 2000) + 1000;
-        track.style.transform = `translateX(-${stopPos}px)`;
-        
-        setTimeout(() => {
-            alert("จบเกม! ยินดีด้วยกับผู้ชนะในรอบนี้");
-            location.reload(); // รีเซ็ตเกมใหม่
-        }, 4500);
+        track.style.transform = `translateX(-${Math.floor(Math.random()*1500) + 500}px)`;
+        setTimeout(() => { alert("Winner: 0x71...!"); location.reload(); }, 4500);
     }
 </script>
+
 </body>
 </html>
