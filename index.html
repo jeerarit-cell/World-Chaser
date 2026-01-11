@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - ULTIMATE</title>
+    <title>WORLD CHASER - PLAYER MODE</title>
     <style>
         :root { --neon: #00ffaa; --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #8b949e; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         html, body { position: fixed; overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: white; font-family: -apple-system, sans-serif; }
 
-        /* Top Nav & News */
         .news-ticker { background: #000; color: var(--neon); padding: 6px 0; font-size: 0.75rem; border-bottom: 1px solid var(--border); white-space: nowrap; overflow: hidden; }
         .ticker-text { display: inline-block; animation: ticker 25s linear infinite; padding-left: 100%; }
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
@@ -17,23 +16,22 @@
         .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; }
         .active { display: flex; }
 
+        /* Header ปรับปรุงใหม่ */
         .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: #000; align-items: center; border-bottom: 1px solid var(--border); }
+        #headerPlayerName { color: #ffffff; font-weight: bold; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 1px; }
+
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 6px; border-radius: 10px; text-align: center; font-size: 0.7rem; }
         .stat-card b { color: var(--neon); font-size: 0.85rem; display: block; margin-top: 2px; }
 
-        /* 10 Slots Board */
         .board-container { padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: rgba(0,0,0,0.3); }
         .slot { aspect-ratio: 1/1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
         .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); background: rgba(0, 255, 170, 0.1); }
 
-        /* Main Section */
         .main-content { flex: 1; display: flex; padding: 10px 15px; gap: 12px; align-items: flex-start; margin-bottom: 35px; }
 
-        /* ฝั่งซ้าย: Status + Chat (340px) */
         .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 8px; }
         
-        /* ช่องใหม่เหนือแชท */
         .status-box { 
             background: rgba(255, 255, 255, 0.05); 
             border: 1px solid var(--border); 
@@ -46,7 +44,7 @@
         }
 
         .chat-section { 
-            height: 340px; /* ขยายขนาดเป็น 340px */
+            height: 340px; 
             border: 2px solid #ffffff; 
             border-radius: 15px; 
             background: rgba(0,0,0,0.8); 
@@ -58,8 +56,7 @@
         .chat-input-row { padding: 12px; background: rgba(255,255,255,0.05); border-top: 1px solid rgba(255,255,255,0.1); }
         .chat-input-row input { width: 100%; background: transparent; border: none; color: var(--neon); outline: none; font-size: 16px; }
 
-        /* ฝั่งขวา: Menu Control */
-        .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 385px; /* ปรับให้พอดีกับความสูงแผงซ้าย */ }
+        .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 385px; }
         .btn-play-action { 
             flex: 2;
             background: #000; 
@@ -84,21 +81,22 @@
 <div id="fireworks">🎉</div>
 
 <div class="news-ticker">
-    <div class="ticker-text">🔥 ยินดีต้อนรับสู่ WORLD CHASER • ตรวจสอบรอบการเล่นได้ที่แถบเหนือแชท • พิมพ์แชทแล้วกด Enter เพื่อคุยกับเพื่อนๆ</div>
+    <div class="ticker-text">🔥 ยินดีต้อนรับสู่ WORLD CHASER • ชื่อของคุณจะแสดงอยู่ด้านบนสุด • พิมพ์แชทแล้วกด Enter เพื่อร่วมสนุก!</div>
 </div>
 
 <div id="lobby" class="screen active">
     <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px;">
-        <h1 style="color:var(--neon); font-size: 2.5rem;">WORLD CHASER</h1>
-        <button onclick="join(0.001)" style="width:100%; padding:20px; background:var(--card); color:white; border:1px solid var(--border); border-radius:15px; margin-bottom:10px;">ROOM 0.001 WLD</button>
-        <button onclick="join(0.01)" style="width:100%; padding:20px; background:var(--card); color:white; border:1px solid var(--border); border-radius:15px;">ROOM 0.01 WLD</button>
+        <h1 style="color:var(--neon); font-size: 2.5rem; margin-bottom: 20px;">WORLD CHASER</h1>
+        <input type="text" id="userNameInp" placeholder="ระบุชื่อผู้เล่นของคุณ..." 
+               style="width:100%; padding:15px; border-radius:10px; border:1px solid var(--border); background:var(--card); color:white; margin-bottom:20px; outline:none; text-align:center;">
+        <button onclick="joinGame(0.001)" style="width:100%; padding:20px; background:var(--neon); color:#000; border:none; border-radius:15px; font-weight:bold;">START GAME</button>
     </div>
 </div>
 
 <div id="game" class="screen">
     <div class="top-nav">
         <button onclick="location.reload()" style="background:none; border:1px solid var(--border); color:white; border-radius:6px; padding:2px 10px;">←</button>
-        <b id="roomTitle">0.001 WLD</b>
+        <b id="headerPlayerName">PLAYER_NAME</b>
         <div style="color:var(--neon); font-weight:bold;">WLD 1.25</div>
     </div>
 
@@ -116,8 +114,8 @@
     <div class="main-content">
         <div class="left-panel">
             <div class="status-box">
-                <span>ROUND: <b id="roundNum">#124</b></span>
-                <span>ONLINE: <b id="onlineCount">12</b></span>
+                <span>ROUND: <b id="roundNum">#125</b></span>
+                <span>ONLINE: <b id="onlineCount">17</b></span>
             </div>
             <div class="chat-section">
                 <div id="chatBox"></div>
@@ -129,7 +127,7 @@
         </div>
 
         <div class="menu-section">
-            <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY<span id="priceLabel">0.001</span></button>
+            <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY<span>0.001</span></button>
             <button class="btn-menu-sub">ประวัติ</button>
             <button class="btn-menu-sub">ธุรกรรม</button>
             <button class="btn-menu-sub" style="color:var(--neon); border-color:var(--neon)">EARN</button>
@@ -140,12 +138,25 @@
 </div>
 
 <script>
+    let currentPlayerName = "GUEST";
     let currentPrice = 0.001;
     let players = [];
     let hasJoined = false;
     let timerStarted = false;
-    let round = 124;
+    let round = 125;
     let audioCtx;
+
+    function joinGame(p) {
+        const nameInput = document.getElementById('userNameInp').value.trim();
+        currentPlayerName = nameInput ? nameInput : "PLAYER_1";
+        
+        // อัปเดตชื่อใน Header
+        document.getElementById('headerPlayerName').innerText = currentPlayerName;
+        
+        document.getElementById('lobby').classList.remove('active');
+        document.getElementById('game').classList.add('active');
+        addChat("System", `สวัสดี ${currentPlayerName}! เชื่อมต่อสำเร็จ`, "color:var(--neon)");
+    }
 
     function initAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -162,16 +173,6 @@
         o.start(); o.stop(audioCtx.currentTime + d);
     }
 
-    function join(p) {
-        initAudio();
-        currentPrice = p;
-        document.getElementById('priceLabel').innerText = p;
-        document.getElementById('roomTitle').innerText = p + " WLD";
-        document.getElementById('lobby').classList.remove('active');
-        document.getElementById('game').classList.add('active');
-        addChat("System", "เชื่อมต่อแล้ว ขอให้โชคดี!", "color:var(--neon)");
-    }
-
     function play() {
         if(hasJoined) return;
         initAudio();
@@ -179,7 +180,7 @@
         const btn = document.getElementById('btnPlay');
         btn.disabled = true; btn.style.opacity = "0.5";
         
-        players.push("You");
+        players.push(currentPlayerName);
         for(let i=0; i<4; i++) players.push("Bot_"+Math.floor(Math.random()*99));
         
         updateStats();
@@ -189,7 +190,7 @@
 
     function updateStats() {
         document.getElementById('pCountTop').innerText = players.length;
-        document.getElementById('onlineCount').innerText = 12 + players.length;
+        document.getElementById('onlineCount').innerText = 17 + players.length;
         document.getElementById('pot').innerText = (players.length * currentPrice * 0.95).toFixed(4);
     }
 
@@ -244,7 +245,6 @@
         const btn = document.getElementById('btnPlay');
         btn.disabled = false; btn.style.opacity = "1";
         document.querySelectorAll('.slot').forEach(s => s.classList.remove('active-chaser'));
-        addChat("System", "เริ่มรอบใหม่ที่ #" + round, "color:var(--neon)");
     }
 
     function addChat(u, m, s='') {
@@ -257,7 +257,7 @@
         const inp = document.getElementById('chatInp');
         const val = inp.value.trim();
         if(val) { 
-            addChat("You", val); 
+            addChat(currentPlayerName, val); 
             inp.value = ""; 
             if(audioCtx) playSfx(1000, 'sine', 0.05, 0.02);
         }
