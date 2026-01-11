@@ -28,24 +28,99 @@
         /* ==========================================
            2. LOBBY STYLES (หน้าแรก)
            ========================================== */
-        .lobby-view { padding: 10px 20px 20px; }
-        .lobby-header { flex-shrink: 0; text-align: center; margin-bottom: 10px; }
-        
-        /* วงโคจร */
-        .orbit-container { position: relative; width: 110px; height: 110px; margin: 0 auto 15px; flex-shrink: 0; }
-        .circle-dashed { position: absolute; width: 100%; height: 100%; border: 1.5px dashed rgba(0,255,163,0.3); border-radius: 50%; animation: rotate 15s linear infinite; }
-        .center-dot { position: absolute; width: 10px; height: 10px; background: #fff; border-radius: 50%; top: 50%; left: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 15px #fff; }
-        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* ==========================================
+   SECTION: LOBBY STYLES (ปรับปรุงตามรูป 1000016307.jpg)
+   ========================================== */
+.lobby-view { 
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: 20px; 
+    overflow: hidden; /* ป้องกันการเลื่อนทั้งหน้าจอ */
+}
 
-        /* รายการห้อง */
-        .room-list { flex-grow: 1; overflow-y: auto; padding-right: 5px; margin-bottom: 10px; }
-        .room-card { background: var(--card-bg); border-radius: 18px; padding: 12px 18px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.05); }
-        .room-info b { font-size: 1.1rem; color: var(--primary); display: block; }
-        .room-info span { font-size: 0.75rem; color: var(--gray); }
-        .btn-join { background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; padding: 10px 22px; border-radius: 12px; font-weight: bold; color: #000; font-size: 0.85rem; cursor: pointer; }
+.lobby-header { 
+    flex-shrink: 0; 
+    text-align: center; 
+    margin-bottom: 20px; 
+}
 
-        .verify-footer { flex-shrink: 0; }
-        .btn-verify { width: 100%; padding: 14px; border-radius: 30px; border: none; background: #ffffff; color: #000; font-weight: bold; font-size: 0.9rem; }
+/* วงโคจรดีไซน์ใหม่ */
+.orbit-container { 
+    position: relative; 
+    width: 140px; 
+    height: 140px; 
+    margin: 0 auto 30px; 
+    flex-shrink: 0; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.circle-dashed { 
+    position: absolute; 
+    width: 100%; 
+    height: 100%; 
+    border: 2px dashed rgba(0, 255, 163, 0.4); /* เส้นประสีเขียวจางๆ */
+    border-radius: 50%; 
+    animation: rotate 20s linear infinite; 
+}
+.center-glow { 
+    width: 12px; 
+    height: 12px; 
+    background: #fff; 
+    border-radius: 50%; 
+    box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.3); /* จุดกลางเรืองแสง */
+}
+
+/* รายการห้องที่เลื่อนได้ */
+.room-list { 
+    flex-grow: 1; 
+    overflow-y: auto; 
+    padding-bottom: 20px;
+}
+.room-card { 
+    background: #1a232e; 
+    border-radius: 20px; 
+    padding: 15px 20px; 
+    margin-bottom: 12px; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border: 1px solid rgba(255,255,255,0.05); 
+}
+.room-info b { font-size: 1.2rem; color: var(--primary); display: block; margin-bottom: 4px; }
+.room-info span { font-size: 0.8rem; color: var(--gray); }
+
+/* ปุ่ม Join สีไล่เฉดตามรูป */
+.btn-join { 
+    background: linear-gradient(135deg, #00ffa3, #00d1ff); 
+    border: none; 
+    padding: 10px 28px; 
+    border-radius: 14px; 
+    font-weight: bold; 
+    color: #0a1118; 
+    font-size: 0.9rem; 
+    cursor: pointer;
+}
+
+/* ปุ่ม Verify ล่างสุด */
+.verify-footer { 
+    flex-shrink: 0; 
+    padding: 10px 0;
+}
+.btn-verify { 
+    width: 100%; 
+    padding: 16px; 
+    border-radius: 35px; 
+    border: none; 
+    background: #ffffff; 
+    color: #000; 
+    font-weight: bold; 
+    font-size: 1rem; 
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
 
         /* ==========================================
            3. PLAY ROOM STYLES (หน้าเล่น)
