@@ -3,185 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WORLD SPIN - Pro Layout</title>
+    <title>WORLD SPIN - Fast & Fun</title>
     <style>
-        :root {
-            --neon: #00ffaa; --bg: #0d1117; --card: #161b22; --border: #30363d; --text-gray: #8b949e;
-        }
+        :root { --neon: #00ffaa; --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #8b949e; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background: var(--bg); color: white; font-family: sans-serif; overflow: hidden; }
-        .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 450px; margin: 0 auto; }
+        .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 450px; margin: 0 auto; position: relative; }
         .active { display: flex; }
 
-        /* Navigation & Ticker */
+        /* Header & Stats */
         .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: #000; align-items: center; border-bottom: 1px solid var(--border); }
-        .ticker { background: #050505; color: var(--neon); font-size: 0.7rem; padding: 6px; overflow: hidden; }
-
-        /* Stats */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; }
-        .stat-card small { display: block; font-size: 0.6rem; color: var(--text-gray); }
         .stat-card b { color: var(--neon); font-size: 0.85rem; }
 
-        /* Animation Slider with Neon Arrow */
+        /* Animation Area */
         .slider-section { position: relative; padding: 25px 0 10px; overflow: hidden; background: rgba(0,0,0,0.3); }
-        .pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); color: var(--neon); font-size: 24px; z-index: 10; filter: drop-shadow(0 0 8px var(--neon)); animation: bounce 1s infinite; }
-        @keyframes bounce { 0%, 100% { top: 0; } 50% { top: 5px; } }
+        .pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); color: var(--neon); font-size: 24px; z-index: 10; text-shadow: 0 0 10px var(--neon); animation: bounce 0.5s infinite; }
+        @keyframes bounce { 0%, 100% { top: 0; } 50% { top: 3px; } }
         .avatar-track { display: flex; gap: 12px; width: max-content; padding-left: 50%; }
-        .avatar { width: 48px; height: 48px; background: #222; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
-        .avatar.active { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); }
+        .avatar { width: 50px; height: 50px; background: #222; border: 2px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .avatar.winner-glow { border-color: #ffd700; box-shadow: 0 0 20px #ffd700; transform: scale(1.1); transition: 0.3s; }
         .scrolling { animation: scrollLoop 20s linear infinite; }
         @keyframes scrollLoop { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
         /* Chat Window (White Border) */
-        .chat-container { flex: 1; margin: 5px 15px; border: 1.5px solid rgba(255, 255, 255, 0.9); border-radius: 12px; background: rgba(0,0,0,0.5); padding: 12px; overflow-y: auto; font-size: 0.85rem; box-shadow: inset 0 0 10px rgba(255,255,255,0.1); }
-        .chat-msg { margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 3px; }
+        .chat-container { flex: 1; margin: 5px 15px; border: 2.5px solid #ffffff; border-radius: 12px; background: rgba(0,0,0,0.6); padding: 10px; overflow-y: auto; font-size: 0.85rem; }
+        .chat-msg { margin-bottom: 5px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .winner-msg { color: #ffd700; font-weight: bold; background: rgba(255,215,0,0.1); padding: 5px; border-radius: 5px; text-align: center; }
 
-        /* New Action Area (Redesigned) */
+        /* Buttons */
         .action-area { padding: 10px 15px; display: flex; gap: 10px; align-items: stretch; background: var(--bg); }
-        .input-group { flex: 1; display: flex; flex-direction: column; gap: 6px; }
-        .msg-input { background: #1c2128; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; outline: none; }
-        .btn-send { background: #30363d; border: none; color: white; padding: 8px; border-radius: 8px; font-weight: bold; cursor: pointer; border: 1px solid #444; }
-
-        /* Extra Large Play Button */
-        .btn-play-big { 
-            background: linear-gradient(135deg, var(--neon), #00d2ff); 
-            border: none; border-radius: 15px; width: 120px;
-            color: #000; font-weight: 900; display: flex; flex-direction: column; 
-            align-items: center; justify-content: center; cursor: pointer;
-            box-shadow: 0 0 20px rgba(0, 255, 170, 0.4);
-        }
-        .btn-play-big span { font-size: 1.2rem; margin-top: -2px; }
-
-        /* Bottom Menu */
-        .bottom-menu { height: 65px; background: #000; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(3, 1fr); }
-        .menu-item { text-align: center; color: var(--text-gray); font-size: 0.75rem; display: flex; flex-direction: column; justify-content: center; }
-        .menu-item.active { color: var(--neon); }
-        .menu-item.earn { color: #ffd700; font-weight: bold; } /* Earn Highlight */
-
-        /* Lobby Room */
-        .lobby-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .lobby-room { width: 100%; background: var(--card); padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; border: 1px solid var(--border); }
+        .btn-play-big { background: linear-gradient(135deg, var(--neon), #00d2ff); border: none; border-radius: 15px; width: 120px; color: #000; font-weight: 900; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(0,255,170,0.4); }
+        
+        .bottom-menu { height: 65px; background: #000; border-top: 1px solid var(--border); display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; }
+        #fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; justify-content: center; align-items: center; font-size: 4rem; }
     </style>
 </head>
 <body>
 
+<div id="fireworks">🎉</div>
+
 <div id="lobby" class="screen active">
-    <div class="lobby-main">
-        <h1 style="color:var(--neon); margin:0;">WORLD SPIN</h1>
-        <p style="color:var(--text-gray); margin-bottom:30px;">สุ่มโชคบน World Chain</p>
-        
-        <div id="roomList" style="width:100%">
-            <div class="lobby-room">
-                <div><small style="color:var(--text-gray)">Room Fee</small><br><b>0.001 WLD</b></div>
-                <button onclick="joinGame(0.001)" style="background:var(--neon); border:none; padding:8px 20px; border-radius:8px; font-weight:bold;">JOIN</button>
-            </div>
-            </div>
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px;">
+        <h2 style="color:var(--neon)">WORLD SPIN</h2>
+        <button onclick="join(0.001)" style="width:100%; padding:20px; background:var(--card); color:white; border:1px solid var(--border); border-radius:15px; display:flex; justify-content:space-between; align-items:center;">
+            <b>0.001 WLD ROOM</b> <span style="background:var(--neon); color:black; padding:5px 12px; border-radius:5px;">JOIN</span>
+        </button>
     </div>
     <div class="bottom-menu">
-        <div class="menu-item active">🏠<br>Home</div>
-        <div class="menu-item">💸<br>ธุรกรรม</div>
-        <div class="menu-item earn">🎁<br>Earn</div>
+        <div style="color:var(--neon)">🏠<br>Home</div>
+        <div>💸<br>ธุรกรรม</div>
+        <div style="color:#ffd700">🎁<br>Earn</div>
     </div>
 </div>
 
 <div id="game" class="screen">
     <div class="top-nav">
-        <button onclick="exitGame()" style="background:none; border:1px solid var(--border); color:white; border-radius:5px; padding:4px 10px;">← Back</button>
-        <div style="text-align:center;"><b>WORLD SPIN</b></div>
-        <div style="color:var(--neon); font-size:0.9rem;">💰 1.250</div>
+        <button onclick="location.reload()" style="background:none; border:1px solid var(--border); color:white; border-radius:5px;">←</button>
+        <b>WORLD SPIN</b>
+        <div style="color:var(--neon)">💰 1.250 WLD</div>
     </div>
-
-    <div class="ticker"><marquee scrollamount="4">🏆 LAST WINNER: 0x82... WON 0.035 WLD | NEXT ROUND STARTING...</marquee></div>
-
     <div class="stats-grid">
-        <div class="stat-card"><small>รางวัลรวม</small><b id="pot">0.0000</b></div>
-        <div class="stat-card"><small>เวลาเริ่ม</small><b id="timer">WAITING</b></div>
-        <div class="stat-card"><small>ผู้เล่นรวม</small><b id="pCount">0</b></div>
+        <div class="stat-card"><small>รางวัล</small><br><b id="pot">0.0000</b></div>
+        <div class="stat-card"><small>เวลา</small><br><b id="timer">WAITING</b></div>
+        <div class="stat-card"><small>ผู้เล่น</small><br><b id="pCount">0</b></div>
     </div>
-
     <div class="slider-section">
         <div class="pointer">▼</div>
-        <div class="avatar-track scrolling" id="track">
-            <div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div>
-            <div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div>
-        </div>
+        <div class="avatar-track scrolling" id="track"></div>
     </div>
-
-    <div style="background:#004d33; color:var(--neon); padding:2px 10px; border-radius:15px; font-size:0.65rem; margin:5px auto; width:fit-content; border:1px solid var(--neon);">● 24 ONLINE</div>
-
-    <div class="chat-container" id="chatBox">
-        <div class="chat-msg" style="color:var(--neon);">System: ยินดีต้อนรับ! รอนับถอยหลัง...</div>
-    </div>
-
+    <div class="chat-container" id="chatBox"></div>
     <div class="action-area">
-        <div class="input-group">
-            <input type="text" id="chatInp" class="msg-input" placeholder="พิมพ์คุย...">
-            <button class="btn-send" onclick="sendMsg()">ส่งข้อความ</button>
+        <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+            <input type="text" id="chatInp" style="background:#1c2128; border:1px solid var(--border); color:white; padding:12px; border-radius:10px; outline:none;" placeholder="พิมพ์คุย...">
+            <button onclick="sendMsg()" style="background:#30363d; border:none; color:white; padding:8px; border-radius:8px;">ส่ง</button>
         </div>
-        <button class="btn-play-big" onclick="playGame()">
-            <small style="font-size:0.6rem; margin-bottom:2px;">กดเข้าเล่น</small>
-            <span id="priceLabel">0.001</span>
-        </button>
+        <button class="btn-play-big" id="playBtn" onclick="play()">PLAY<br><span id="priceLabel">0.001</span></button>
     </div>
-
     <div class="bottom-menu">
-        <div class="menu-item" onclick="exitGame()">🏠<br>Home</div>
-        <div class="menu-item">💸<br>ธุรกรรม</div>
-        <div class="menu-item earn">🎁<br>Earn</div>
+        <div>🏠<br>Home</div>
+        <div>💸<br>ธุรกรรม</div>
+        <div style="color:#ffd700">🎁<br>Earn</div>
     </div>
 </div>
 
 <script>
     let price = 0.001;
-    let players = 0;
+    let players = [];
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    function joinGame(p) {
-        price = p;
-        document.getElementById('priceLabel').innerText = p;
-        document.getElementById('lobby').classList.remove('active');
-        document.getElementById('game').classList.add('active');
+    function playSfx(f, type, d, v) {
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
     }
 
-    function exitGame() {
-        document.getElementById('game').classList.remove('active');
-        document.getElementById('lobby').classList.add('active');
+    const track = document.getElementById('track');
+    for(let i=0; i<40; i++) {
+        track.innerHTML += `<div class="avatar">${i%2===0?'👤':'🤖'}</div>`;
+    }
+
+    function join(p) {
+        price = p; document.getElementById('priceLabel').innerText = p;
+        document.getElementById('lobby').classList.remove('active');
+        document.getElementById('game').classList.add('active');
+        if(audioCtx.state === 'suspended') audioCtx.resume();
     }
 
     function sendMsg() {
         const inp = document.getElementById('chatInp');
-        if(inp.value.trim()){
-            const box = document.getElementById('chatBox');
-            box.innerHTML += `<div class="chat-msg"><b>You:</b> ${inp.value}</div>`;
-            inp.value = "";
-            box.scrollTop = box.scrollHeight;
+        if(inp.value.trim()) {
+            addChat("You", inp.value); inp.value = "";
         }
     }
 
-    function playGame() {
-        players++;
-        document.getElementById('pCount').innerText = players;
-        document.getElementById('pot').innerText = (players * price * 0.95).toFixed(4);
-        if(players >= 2) startTimer();
+    function addChat(u, m, t='') {
+        const b = document.getElementById('chatBox');
+        b.innerHTML += `<div class="chat-msg ${t}"><b>${u}:</b> ${m}</div>`;
+        b.scrollTop = b.scrollHeight;
+    }
+
+    function play() {
+        players.push("You", "Bot_"+Math.floor(Math.random()*99));
+        document.getElementById('pCount').innerText = players.length;
+        document.getElementById('pot').innerText = (players.length * price * 0.95).toFixed(4);
+        if(players.length >= 2) startTimer();
     }
 
     function startTimer() {
-        let sec = 15;
+        let sec = 10;
         const itv = setInterval(() => {
-            sec--;
-            document.getElementById('timer').innerText = `00:${sec < 10 ? '0'+sec : sec}`;
-            if(sec <= 0) { clearInterval(itv); finishGame(); }
+            sec--; playSfx(600, 'sine', 0.1, 0.1);
+            document.getElementById('timer').innerText = `00:${sec<10?'0'+sec:sec}`;
+            if(sec<=0) { clearInterval(itv); finish(); }
         }, 1000);
     }
 
-    function finishGame() {
-        const track = document.getElementById('track');
+    function finish() {
+        const spinTime = 2000;
+        let sItv = setInterval(() => playSfx(200, 'triangle', 0.05, 0.05), 60);
         track.classList.remove('scrolling');
-        track.style.transition = "transform 4s cubic-bezier(0.15, 0, 0.15, 1)";
-        track.style.transform = `translateX(-${Math.floor(Math.random()*1500) + 500}px)`;
-        setTimeout(() => { alert("Winner: 0x71...!"); location.reload(); }, 4500);
+        const stopIdx = Math.floor(Math.random()*20)+5;
+        track.style.transition = `transform ${spinTime}ms cubic-bezier(0.1, 0, 0.3, 1)`;
+        track.style.transform = `translateX(-${stopIdx * 62}px)`;
+
+        setTimeout(() => {
+            clearInterval(sItv);
+            [523, 659, 783].forEach((f, i) => setTimeout(() => playSfx(f, 'square', 0.4, 0.1), i*100));
+            const winner = players[Math.floor(Math.random()*players.length)];
+            document.getElementById('fireworks').style.display='flex';
+            addChat("🏆 WINNER", `${winner} WON!`, "winner-msg");
+            setTimeout(() => location.reload(), 3000);
+        }, spinTime);
     }
 </script>
-
 </body>
 </html>
