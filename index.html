@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - NEON ORANGE BUSINESS</title>
+    <title>WORLD CHASER - NEON ORANGE</title>
     <style>
         :root { 
             --neon: #FF9500; 
@@ -17,7 +17,7 @@
 
         /* Ticker */
         .news-ticker { background: #000; color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon-hot); white-space: nowrap; overflow: hidden; }
-        .ticker-text { display: inline-block; animation: ticker 25s linear infinite; padding-left: 100%; }
+        .ticker-text { display: inline-block; animation: ticker 20s linear infinite; padding-left: 100%; }
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
         .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; background: radial-gradient(circle at top, #2b1a0a 0%, #0a0a0c 100%); }
@@ -31,17 +31,16 @@
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 12px; text-align: center; font-size: 0.7rem; color: #888; }
         .stat-card b { color: var(--neon); font-size: 0.9rem; display: block; margin-top: 3px; text-shadow: 0 0 5px var(--neon-hot); }
 
-        /* Board Slots */
-        .board-container { padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; min-height: 120px; }
-        .slot { aspect-ratio: 1/1; background: #111; border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: 0.2s; color: #444; overflow: hidden; text-overflow: ellipsis; }
-        .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 20px var(--neon-hot); background: rgba(255, 149, 0, 0.2); transform: scale(1.05); color: white !important; }
+        /* Dynamic Board Slots */
+        .board-container { padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; max-height: 180px; overflow-y: auto; scrollbar-width: none; }
+        .board-container::-webkit-scrollbar { display: none; }
+        .slot { aspect-ratio: 1/1; background: #111; border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: 0.2s; color: #444; text-align: center; padding: 2px; }
+        .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 20px var(--neon-hot); background: rgba(255, 149, 0, 0.2); transform: scale(1.05); color: white !important; font-weight: bold; }
 
-        /* Main Content Area */
+        /* Main Content */
         .main-content { flex: 1; display: flex; padding: 10px 15px; gap: 12px; align-items: flex-start; margin-bottom: 35px; }
-
         .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 8px; }
         .status-box { background: rgba(255, 94, 0, 0.1); border: 1px solid rgba(255, 149, 0, 0.3); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--neon); }
-
         .chat-section { height: 340px; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; overflow: hidden; }
         #chatBox { flex: 1; padding: 12px; overflow-y: auto; font-size: 0.85rem; }
         .chat-input-row { padding: 14px; background: rgba(255, 149, 0, 0.05); border-top: 1px solid rgba(255,255,255,0.1); }
@@ -61,7 +60,7 @@
 <div id="fireworks">💥</div>
 
 <div class="news-ticker">
-    <div class="ticker-text">🔥 WORLD CHASER: ห้อง 0.001 WLD • รางวัลจะปรากฏเมื่อมีผู้เล่นครบ 2 คน • หักค่าธรรมเนียม 15% เข้ากองกลาง •</div>
+    <div class="ticker-text" id="tickerText">🔥 ยินดีต้อนรับสู่ WORLD CHASER • ต้องการผู้เล่นอย่างน้อย 2 คนเพื่อเริ่มรอบใหม่ • ขอให้โชคดี!</div>
 </div>
 
 <div id="lobby" class="screen active">
@@ -87,8 +86,7 @@
         <div class="stat-card">ผู้เล่น<br><b id="pCountTop">0</b></div>
     </div>
 
-    <div class="board-container" id="board">
-        </div>
+    <div class="board-container" id="board"></div>
 
     <div class="main-content">
         <div class="left-panel">
@@ -133,73 +131,54 @@
         document.getElementById('lobby').classList.remove('active');
         document.getElementById('game').classList.add('active');
         updateBoard();
-        addChat("System", `ยินดีต้อนรับ ${currentPlayerName}! รอผู้เล่นครบ 2 คนเพื่อเริ่มเกม`, "color:var(--neon); font-weight:bold;");
-    }
-
-    function initAudio() {
-        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-    }
-
-    function playSfx(f, type, d, v) {
-        if(!audioCtx) return;
-        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
+        addChat("System", `ยินดีต้อนรับ ${currentPlayerName}! ระบบต้องการผู้เล่น 2 คนเพื่อเริ่มเกม`, "color:var(--neon); font-weight:bold;");
     }
 
     function updateBoard() {
         const board = document.getElementById('board');
         board.innerHTML = "";
         
-        // สร้าง 10 ช่อง
-        for(let i=0; i<10; i++) {
+        // Dynamic Board: แสดงตามจำนวนคนจริง แต่ขั้นต่ำ 10 ช่อง
+        const displayCount = Math.max(players.length, 10);
+        for(let i=0; i < displayCount; i++) {
             const slot = document.createElement('div');
             slot.className = 'slot';
             if(players[i]) {
-                slot.innerText = players[i].substring(0, 3).toUpperCase();
+                slot.innerText = players[i].substring(0, 5).toUpperCase();
                 slot.style.color = "var(--neon)";
                 slot.style.borderColor = "var(--neon)";
             }
             board.appendChild(slot);
         }
 
-        // แสดงรางวัลเฉพาะเมื่อมี 2 คนขึ้นไป
+        // คำนวณรางวัล (โชว์เมื่อคนครบ 2)
         const prizeDisplay = document.getElementById('prizeDisplay');
         if (players.length >= 2) {
-            let totalPool = players.length * ENTRY_FEE;
-            let netPrize = totalPool * (1 - HOUSE_FEE);
+            let netPrize = (players.length * ENTRY_FEE) * (1 - HOUSE_FEE);
             prizeDisplay.innerText = netPrize.toFixed(4);
-            prizeDisplay.style.textShadow = "0 0 10px var(--neon)";
         } else {
             prizeDisplay.innerText = "0.0000";
-            prizeDisplay.style.textShadow = "none";
         }
         document.getElementById('pCountTop').innerText = players.length;
     }
 
     function play() {
         if(hasJoined) return;
-        initAudio();
+        if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         hasJoined = true;
 
         players.push(currentPlayerName);
         updateBoard();
 
-        const btn = document.getElementById('btnPlay');
-        btn.disabled = true; btn.style.opacity = "0.5";
-        playSfx(400, 'sine', 0.1, 0.1);
+        document.getElementById('btnPlay').disabled = true;
+        document.getElementById('btnPlay').style.opacity = "0.5";
 
-        // จำลองบอทเข้ามาเพื่อให้ระบบเริ่มทำงาน (สำหรับทดสอบ)
+        // จำลองบอทเพื่อทดสอบระบบ 2 คน
         setTimeout(() => {
             if(players.length < 2) {
-                players.push("BOT_A");
+                players.push("USER_" + Math.floor(Math.random()*99));
                 updateBoard();
                 checkStart();
-                addChat("System", "ผู้เล่นคนที่ 2 เข้าร่วมแล้ว!", "color:#fff");
             }
         }, 3000);
 
@@ -209,14 +188,12 @@
     function checkStart() {
         if(players.length >= 2 && !timerStarted) {
             timerStarted = true;
-            let sec = 20; // นับถอยหลัง 20 วินาที
+            let sec = 20;
             document.getElementById('timer').innerText = sec + "s";
             
             countdownTimer = setInterval(() => {
                 sec--;
                 document.getElementById('timer').innerText = sec + "s";
-                if(sec <= 5) playSfx(600, 'sine', 0.05, 0.05);
-                
                 if(sec <= 0) {
                     clearInterval(countdownTimer);
                     document.getElementById('timer').innerText = "LIVE";
@@ -233,19 +210,17 @@
         let currentIdx = 0;
         let speed = 50;
         let steps = 0;
-        // หยุดที่ช่องที่มีผู้เล่นจริงเท่านั้น
         const winnerIndex = Math.floor(Math.random() * players.length);
-        const totalSteps = 30 + winnerIndex;
+        const totalSteps = 40 + winnerIndex;
 
         function move() {
             slots.forEach(s => s.classList.remove('active-chaser'));
             currentIdx = (currentIdx + 1) % slots.length;
             slots[currentIdx].classList.add('active-chaser');
-            playSfx(300, 'triangle', 0.05, 0.05);
             steps++;
 
             if (steps < totalSteps || currentIdx !== winnerIndex) {
-                if (totalSteps - steps < 10) speed += 50;
+                if (totalSteps - steps < 12) speed += 45;
                 setTimeout(move, speed);
             } else {
                 finishGame(currentIdx);
@@ -255,12 +230,13 @@
     }
 
     function finishGame(winIdx) {
-        playSfx(500, 'square', 0.4, 0.1);
         document.getElementById('fireworks').style.display = 'flex';
         const winner = players[winIdx];
         const winAmount = document.getElementById('prizeDisplay').innerText;
         
-        addChat("🏆 WINNER", `${winner} รับ ${winAmount} WLD!`, "color:#000; background:var(--neon); padding:2px 5px; border-radius:4px; font-weight:bold;");
+        // ประกาศที่ Ticker
+        document.getElementById('tickerText').innerText = `🎊 ยินดีด้วยคุณ ${winner} ชนะรางวัลรวม ${winAmount} WLD ในรอบที่ #${round}!!! 🎊`;
+        addChat("🏆 WINNER", `${winner} รับ ${winAmount} WLD!`, "color:#000; background:var(--neon); font-weight:bold;");
         
         setTimeout(() => {
             document.getElementById('fireworks').style.display = 'none';
@@ -271,14 +247,14 @@
     function reset() {
         round++;
         document.getElementById('roundNum').innerText = "#" + round;
+        document.getElementById('tickerText').innerText = `🔥 รอบที่ #${round} กำลังจะเริ่ม • ต้องการผู้เล่นอย่างน้อย 2 คนเพื่อเปิดรางวัล • กด PLAY เพื่อเข้าร่วม!`;
         players = [];
         hasJoined = false;
         timerStarted = false;
         document.getElementById('timer').innerText = "WAIT";
         updateBoard();
-        
-        const btn = document.getElementById('btnPlay');
-        btn.disabled = false; btn.style.opacity = "1";
+        document.getElementById('btnPlay').disabled = false;
+        document.getElementById('btnPlay').style.opacity = "1";
     }
 
     function addChat(u, m, s='') {
@@ -290,11 +266,7 @@
     function sendMsg() {
         const inp = document.getElementById('chatInp');
         const val = inp.value.trim();
-        if(val) { 
-            addChat(currentPlayerName, val, "color:var(--neon)"); 
-            inp.value = ""; 
-            if(audioCtx) playSfx(1200, 'sine', 0.03, 0.02);
-        }
+        if(val) { addChat(currentPlayerName, val, "color:var(--neon)"); inp.value = ""; }
     }
 </script>
 </body>
