@@ -15,73 +15,85 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         html, body { position: fixed; overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: white; font-family: -apple-system, sans-serif; }
 
-        .news-ticker { background: #000; color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon-hot); white-space: nowrap; overflow: hidden; }
+        /* Ticker */
+        .news-ticker { background: #000; color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon-hot); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
         .ticker-text { display: inline-block; animation: ticker 20s linear infinite; padding-left: 100%; }
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
+        /* Screen Layout */
         .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; background: radial-gradient(circle at top, #2b1a0a 0%, #0a0a0c 100%); position: relative; }
         .active { display: flex; }
 
-        .top-nav { display: flex; justify-content: space-between; padding: 12px 15px; background: rgba(0,0,0,0.8); align-items: center; border-bottom: 1px solid var(--border); }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; }
+        /* Navigation & Stats */
+        .top-nav { display: flex; justify-content: space-between; padding: 12px 15px; background: rgba(0,0,0,0.8); align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 12px; flex-shrink: 0; }
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 12px; text-align: center; font-size: 0.7rem; color: #888; }
         .stat-card b { color: var(--neon); font-size: 0.9rem; display: block; margin-top: 3px; }
 
-        /* Board 2 แถว แถวละ 6 */
-        .board-container { padding: 10px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; min-height: 140px; }
-        .slot { aspect-ratio: 1/1; background: #111; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #444; transition: 0.2s; overflow: hidden; }
+        /* Board 2x6 */
+        .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; flex-shrink: 0; }
+        .slot { aspect-ratio: 1/1; background: #111; border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #444; transition: 0.2s; overflow: hidden; text-align: center; }
         .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 15px var(--neon-hot); background: rgba(255, 149, 0, 0.2); color: white !important; font-weight: bold; }
 
-        .main-content { flex: 1; display: flex; padding: 10px 15px; gap: 12px; margin-bottom: 35px; overflow: hidden; }
-        .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 8px; }
-        .chat-section { flex: 1; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; overflow: hidden; }
-        #chatBox { flex: 1; padding: 12px; overflow-y: auto; font-size: 0.85rem; }
+        /* Main Content - Responsive Fix */
+        .main-content { flex: 1; display: flex; padding: 5px 15px; gap: 10px; margin-bottom: 15px; min-height: 0; }
+        .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 8px; min-height: 0; }
         
-        /* Overlay Panels */
-        .overlay-panel { display: none; position: absolute; top: 60px; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 100; padding: 20px; flex-direction: column; }
-        .panel-content { flex: 1; overflow-y: auto; margin-top: 15px; }
+        .status-row { display: flex; gap: 6px; flex-shrink: 0; }
+        .status-pill { flex: 1; background: rgba(255,149,0,0.1); border: 1px solid var(--border); border-radius: 8px; padding: 6px; text-align: center; font-size: 0.65rem; color: #888; }
 
-        .menu-section { flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        .btn-play-action { flex: 2.5; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 18px; font-size: 1.4rem; font-weight: 900; box-shadow: 0 5px 15px rgba(255, 94, 0, 0.4); cursor: pointer; }
+        .chat-section { flex: 1; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.85); display: flex; flex-direction: column; min-height: 0; }
+        #chatBox { flex: 1; padding: 12px; overflow-y: auto; font-size: 0.8rem; -webkit-overflow-scrolling: touch; }
+        .chat-input-row { padding: 10px; background: rgba(255, 149, 0, 0.05); border-top: 1px solid rgba(255,255,255,0.1); }
+        .chat-input-row input { width: 100%; background: transparent; border: none; color: var(--neon); outline: none; font-size: 14px; }
+
+        /* Right Menu */
+        .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 100%; }
+        .btn-play-action { flex: 2.5; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 18px; font-size: 1.3rem; font-weight: 900; box-shadow: 0 5px 15px rgba(255, 94, 0, 0.4); cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .btn-menu-sub { flex: 1; background: #1a1a1e; border: 1px solid var(--border); color: #eee; border-radius: 10px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+
+        /* Overlay Panels */
+        .overlay-panel { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 200; padding: 20px; flex-direction: column; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-top: 10px; }
+        .panel-content { flex: 1; overflow-y: auto; }
     </style>
 </head>
 <body>
 
 <div class="news-ticker">
-    <div class="ticker-text" id="tickerText">🔥 WORLD CHASER: ต้องการ 2 ผู้เล่นเพื่อเริ่มรอบใหม่...</div>
+    <div class="ticker-text" id="tickerText">🔥 WORLD CHASER: รอผู้เล่นขั้นต่ำ 2 คนเพื่อเริ่มรอบใหม่...</div>
 </div>
 
 <div id="lobby" class="screen active">
     <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px;">
         <h1 style="color:#fff; font-size: 2.8rem; margin: 0;">WORLD</h1>
         <h1 style="color:var(--neon); font-size: 2.8rem; margin: 0 0 30px 0;">CHASER</h1>
-        <input type="text" id="userNameInp" placeholder="ระบุชื่อผู้เล่น..." style="width:100%; padding:18px; border-radius:15px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:white; margin-bottom:20px; text-align:center;">
-        <button onclick="joinGame()" style="width:100%; padding:20px; background:var(--neon); border:none; border-radius:15px; font-weight:900;">START GAME</button>
+        <input type="text" id="userNameInp" placeholder="ระบุชื่อผู้เล่น..." style="width:100%; padding:18px; border-radius:15px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:white; margin-bottom:20px; text-align:center; font-size: 1.1rem;">
+        <button onclick="joinGame()" style="width:100%; padding:20px; background:var(--neon); border:none; border-radius:15px; font-weight:900; font-size: 1.2rem;">START GAME</button>
     </div>
 </div>
 
 <div id="game" class="screen">
     <div id="historyPanel" class="overlay-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <b style="color:var(--neon); font-size:1.2rem;">HISTORY (100 ล่าสุด)</b>
-            <button onclick="closeOverlay('historyPanel')" style="background:var(--card); border:1px solid var(--border); color:white; padding:5px 15px; border-radius:8px;">ย้อนกลับ</button>
+        <div class="panel-header">
+            <b style="color:var(--neon); font-size:1.1rem;">HISTORY (100 ล่าสุด)</b>
+            <button onclick="closeOverlay('historyPanel')" style="background:var(--card); border:1px solid var(--border); color:white; padding:8px 15px; border-radius:8px;">ย้อนกลับ</button>
         </div>
         <div id="historyContent" class="panel-content"></div>
     </div>
 
     <div id="leaderboardPanel" class="overlay-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <b style="color:var(--neon); font-size:1.2rem;">TOP 100 PLAYERS</b>
-            <button onclick="closeOverlay('leaderboardPanel')" style="background:var(--card); border:1px solid var(--border); color:white; padding:5px 15px; border-radius:8px;">ย้อนกลับ</button>
+        <div class="panel-header">
+            <b style="color:var(--neon); font-size:1.1rem;">TOP 100 PLAYERS</b>
+            <button onclick="closeOverlay('leaderboardPanel')" style="background:var(--card); border:1px solid var(--border); color:white; padding:8px 15px; border-radius:8px;">ย้อนกลับ</button>
         </div>
         <div id="leaderboardContent" class="panel-content"></div>
     </div>
 
-    <div id="earnPanel" class="overlay-panel" style="justify-content:center; align-items:center; text-align:center;">
+    <div id="earnPanel" class="overlay-panel" style="justify-content:center; align-items:center;">
         <h2 style="color:var(--neon); margin:0;">COMING SOON</h2>
-        <p style="color:#666;">ระบบกำลังพัฒนา...</p>
-        <button onclick="closeOverlay('earnPanel')" style="margin-top:20px; background:var(--card); border:1px solid var(--border); color:white; padding:10px 30px; border-radius:8px;">ย้อนกลับ</button>
+        <p style="color:#666; margin: 10px 0 20px 0;">ระบบกำลังพัฒนา...</p>
+        <button onclick="closeOverlay('earnPanel')" style="background:var(--card); border:1px solid var(--border); color:white; padding:10px 40px; border-radius:8px;">ย้อนกลับ</button>
     </div>
 
     <div class="top-nav">
@@ -100,15 +112,20 @@
 
     <div class="main-content">
         <div class="left-panel">
+            <div class="status-row">
+                <div class="status-pill">ROUND <b id="roundNum" style="color:var(--neon)">#125</b></div>
+                <div class="status-pill">ONLINE <b id="onlineCount" style="color:var(--neon)">17</b></div>
+            </div>
             <div class="chat-section">
                 <div id="chatBox"></div>
                 <div class="chat-input-row">
-                    <input type="text" id="chatInp" placeholder="คุยกับเพื่อน..." onkeydown="if(event.key==='Enter') sendMsg()">
+                    <input type="text" id="chatInp" placeholder="คุยกับเพื่อน..." onkeydown="if(event.key==='Enter') sendMsg()" autocomplete="off">
                 </div>
             </div>
         </div>
+
         <div class="menu-section">
-            <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY<br><span style="font-size:0.7rem">0.001 WLD</span></button>
+            <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY<br><span style="font-size:0.7rem; font-weight:normal;">0.001 WLD</span></button>
             <button class="btn-menu-sub" onclick="openOverlay('historyPanel')">ประวัติ</button>
             <button class="btn-menu-sub" onclick="openOverlay('leaderboardPanel')">อันดับ</button>
             <button class="btn-menu-sub" onclick="openOverlay('earnPanel')" style="color:var(--neon)">EARN</button>
@@ -147,11 +164,13 @@
     }
 
     function joinGame() {
-        currentPlayerName = document.getElementById('userNameInp').value.trim() || "PLAYER_" + Math.floor(Math.random()*99);
+        const inp = document.getElementById('userNameInp').value.trim();
+        currentPlayerName = inp || "PLAYER_" + Math.floor(Math.random()*99);
         document.getElementById('headerPlayerName').innerText = currentPlayerName.toUpperCase();
         document.getElementById('lobby').classList.remove('active');
         document.getElementById('game').classList.add('active');
         updateBoard();
+        document.getElementById('onlineCount').innerText = Math.floor(Math.random() * 20) + 15;
     }
 
     function updateBoard() {
@@ -191,6 +210,7 @@
                 playSfx(800, 'sine', 0.03, 0.01);
                 if(players.length >= 2 && !timerStarted) startCountdown();
             } else clearInterval(itv);
+            if(count++ >= 11) clearInterval(itv);
         }, 500);
     }
 
@@ -214,10 +234,10 @@
             slots.forEach(s => s.classList.remove('active-chaser'));
             currentIdx = (currentIdx + 1) % slots.length;
             slots[currentIdx].classList.add('active-chaser');
-            playSfx(300 + steps, 'triangle', 0.05, 0.05);
+            playSfx(300 + (steps*2), 'triangle', 0.05, 0.05);
             steps++;
             if(steps < total || currentIdx !== winIdx) {
-                if(total - steps < 12) speed += 50;
+                if(total - steps < 12) speed += 55;
                 setTimeout(move, speed);
             } else finish(currentIdx);
         }
@@ -229,31 +249,30 @@
         const winner = players[idx];
         const amount = parseFloat(document.getElementById('prizeDisplay').innerText);
         
-        // บันทึกประวัติ
         gameHistory.unshift({ round: round, winner: winner, amount: amount.toFixed(4) });
         if(gameHistory.length > 100) gameHistory.pop();
-
-        // บันทึกอันดับ
         leaderData[winner] = (leaderData[winner] || 0) + amount;
 
         document.getElementById('tickerText').innerText = `🎊 รอบที่ #${round} ผู้ชนะคือ ${winner} รับ ${amount.toFixed(4)} WLD! 🎊`;
-        addChat("🏆 WINNER", `${winner} ชนะ ${amount.toFixed(4)} WLD`, "color:black; background:var(--neon); font-weight:bold;");
+        addChat("🏆 WINNER", `${winner} ชนะ ${amount.toFixed(4)} WLD`, "color:black; background:var(--neon); font-weight:bold; padding:0 4px;");
         setTimeout(reset, 5000);
     }
 
     function renderHistory() {
         const h = document.getElementById('historyContent');
-        h.innerHTML = gameHistory.map(i => `<div style="padding:8px; border-bottom:1px solid #222;">#${i.round} | <b>${i.winner}</b>: <span style="color:var(--neon)">${i.amount} WLD</span></div>`).join('') || "ยังไม่มีประวัติ";
+        h.innerHTML = gameHistory.map(i => `<div style="padding:10px; border-bottom:1px solid #222;">#${i.round} | <b>${i.winner}</b>: <span style="color:var(--neon)">${i.amount} WLD</span></div>`).join('') || "ยังไม่มีประวัติ";
     }
 
     function renderLeaderboard() {
         const l = document.getElementById('leaderboardContent');
         const sorted = Object.entries(leaderData).sort((a,b) => b[1] - a[1]).slice(0,100);
-        l.innerHTML = sorted.map((i, idx) => `<div style="padding:8px; border-bottom:1px solid #222;">${idx+1}. <b>${i[0]}</b>: <span style="color:var(--neon)">${i[1].toFixed(4)} WLD</span></div>`).join('') || "ยังไม่มีข้อมูล";
+        l.innerHTML = sorted.map((i, idx) => `<div style="padding:10px; border-bottom:1px solid #222;">${idx+1}. <b>${i[0]}</b>: <span style="color:var(--neon)">${i[1].toFixed(4)} WLD</span></div>`).join('') || "ยังไม่มีข้อมูล";
     }
 
     function reset() {
-        round++; players = []; hasJoined = false; timerStarted = false;
+        round++;
+        document.getElementById('roundNum').innerText = "#" + round;
+        players = []; hasJoined = false; timerStarted = false;
         document.getElementById('timer').innerText = "WAIT";
         updateBoard();
         document.getElementById('btnPlay').disabled = false;
@@ -262,7 +281,7 @@
 
     function addChat(u, m, s='') {
         const b = document.getElementById('chatBox');
-        b.innerHTML += `<div style="margin-bottom:5px;"><b style="${s}">${u}:</b> <span style="color:#eee">${m}</span></div>`;
+        b.innerHTML += `<div style="margin-bottom:6px;"><b style="${s}">${u}:</b> <span style="color:#eee">${m}</span></div>`;
         b.scrollTop = b.scrollHeight;
     }
 
