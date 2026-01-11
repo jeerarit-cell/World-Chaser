@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WORLD SPIN - Fixed Layout</title>
+    <title>WORLD SPIN - Full Screen</title>
     <style>
         :root {
             --neon: #00ffaa; 
@@ -13,7 +13,12 @@
             --text-gray: #8b949e;
         }
         
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        * { 
+            box-sizing: border-box; 
+            -webkit-tap-highlight-color: transparent; 
+            margin: 0; 
+            padding: 0;
+        }
         
         body { 
             background: var(--bg); 
@@ -21,234 +26,225 @@
             font-family: -apple-system, sans-serif;
             height: 100vh;
             width: 100vw;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
+            overflow: hidden; /* ป้องกันการเลื่อนจอไปมา */
         }
         
+        /* แก้ไขตรงนี้ให้กว้าง 100% และสูงเต็มจอ */
         .screen { 
             display: none; 
-            height: 100%; 
+            height: 100vh; 
             width: 100%; 
-            flex-direction: column;
-            position: relative;
+            flex-direction: column; 
         }
         .active { display: flex; }
 
-        /* --- Header & Ticker --- */
-        .header-area { flex-shrink: 0; }
+        /* Top Nav */
         .top-nav { 
-            display: flex; justify-content: space-between; padding: 12px 15px; 
-            background: #000; align-items: center; border-bottom: 1px solid var(--border); 
-        }
-        .ticker { 
-            background: #050505; color: var(--neon); font-size: 0.7rem; 
-            padding: 6px; border-bottom: 1px solid var(--border);
+            display: flex; 
+            justify-content: space-between; 
+            padding: 12px 15px; 
+            background: #000; 
+            align-items: center; 
+            border-bottom: 1px solid var(--border); 
         }
 
-        /* --- Main Content (Scrollable) --- */
+        .ticker { 
+            background: #050505; 
+            color: var(--neon); 
+            font-size: 0.75rem; 
+            padding: 6px; 
+            border-bottom: 1px solid var(--border);
+        }
+
+        /* Content Area */
         .main-content {
             flex: 1;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            padding-bottom: 5px;
         }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; }
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 8px; 
+            padding: 12px; 
+        }
         .stat-card { 
-            background: var(--card); border: 1px solid var(--border); 
-            padding: 8px; border-radius: 10px; text-align: center; 
+            background: var(--card); 
+            border: 1px solid var(--border); 
+            padding: 10px; 
+            border-radius: 10px; 
+            text-align: center; 
         }
-        .stat-card small { display: block; font-size: 0.6rem; color: var(--text-gray); }
-        .stat-card b { color: var(--neon); font-size: 0.85rem; }
+        .stat-card small { display: block; font-size: 0.65rem; color: var(--text-gray); }
+        .stat-card b { color: var(--neon); font-size: 0.9rem; }
 
-        /* Animation Section */
+        /* Slider */
         .slider-section { 
-            position: relative; padding: 15px 0; overflow: hidden; 
-            background: rgba(0,0,0,0.2); margin: 5px 0;
+            position: relative; 
+            padding: 20px 0; 
+            overflow: hidden; 
+            background: rgba(0,0,0,0.2); 
+            margin: 5px 0;
         }
         .pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); color: var(--neon); z-index: 5; }
         .avatar-track { display: flex; gap: 10px; width: max-content; padding-left: 50%; }
-        .avatar { width: 45px; height: 45px; background: #222; border: 2px solid var(--border); border-radius: 50%; }
+        .avatar { width: 50px; height: 50px; background: #222; border: 2px solid var(--border); border-radius: 50%; }
         .avatar.active { border-color: var(--neon); box-shadow: 0 0 10px var(--neon); }
+
         .scrolling { animation: scrollLoop 15s linear infinite; }
         @keyframes scrollLoop { from { transform: translateX(0); } to { transform: translateX(-50%); } }
 
+        /* Chat ที่ยืดหยุ่นตามความสูงหน้าจอ */
         .chat-container { 
-            flex: 1; margin: 5px 15px; border: 1px solid var(--border); 
-            border-radius: 12px; background: rgba(0,0,0,0.4); padding: 10px; 
-            overflow-y: auto; font-size: 0.85rem; min-height: 120px;
+            flex: 1; 
+            margin: 10px 15px; 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            background: rgba(0,0,0,0.4); 
+            padding: 10px; 
+            overflow-y: auto; 
+            min-height: 100px;
         }
 
-        /* --- Fixed Footer Section --- */
-        .footer-area { flex-shrink: 0; background: #000; }
-        
+        /* Control Panel ด้านล่าง */
         .action-area { 
-            padding: 10px 15px; display: flex; gap: 10px; 
-            border-top: 1px solid var(--border); align-items: center;
+            padding: 15px; 
+            display: flex; 
+            gap: 10px; 
+            background: #000;
+            border-top: 1px solid var(--border);
         }
-        .input-box-wrap { flex: 1; }
-        .msg-input { 
-            width: 100%; background: #1c2128; border: 1px solid var(--border); 
-            color: white; padding: 12px; border-radius: 8px; outline: none;
-        }
+        .input-box-wrap { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+        .msg-input { background: #1c2128; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 8px; outline: none; }
         
         .btn-play-big { 
             background: linear-gradient(135deg, var(--neon), #00d2ff); 
-            border: none; border-radius: 12px; width: 90px; height: 60px;
-            color: #000; font-weight: bold; font-size: 0.9rem; cursor: pointer;
+            border: none; border-radius: 12px; width: 100px; height: 70px;
+            color: #000; font-weight: bold; font-size: 1rem; cursor: pointer;
         }
 
-        .bottom-menu { 
-            height: 65px; display: grid; grid-template-columns: repeat(3, 1fr); 
-            align-items: center; border-top: 1px solid var(--border);
-        }
-        .menu-item { text-align: center; color: var(--text-gray); font-size: 0.7rem; cursor: pointer; }
-        .menu-item.active { color: var(--neon); }
-
-        /* Lobby Room Styles */
+        /* Lobby */
         .lobby-main { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .lobby-room { 
-            width: 100%; background: var(--card); padding: 15px; border-radius: 12px; 
-            margin-bottom: 10px; display: flex; justify-content: space-between; 
-            align-items: center; border: 1px solid var(--border); 
+            width: 100%; 
+            max-width: 500px; /* จำกัดความกว้างเล็กน้อยเพื่อให้ดูดีในแนวนอน แต่ยังเต็มจอในแนวตั้ง */
+            background: var(--card); 
+            padding: 18px; 
+            border-radius: 15px; 
+            margin-bottom: 10px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            border: 1px solid var(--border); 
         }
+
+        /* Bottom Menu */
+        .bottom-menu { 
+            height: 70px; 
+            background: #000; 
+            border-top: 1px solid var(--border); 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            align-items: center; 
+        }
+        .menu-item { text-align: center; color: var(--text-gray); font-size: 0.75rem; }
+        .menu-item.active { color: var(--neon); }
     </style>
 </head>
 <body>
 
 <div id="lobby" class="screen active">
     <div class="lobby-main">
-        <h2 style="color:var(--neon); margin-bottom:20px;">WORLD SPIN</h2>
-        <div style="width: 100%; max-width: 400px;">
-            <div class="lobby-room"><b>0.001 WLD</b><button onclick="goToGame(0.001)" style="background:var(--neon); border:none; padding:8px 15px; border-radius:5px; font-weight:bold;">JOIN</button></div>
-            <div class="lobby-room"><b>0.01 WLD</b><button onclick="goToGame(0.01)" style="background:var(--neon); border:none; padding:8px 15px; border-radius:5px; font-weight:bold;">JOIN</button></div>
-            <div class="lobby-room"><b>0.1 WLD</b><button onclick="goToGame(0.1)" style="background:var(--neon); border:none; padding:8px 15px; border-radius:5px; font-weight:bold;">JOIN</button></div>
+        <h2 style="color:var(--neon); margin-bottom: 10px;">WORLD SPIN</h2>
+        <p style="color:var(--text-gray); margin-bottom: 30px;">วงล้อสุ่มบน World Chain</p>
+        
+        <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+            <div class="lobby-room">
+                <b>0.001 WLD</b>
+                <button onclick="goToGame(0.001)" style="background:var(--neon); border:none; padding:10px 20px; border-radius:8px; font-weight:bold;">JOIN</button>
+            </div>
+            <div class="lobby-room">
+                <b>0.01 WLD</b>
+                <button onclick="goToGame(0.01)" style="background:var(--neon); border:none; padding:10px 20px; border-radius:8px; font-weight:bold;">JOIN</button>
+            </div>
+            <div class="lobby-room">
+                <b>0.1 WLD</b>
+                <button onclick="goToGame(0.1)" style="background:var(--neon); border:none; padding:10px 20px; border-radius:8px; font-weight:bold;">JOIN</button>
+            </div>
         </div>
     </div>
-    <div class="footer-area">
-        <div class="bottom-menu">
-            <div class="menu-item active">🏠<br>Home</div>
-            <div class="menu-item">💸<br>ธุรกรรม</div>
-            <div class="menu-item">🎁<br>Earn</div>
-        </div>
+    
+    <div class="bottom-menu">
+        <div class="menu-item active">🏠<br>Home</div>
+        <div class="menu-item">💸<br>ธุรกรรม</div>
+        <div class="menu-item">🎁<br>Earn</div>
     </div>
 </div>
 
 <div id="game" class="screen">
-    <div class="header-area">
-        <div class="top-nav">
-            <button onclick="backToLobby()" style="background:none; border:1px solid #444; color:white; border-radius:5px; padding:5px 10px;">← Back</button>
-            <b id="roomTitle">ROOM: 0.001 WLD</b>
-            <div style="color:var(--neon); font-size:0.8rem;">💰 1.250</div>
-        </div>
-        <div class="ticker"><marquee>🏆 LAST WINNER: 0x82... WON 0.035 WLD | NEXT ROUND STARTING...</marquee></div>
+    <div class="top-nav">
+        <button onclick="backToLobby()" style="background:none; border:1px solid #444; color:white; border-radius:5px; padding:5px 10px;">← Back</button>
+        <b>WORLD SPIN</b>
+        <div style="color:var(--neon); font-size:0.8rem;">💰 1.250 WLD</div>
+    </div>
+    
+    <div class="ticker">
+        <marquee>🏆 LAST WINNER: 0x82... WON 0.035 WLD | NEXT ROUND STARTING...</marquee>
     </div>
 
     <div class="main-content">
         <div class="stats-grid">
-            <div class="stat-card"><small>รางวัลสะสม</small><b id="pot">0.0000</b></div>
-            <div class="stat-card"><small>เวลานับถอยหลัง</small><b id="timer">WAITING</b></div>
-            <div class="stat-card"><small>ผู้เล่นรวม</small><b id="pCount">0</b></div>
+            <div class="stat-card"><small>รางวัล</small><b id="pot">0.0000</b></div>
+            <div class="stat-card"><small>เวลา</small><b id="timer">WAITING</b></div>
+            <div class="stat-card"><small>ผู้เล่น</small><b id="pCount">0</b></div>
         </div>
+
         <div class="slider-section">
             <div class="pointer">▼</div>
             <div class="avatar-track scrolling" id="track">
-                <div class="avatar active"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
-                <div class="avatar active"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
+                <div class="avatar active"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
+                <div class="avatar active"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
             </div>
         </div>
-        <div style="text-align:center; margin:5px;"><span style="color:var(--neon); font-size:0.7rem;">● 00 ONLINE</span></div>
+
         <div class="chat-container" id="chatBox">
-            <p style="color:var(--neon);">System: ยินดีต้อนรับ! รอนับถอยหลัง...</p>
+            <p style="color:var(--neon);">System: รอนับถอยหลัง...</p>
         </div>
     </div>
 
-    <div class="footer-area">
-        <div class="action-area">
-            <div class="input-box-wrap">
-                <input type="text" id="chatInp" class="msg-input" placeholder="พิมพ์ข้อความ...">
-            </div>
-            <button class="btn-play-big" onclick="playGame()">PLAY<br><span id="playVal" style="font-size:0.7rem;">0.001</span></button>
+    <div class="action-area">
+        <div class="input-box-wrap">
+            <input type="text" id="chatInp" class="msg-input" placeholder="พิมพ์ข้อความ...">
         </div>
-        <div class="bottom-menu">
-            <div class="menu-item" onclick="backToLobby()">🏠<br>Home</div>
-            <div class="menu-item">💸<br>ธุรกรรม</div>
-            <div class="menu-item">🎁<br>Earn</div>
-        </div>
+        <button class="btn-play-big" onclick="playGame()">PLAY<br><span id="playVal" style="font-size: 0.7rem;">0.001</span></button>
+    </div>
+
+    <div class="bottom-menu">
+        <div class="menu-item" onclick="backToLobby()">🏠<br>Home</div>
+        <div class="menu-item">💸<br>ธุรกรรม</div>
+        <div class="menu-item">🎁<br>Earn</div>
     </div>
 </div>
 
 <script>
-    let currentPrice = 0.001;
-    let playerCount = 0;
-    let timerActive = false;
-
     function goToGame(p) {
-        currentPrice = p;
-        document.getElementById('roomTitle').innerText = `ROOM: ${p} WLD`;
         document.getElementById('playVal').innerText = p;
-        document.getElementById('lobby').classList.remove('active');
-        document.getElementById('game').classList.add('active');
-        resetRoomState(); // มั่นใจว่าเข้าห้องใหม่แล้วค่าต้องสะอาด
+        document.getElementById('lobby').style.display = 'none';
+        document.getElementById('game').style.display = 'flex';
     }
 
     function backToLobby() {
-        document.getElementById('game').classList.remove('active');
-        document.getElementById('lobby').classList.add('active');
+        document.getElementById('game').style.display = 'none';
+        document.getElementById('lobby').style.display = 'flex';
     }
 
+    let playerCount = 0;
     function playGame() {
         playerCount++;
         document.getElementById('pCount').innerText = playerCount;
-        document.getElementById('pot').innerText = (playerCount * currentPrice).toFixed(4);
-        
-        if(playerCount >= 2 && !timerActive) {
-            startTimer();
-        }
-    }
-
-    function startTimer() {
-        timerActive = true;
-        let sec = 10;
-        let itv = setInterval(() => {
-            sec--;
-            document.getElementById('timer').innerText = `00:${sec < 10 ? '0'+sec : sec}`;
-            if(sec <= 0) {
-                clearInterval(itv);
-                finishGame();
-            }
-        }, 1000);
-    }
-
-    function finishGame() {
-        // อนิเมชั่นวงล้อหยุด
-        const track = document.getElementById('track');
-        track.classList.remove('scrolling');
-        track.style.transition = "transform 3s cubic-bezier(0.15, 0, 0.15, 1)";
-        track.style.transform = "translateX(-600px)";
-
-        setTimeout(() => {
-            alert("จบเกม! ยินดีด้วยกับผู้ชนะ");
-            resetRoomState(); // ล้างค่าในห้องแต่ไม่ย้ายหน้า
-        }, 3500);
-    }
-
-    function resetRoomState() {
-        playerCount = 0;
-        timerActive = false;
-        document.getElementById('pCount').innerText = "0";
-        document.getElementById('pot').innerText = "0.0000";
-        document.getElementById('timer').innerText = "WAITING";
-        const track = document.getElementById('track');
-        track.style.transition = "none";
-        track.style.transform = "translateX(0)";
-        track.classList.add('scrolling');
-        
-        const chatBox = document.getElementById('chatBox');
-        chatBox.innerHTML += `<p style="color:var(--neon); margin-top:5px;">System: เริ่มรอบใหม่แล้ว!</p>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
+        document.getElementById('pot').innerText = (playerCount * 0.001).toFixed(4);
     }
 </script>
 </body>
