@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WORLD SPIN - Pro UI</title>
     <style>
         :root {
@@ -13,97 +13,107 @@
             --glow: 0 0 15px rgba(0, 255, 170, 0.4);
         }
 
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             background-color: var(--dark-bg);
             color: white;
-            font-family: 'Segoe UI', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
+            overflow: hidden; /* ป้องกันการเลื่อนทั้งหน้าจอ */
             display: flex;
             justify-content: center;
-            overflow: hidden;
         }
 
         .container {
             width: 100%;
             max-width: 400px;
             height: 100vh;
-            padding: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
         }
 
-        .screen { display: none; width: 100%; flex-direction: column; }
-        .active { display: flex; }
+        .screen { display: none; width: 100%; height: 100%; flex-direction: column; padding: 20px; }
+        .screen.active { display: flex; }
 
-        /* --- UI ส่วนบนหน้า Game --- */
-        .header-bar { width: 100%; display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        /* --- [LOBBY SCREEN] --- */
+        .lobby-content { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        
+        .wheel-area {
+            width: 200px; height: 200px; border: 1px dashed var(--border);
+            border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; position: relative; margin-bottom: 30px;
+        }
+        .arrow-main {
+            font-size: 50px; color: #ffcf40; text-shadow: 0 0 15px rgba(255, 207, 64, 0.7);
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+        .dots-wrap { position: absolute; width: 100%; height: 100%; }
+        .dot {
+            position: absolute; width: 6px; height: 6px; background: white;
+            border-radius: 50%; top: 50%; left: 50%; box-shadow: 0 0 8px white;
+        }
+        /* วางจุด 10 จุด */
+        .dot:nth-child(1) { transform: translate(-50%, -50%) rotate(0deg) translate(85px); }
+        .dot:nth-child(2) { transform: translate(-50%, -50%) rotate(36deg) translate(85px); }
+        .dot:nth-child(3) { transform: translate(-50%, -50%) rotate(72deg) translate(85px); }
+        .dot:nth-child(4) { transform: translate(-50%, -50%) rotate(108deg) translate(85px); }
+        .dot:nth-child(5) { transform: translate(-50%, -50%) rotate(144deg) translate(85px); }
+        .dot:nth-child(6) { transform: translate(-50%, -50%) rotate(180deg) translate(85px); }
+        .dot:nth-child(7) { transform: translate(-50%, -50%) rotate(216deg) translate(85px); }
+        .dot:nth-child(8) { transform: translate(-50%, -50%) rotate(252deg) translate(85px); }
+        .dot:nth-child(9) { transform: translate(-50%, -50%) rotate(288deg) translate(85px); }
+        .dot:nth-child(10) { transform: translate(-50%, -50%) rotate(324deg) translate(85px); }
+
+        .lobby-card {
+            width: 100%; background: var(--card-bg); padding: 18px;
+            border-radius: 16px; margin-top: 12px; display: flex;
+            justify-content: space-between; align-items: center; border: 1px solid var(--border);
+        }
+
+        /* --- [GAME SCREEN] --- */
+        .header-bar { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .back-btn { background: none; border: 1px solid var(--border); color: white; padding: 6px 12px; border-radius: 8px; cursor: pointer; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; margin-bottom: 20px; }
+        .stats-grid { flex-shrink: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         .stat-box { background: var(--card-bg); padding: 10px; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
         .stat-box small { display: block; font-size: 0.65rem; color: #8b949e; margin-bottom: 4px; }
         .stat-box b { color: var(--neon-green); font-size: 0.9rem; }
 
-        /* --- Avatar Slider (คนที่กด Play) --- */
-        .avatar-slider {
-            width: 100%;
-            display: flex;
-            gap: 12px;
-            overflow-x: auto;
-            padding: 10px 5px;
-            margin-bottom: 20px;
-            scrollbar-width: none; /* Hide scrollbar Firefox */
+        /* Infinite Slider */
+        .slider-box {
+            flex-shrink: 0; width: 100%; overflow: hidden; 
+            padding: 10px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+            margin-bottom: 15px;
         }
-        .avatar-slider::-webkit-scrollbar { display: none; } /* Hide scrollbar Chrome/Safari */
-
-        .avatar-item {
-            min-width: 45px; height: 45px;
-            background: #21262d;
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            flex-shrink: 0;
-            display: flex; justify-content: center; align-items: center;
-            transition: 0.3s;
-        }
-        .avatar-item.active { border-color: var(--neon-green); box-shadow: var(--glow); }
-
-        /* --- Glowing Chat Box --- */
-        .chat-box {
-            width: 60%; /* กว้างขึ้นเล็กน้อยเพื่อความสวยงาม */
-            height: 180px;
-            background: rgba(22, 27, 34, 0.8);
-            border: 1px solid var(--neon-green); /* กรอบสว่าง */
-            box-shadow: var(--glow); /* เอฟเฟกต์เรืองแสง */
-            border-radius: 12px;
-            padding: 12px;
-            font-size: 0.8rem;
-            overflow-y: auto;
-            align-self: flex-start;
-            margin-bottom: 25px;
-        }
-
-        /* --- Input & Buttons Section --- */
-        .action-area { width: 100%; display: flex; flex-direction: column; gap: 15px; margin-top: auto; padding-bottom: 20px; }
+        .track { display: flex; gap: 15px; width: max-content; animation: slide 20s linear infinite; }
+        @keyframes slide { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
         
-        .message-input-group { display: flex; gap: 8px; }
-        .message-input-group input {
+        .avatar {
+            min-width: 45px; height: 45px; background: #21262d; border: 2px solid var(--border);
+            border-radius: 50%; display: flex; justify-content: center; align-items: center;
+        }
+        .avatar.active { border-color: var(--neon-green); box-shadow: var(--glow); color: var(--neon-green); }
+
+        .chat-box {
+            flex-grow: 1; background: rgba(22, 27, 34, 0.6); border: 1px solid var(--neon-green);
+            box-shadow: var(--glow); border-radius: 12px; padding: 12px; font-size: 0.85rem;
+            overflow-y: auto; margin-bottom: 15px;
+        }
+
+        .action-area { flex-shrink: 0; display: flex; flex-direction: column; gap: 12px; padding-bottom: 10px; }
+        .input-row { display: flex; gap: 8px; }
+        .input-row input {
             flex: 1; background: #161b22; border: 1px solid var(--border);
             color: white; padding: 12px; border-radius: 10px; outline: none;
         }
-        .send-btn { background: var(--border); border: none; color: white; padding: 0 15px; border-radius: 10px; cursor: pointer; }
-
         .play-btn {
             background: linear-gradient(135deg, var(--neon-green), #00d2ff);
-            border: none; padding: 18px; border-radius: 15px;
-            color: #000; font-weight: 800; font-size: 1.2rem;
-            cursor: pointer; box-shadow: 0 4px 15px rgba(0, 255, 170, 0.3);
+            border: none; padding: 16px; border-radius: 15px;
+            color: #000; font-weight: 800; font-size: 1.1rem; cursor: pointer;
         }
-
-        /* Lobby Styles */
-        .lobby-content { text-align: center; }
-        .lobby-card { background: var(--card-bg); padding: 20px; border-radius: 15px; margin-top: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
-        
     </style>
 </head>
 <body>
@@ -111,14 +121,31 @@
 <div class="container">
     
     <div id="lobbyScreen" class="screen active">
-        <h1 style="color: var(--neon-green); text-align: center;">WORLD SPIN</h1>
-        <p style="color: #8b949e; text-align: center; font-size: 0.9rem;">เลือกห้องเพื่อเริ่มต้น</p>
-        
-        <div class="lobby-card">
-            <div><b style="color: var(--neon-green);">0.001 WLD</b><br><small style="color:#8b949e">Players: 2/10</small></div>
-            <button class="back-btn" style="border-color: var(--neon-green); color: var(--neon-green);" onclick="joinGame('0.001')">JOIN</button>
+        <div class="lobby-content">
+            <h1 style="color: var(--neon-green); margin: 0;">WORLD SPIN</h1>
+            <p style="color: #8b949e; font-size: 0.9rem; margin-bottom: 25px;">วงล้อสุ่มผู้โชคดีบน World Chain</p>
+
+            <div class="wheel-area">
+                <div class="arrow-main">➤</div>
+                <div class="dots-wrap">
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                </div>
+            </div>
+
+            <div class="lobby-card">
+                <div><b style="color: var(--neon-green); font-size: 1.2rem;">0.001 WLD</b><br>
+                     <small style="color:#8b949e">ผู้เล่นในห้อง: 2 คน</small></div>
+                <button class="back-btn" style="border-color: var(--neon-green); color: var(--neon-green); padding: 8px 20px;" onclick="joinGame('0.001')">JOIN</button>
+            </div>
+            
+            <div class="lobby-card">
+                <div><b style="color: var(--neon-green); font-size: 1.2rem;">0.01 WLD</b><br>
+                     <small style="color:#8b949e">ผู้เล่นในห้อง: 4 คน</small></div>
+                <button class="back-btn" style="border-color: var(--neon-green); color: var(--neon-green); padding: 8px 20px;" onclick="joinGame('0.01')">JOIN</button>
+            </div>
         </div>
-        </div>
+    </div>
 
     <div id="gameScreen" class="screen">
         <div class="header-bar">
@@ -135,26 +162,21 @@
             <div class="stat-box"><small>ผู้เล่น</small><b>2</b></div>
         </div>
 
-        <div class="avatar-slider">
-            <div class="avatar-item active">👤</div>
-            <div class="avatar-item active">👤</div>
-            <div class="avatar-item"></div>
-            <div class="avatar-item"></div>
-            <div class="avatar-item"></div>
-            <div class="avatar-item"></div>
-            <div class="avatar-item"></div>
-            <div class="avatar-item"></div>
+        <div class="slider-box">
+            <div class="track">
+                <div class="avatar active">👤</div><div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
+                <div class="avatar active">👤</div><div class="avatar active">👤</div><div class="avatar"></div><div class="avatar"></div><div class="avatar"></div>
+            </div>
         </div>
 
         <div class="chat-box" id="chatBox">
             <p style="margin: 0 0 8px 0; color: #00d2ff;"><b>System:</b> รอนับถอยหลัง...</p>
-            <p style="margin: 0 0 8px 0; color: var(--neon-green);"><b>You:</b> พร้อมแล้ว! 🚀</p>
         </div>
 
         <div class="action-area">
-            <div class="message-input-group">
+            <div class="input-row">
                 <input type="text" id="msgInput" placeholder="พิมพ์ข้อความ...">
-                <button class="send-btn" onclick="sendMsg()">ส่ง</button>
+                <button class="back-btn" onclick="sendMsg()">ส่ง</button>
             </div>
             <button class="play-btn" id="mainPlayBtn">PLAY 0.001</button>
         </div>
