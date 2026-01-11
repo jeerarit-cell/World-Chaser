@@ -3,94 +3,239 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - STRUCTURE</title>
+    <title>WORLD CHASER - BALANCED</title>
     <style>
-        :root { --bg: #ffffff; --border: #cccccc; --card: #f5f5f5; --text: #333333; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { margin: 0; background: var(--bg); color: var(--text); font-family: sans-serif; overflow: hidden; height: 100vh; }
+        :root { --neon: #00ffaa; --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #8b949e; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        html, body { position: fixed; overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: white; font-family: -apple-system, sans-serif; }
 
-        .screen { display: flex; flex-direction: column; height: 100vh; max-width: 500px; margin: 0 auto; border: 1px solid var(--border); }
+        .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; }
+        .active { display: flex; }
 
-        /* Top Nav */
-        .top-nav { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; padding: 10px; }
-        .stat-card { border: 1px solid var(--border); padding: 5px; text-align: center; border-radius: 5px; background: var(--card); }
+        /* News Ticker */
+        .news-ticker { background: #000; color: var(--neon); padding: 6px 0; font-size: 0.75rem; border-bottom: 1px solid var(--border); white-space: nowrap; overflow: hidden; }
+        .ticker-text { display: inline-block; animation: ticker 25s linear infinite; padding-left: 100%; }
+        @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
-        /* Board - ให้พื้นที่มากขึ้น */
-        .board-section { flex: 1.2; padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(2, 1fr); gap: 8px; }
-        .slot { border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; background: var(--card); }
-        .active-chaser { border: 2px solid #000; background: #eee; box-shadow: 0 0 5px #000; }
+        /* Top Stats */
+        .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: #000; align-items: center; border-bottom: 1px solid var(--border); }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 6px; border-radius: 10px; text-align: center; font-size: 0.7rem; }
+        .stat-card b { color: var(--neon); font-size: 0.85rem; display: block; margin-top: 2px; }
 
-        /* Main Section - โซนแชทและเมนู */
-        .main-content { flex: 1.5; display: flex; padding: 10px; gap: 10px; border-top: 1px solid var(--border); margin-bottom: 35px; /* ยกขึ้น 1cm */ }
+        /* Board 10 Slots */
+        .board-container { padding: 10px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; background: rgba(0,0,0,0.3); }
+        .slot { aspect-ratio: 1/1; background: var(--card); border: 1px solid var(--border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); background: rgba(0, 255, 170, 0.1); }
 
-        /* ฝั่งซ้าย: แชทสั้นลง */
-        .left-panel { flex: 1.5; display: flex; flex-direction: column; gap: 5px; }
-        #chatBox { flex: 1; border: 1px solid var(--border); border-radius: 5px; padding: 8px; overflow-y: auto; font-size: 13px; background: #fff; max-height: 150px; /* ล็อคความสูงแชท */ }
-        .input-group { display: flex; gap: 5px; }
-        input[type="text"] { flex: 1; border: 1px solid var(--border); border-radius: 4px; padding: 8px; font-size: 16px; }
-        .btn-send { border: 1px solid var(--border); background: var(--card); padding: 0 10px; border-radius: 4px; }
+        /* Main Section: Chat & Controls */
+        .main-content { flex: 1; display: flex; padding: 15px; gap: 12px; align-items: flex-start; margin-bottom: 25px; /* Raised for Mobile */ }
 
-        /* ฝั่งขวา: ปุ่มควบคุม */
-        .right-panel { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        .btn-play-main { flex: 1.5; border: 2px solid #000; background: #fff; font-weight: bold; border-radius: 8px; font-size: 1.2rem; }
-        .btn-sub { flex: 1; border: 1px solid var(--border); background: var(--card); border-radius: 5px; font-size: 0.75rem; }
+        /* Chat Panel - สั้นลงและกระชับ */
+        .chat-section { 
+            flex: 1.6; 
+            height: 180px; /* ลดความสูงลง */
+            border: 2px solid #ffffff; 
+            border-radius: 15px; 
+            background: rgba(0,0,0,0.8); 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+        #chatBox { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.8rem; }
+        .chat-input-row { display: flex; padding: 8px; background: rgba(255,255,255,0.05); border-top: 1px solid rgba(255,255,255,0.1); gap: 5px; }
+        .chat-input-row input { flex: 1; background: transparent; border: none; color: white; outline: none; font-size: 14px; }
+        .btn-send-chat { background: var(--neon); color: #000; border: none; border-radius: 6px; padding: 4px 10px; font-weight: bold; font-size: 0.75rem; }
 
+        /* Menu Panel */
+        .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .btn-play-action { 
+            background: #000; 
+            border: 3px solid #ff3b30; 
+            color: white; 
+            border-radius: 15px; 
+            height: 85px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 1.4rem; 
+            font-weight: 900; 
+        }
+        .btn-play-action span { font-size: 0.8rem; margin-top: 4px; opacity: 0.8; }
+        .btn-menu-sub { background: #000; border: 1px solid var(--border); color: white; border-radius: 8px; padding: 8px; font-size: 0.7rem; font-weight: bold; }
+
+        #fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; justify-content: center; align-items: center; font-size: 5rem; }
     </style>
 </head>
 <body>
 
-<div class="screen">
+<div id="fireworks">🎉</div>
+
+<div class="news-ticker">
+    <div class="ticker-text">🔥 ยินดีต้อนรับสู่ WORLD CHASER • รางวัลใหญ่รอคุณอยู่ • แตะ PLAY เพื่อเริ่มสนุก! • ระบบรองรับ World Chain เต็มรูปแบบ</div>
+</div>
+
+<div id="lobby" class="screen active">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px;">
+        <h1 style="color:var(--neon); font-size: 2.2rem; text-shadow: 0 0 10px var(--neon);">WORLD CHASER</h1>
+        <button onclick="join(0.001)" style="width:100%; padding:20px; background:var(--card); color:white; border:1px solid var(--border); border-radius:15px; margin-bottom:10px;">ROOM 0.001 WLD</button>
+        <button onclick="join(0.01)" style="width:100%; padding:20px; background:var(--card); color:white; border:1px solid var(--border); border-radius:15px;">ROOM 0.01 WLD</button>
+    </div>
+</div>
+
+<div id="game" class="screen">
     <div class="top-nav">
-        <button>←</button>
-        <b>WORLD CHASER</b>
-        <span>WLD 1.25</span>
+        <button onclick="location.reload()" style="background:none; border:1px solid var(--border); color:white; border-radius:6px; padding:2px 10px;">←</button>
+        <b id="roomTitle">0.001 WLD</b>
+        <div style="color:var(--neon); font-weight:bold; font-size: 0.8rem;">WLD 1.25</div>
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card"><small>รางวัล</small><br><b>0.0000</b></div>
-        <div class="stat-card"><small>เวลา</small><br><b>รอ</b></div>
-        <div class="stat-card"><small>ผู้เล่น</small><br><b>0</b></div>
+        <div class="stat-card">รางวัล<b id="pot">0.0000</b></div>
+        <div class="stat-card">เวลา<b id="timer">รอ</b></div>
+        <div class="stat-card">ผู้เล่น<b id="pCount">0</b></div>
     </div>
 
-    <div class="board-section" id="board">
+    <div class="board-container" id="board">
         <div class="slot">👤</div><div class="slot">🤖</div><div class="slot">👤</div><div class="slot">🤖</div><div class="slot">👤</div>
         <div class="slot">🤖</div><div class="slot">👤</div><div class="slot">🤖</div><div class="slot">👤</div><div class="slot">🤖</div>
     </div>
 
     <div class="main-content">
-        <div class="left-panel">
-            <div id="chatBox">
-                System: ยินดีต้อนรับ...<br>
-                Bot_1: ลุยเลยทุกคน!<br>
-                Bot_2: รอบนี้ของฉันแน่ๆ
-            </div>
-            <div class="input-group">
-                <input type="text" placeholder="พิมพ์ข้อความ...">
-                <button class="btn-send">ส่ง</button>
+        <div class="chat-section">
+            <div id="chatBox"></div>
+            <div class="chat-input-row">
+                <input type="text" id="chatInp" placeholder="พิมพ์คุย..." autocomplete="off">
+                <button class="btn-send-chat" onclick="sendMsg()">ส่ง</button>
             </div>
         </div>
 
-        <div class="right-panel">
-            <button class="btn-play-main">PLAY<br><small>0.001</small></button>
-            <button class="btn-sub">ประวัติ</button>
-            <button class="btn-sub">ธุรกรรม</button>
-            <button class="btn-sub">EARN</button>
+        <div class="menu-section">
+            <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY<span id="priceLabel">0.001</span></button>
+            <button class="btn-menu-sub">ประวัติ</button>
+            <button class="btn-menu-sub">ธุรกรรม</button>
+            <button class="btn-menu-sub" style="color:var(--neon); border-color:var(--neon)">earn</button>
         </div>
     </div>
+    
+    <div style="height: 10px;"></div>
 </div>
 
 <script>
-    // โครงสร้างหลักสำหรับการสุ่มแบบใหม่
+    let currentPrice = 0.001;
+    let players = [];
+    let hasJoined = false;
+    let timerStarted = false;
+    let audioCtx;
+
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSfx(f, type, d, v) {
+        if(!audioCtx) return;
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    }
+
+    function join(p) {
+        initAudio();
+        currentPrice = p;
+        document.getElementById('priceLabel').innerText = p;
+        document.getElementById('roomTitle').innerText = p + " WLD";
+        document.getElementById('lobby').classList.remove('active');
+        document.getElementById('game').classList.add('active');
+        addChat("System", "เชื่อมต่อสำเร็จ!", "color:var(--neon)");
+    }
+
+    function play() {
+        if(hasJoined) return;
+        initAudio();
+        hasJoined = true;
+        document.getElementById('btnPlay').disabled = true;
+        document.getElementById('btnPlay').style.opacity = "0.5";
+        
+        players.push("You");
+        for(let i=0; i<4; i++) players.push("Bot_"+Math.floor(Math.random()*99));
+        
+        updateStats();
+        playSfx(800, 'sine', 0.1, 0.1);
+        if(!timerStarted) { timerStarted = true; startCountdown(); }
+    }
+
+    function updateStats() {
+        document.getElementById('pCount').innerText = players.length;
+        document.getElementById('pot').innerText = (players.length * currentPrice * 0.95).toFixed(4);
+    }
+
+    function startCountdown() {
+        let sec = 5;
+        const itv = setInterval(() => {
+            sec--;
+            playSfx(600, 'sine', 0.1, 0.1);
+            document.getElementById('timer').innerText = sec + "s";
+            if(sec <= 0) { clearInterval(itv); startChasing(); }
+        }, 1000);
+    }
+
     function startChasing() {
         const slots = document.querySelectorAll('.slot');
-        let current = 0;
-        let itv = setInterval(() => {
+        let currentIdx = 0;
+        let speed = 40;
+        let steps = 0;
+        const totalSteps = 35 + Math.floor(Math.random() * 10);
+
+        function move() {
             slots.forEach(s => s.classList.remove('active-chaser'));
-            current = (current + 1) % slots.length;
-            slots[current].classList.add('active-chaser');
-        }, 100);
-        // ในอนาคตใส่ Logic หยุดที่ผู้ชนะตรงนี้
+            currentIdx = (currentIdx + 1) % slots.length;
+            slots[currentIdx].classList.add('active-chaser');
+            playSfx(400, 'triangle', 0.05, 0.03);
+
+            steps++;
+            if (steps < totalSteps) {
+                if (totalSteps - steps < 12) speed += 45;
+                setTimeout(move, speed);
+            } else {
+                finishGame(currentIdx);
+            }
+        }
+        move();
+    }
+
+    function finishGame(winIdx) {
+        playSfx(523, 'square', 0.5, 0.1);
+        document.getElementById('fireworks').style.display = 'flex';
+        const winner = players[Math.floor(Math.random() * players.length)];
+        addChat("🏆 WINNER", winner + " ชนะรางวัล!", "color:#ffd700; font-weight:bold;");
+        setTimeout(reset, 4000);
+    }
+
+    function reset() {
+        hasJoined = false; timerStarted = false; players = [];
+        document.getElementById('fireworks').style.display = 'none';
+        document.getElementById('timer').innerText = "รอ";
+        const btn = document.getElementById('btnPlay');
+        btn.disabled = false;
+        btn.style.opacity = "1";
+        document.querySelectorAll('.slot').forEach(s => s.classList.remove('active-chaser'));
+        addChat("System", "เริ่มรอบใหม่!", "color:var(--neon)");
+    }
+
+    function addChat(u, m, s='') {
+        const b = document.getElementById('chatBox');
+        b.innerHTML += `<div style="margin-bottom:5px;"><b style="${s}">${u}:</b> ${m}</div>`;
+        b.scrollTop = b.scrollHeight;
+    }
+
+    function sendMsg() {
+        const inp = document.getElementById('chatInp');
+        if(inp.value.trim()) { addChat("You", inp.value); inp.value = ""; }
     }
 </script>
 </body>
