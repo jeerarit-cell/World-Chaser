@@ -3,126 +3,256 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD SPIN MOBILE - FIXED</title>
+    <title>WORLD SPIN - ARROW CHASER</title>
     <style>
-        :root { 
-            --neon: #00ffaa; 
-            --bg: #0d1117; 
-            --card: #161b22; 
-            --border: #30363d; 
-            --safe-bottom: env(safe-area-inset-bottom, 15px);
-        }
-        
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        html, body { 
-            position: fixed; overflow: hidden; width: 100%; height: 100%; 
-            margin: 0; padding: 0; background: var(--bg); color: white; 
-            font-family: -apple-system, sans-serif; 
-        }
+        :root { --neon: #00ffaa; --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #8b949e; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        html, body { position: fixed; overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: white; font-family: -apple-system, sans-serif; }
 
-        /* บังคับให้ Screen สูงเต็มจอพอดี */
-        .screen { 
-            display: none; height: 100vh; width: 100%; max-width: 500px; 
-            margin: 0 auto; flex-direction: column; overflow: hidden;
-        }
+        .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; }
         .active { display: flex; }
 
-        .top-nav { flex-shrink: 0; display: flex; justify-content: space-between; padding: 12px 15px; background: #000; border-bottom: 1px solid var(--border); align-items: center; }
-        .stats-grid { flex-shrink: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 6px; border-radius: 10px; text-align: center; }
-        .stat-card b { color: var(--neon); font-size: 0.8rem; }
+        /* Header & Stats */
+        .top-nav { display: flex; justify-content: space-between; padding: 15px; background: #000; align-items: center; border-bottom: 1px solid var(--border); }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 12px; text-align: center; }
+        .stat-card b { color: var(--neon); font-size: 0.85rem; }
 
-        .slider-section { flex-shrink: 0; position: relative; padding: 15px 0; background: rgba(0,0,0,0.2); overflow: hidden; }
-        .pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); color: var(--neon); font-size: 20px; z-index: 10; }
-        .avatar-track { display: flex; gap: 6px; width: max-content; padding-left: calc(50% - 22px); }
-        .avatar { width: 45px; height: 45px; background: #222; border: 2px solid var(--border); border-radius: 10px; flex-shrink: 0; overflow: hidden; }
-        .avatar img { width: 100%; height: 100%; }
-
-        /* ส่วนประวัติและแชท - ให้ยืดหดตามพื้นที่ที่เหลือ */
-        .content-area { 
-            flex: 1; display: flex; flex-direction: column; 
-            padding: 0 10px; overflow: hidden; gap: 5px;
+        /* Board Style (10 Avatars Fixed) */
+        .board-container { 
+            padding: 20px 10px; 
+            display: grid; 
+            grid-template-columns: repeat(5, 1fr); 
+            grid-template-rows: repeat(2, 1fr); 
+            gap: 10px; 
+            background: rgba(0,0,0,0.3);
+            position: relative;
         }
-        .history-bar { flex-shrink: 0; display: flex; gap: 5px; overflow-x: auto; padding: 5px 0; scrollbar-width: none; }
-        .history-item { width: 30px; height: 30px; border-radius: 50%; border: 1px solid #ffd700; flex-shrink: 0; overflow: hidden; }
-        .history-item img { width: 100%; height: 100%; }
-
-        /* ช่องแชทที่ Scroll ได้ */
-        .chat-container { 
-            flex: 1; border: 1px solid var(--border); border-radius: 12px; 
-            background: rgba(0,0,0,0.3); padding: 10px; overflow-y: auto; 
-            font-size: 0.85rem; margin-bottom: 5px;
-        }
-
-        /* แถบปุ่มกด - ล็อกไว้ล่างสุดเสมอ */
-        .action-area { 
-            flex-shrink: 0; padding: 10px 15px calc(var(--safe-bottom) + 5px) 15px; 
-            display: flex; gap: 10px; background: #000; border-top: 1px solid var(--border);
+        .slot {
+            aspect-ratio: 1/1;
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            display: flex;
             align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+            transition: 0.2s;
         }
-        .chat-input-box { flex: 1; display: flex; flex-direction: column; }
-        input[type="text"] { background: #1c2128; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 8px; outline: none; font-size: 14px; width: 100%; }
+        /* ไฟวิ่ง/ลูกศร */
+        .slot.active-chaser {
+            border-color: var(--neon);
+            box-shadow: 0 0 15px var(--neon);
+            transform: scale(1.05);
+            background: rgba(0, 255, 170, 0.1);
+        }
+        .slot.active-chaser::after {
+            content: '▼';
+            position: absolute;
+            top: -20px;
+            color: var(--neon);
+            font-size: 16px;
+            animation: bounce 0.4s infinite;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+        /* Chat & Actions */
+        .chat-container { flex: 1; margin: 10px 15px; border: 2px solid #ffffff; border-radius: 15px; background: rgba(0,0,0,0.7); padding: 12px; overflow-y: auto; font-size: 0.9rem; }
+        
+        .action-area { 
+            padding: 15px 15px 40px 15px; /* ยกขึ้น 1 cm */
+            display: flex; gap: 10px; background: var(--bg); border-top: 1px solid var(--border); 
+        }
+        .chat-input-box { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+        input[type="text"] { background: #1c2128; border: 1px solid var(--border); color: white; padding: 12px; border-radius: 10px; outline: none; font-size: 16px; }
         
         .btn-play { 
             background: linear-gradient(135deg, var(--neon), #00d2ff); 
-            border: none; border-radius: 12px; width: 85px; height: 50px;
-            color: #000; font-weight: 900; font-size: 0.85rem; flex-shrink: 0;
-            line-height: 1.2;
+            border: none; border-radius: 18px; width: 100px; color: #000; 
+            font-weight: 900; font-size: 1rem; box-shadow: 0 0 15px rgba(0,255,170,0.4); 
         }
-        .btn-play:disabled { background: #30363d; color: #8b949e; }
+
+        #fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; justify-content: center; align-items: center; font-size: 5rem; }
+        
+        @keyframes win-pulse {
+            0% { transform: scale(1.05); box-shadow: 0 0 20px #ffd700; border-color: #ffd700; }
+            100% { transform: scale(1.1); box-shadow: 0 0 40px #ffd700; border-color: #ffd700; }
+        }
+        .winner-slot { animation: win-pulse 0.5s infinite alternate; z-index: 10; }
     </style>
 </head>
 <body>
 
-<div id="game" class="screen active">
+<div id="fireworks">🎉</div>
+
+<div id="lobby" class="screen active">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px;">
+        <h1 style="color:var(--neon); font-size: 2.2rem; text-shadow: 0 0 10px var(--neon);">WORLD CHASER</h1>
+        <button onclick="join(0.001)" style="width:100%; padding:25px; background:var(--card); color:white; border:1px solid var(--border); border-radius:20px; display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <b>0.001 WLD</b> <span style="background:var(--neon); color:black; padding:8px 15px; border-radius:10px; font-weight:bold;">เล่น</span>
+        </button>
+        <button onclick="join(0.01)" style="width:100%; padding:25px; background:var(--card); color:white; border:1px solid var(--border); border-radius:20px; display:flex; justify-content:space-between; align-items:center;">
+            <b>0.01 WLD</b> <span style="background:var(--neon); color:black; padding:8px 15px; border-radius:10px; font-weight:bold;">เล่น</span>
+        </button>
+    </div>
+</div>
+
+<div id="game" class="screen">
     <div class="top-nav">
-        <button style="background:none; border:none; color:white; font-size:18px;">✕</button>
-        <b id="roomTitle">0.001 WLD ROOM</b>
-        <div style="color:var(--neon); font-size:13px;">Wallet: 1.25</div>
+        <button onclick="location.reload()" style="background:none; border:1px solid var(--border); color:white; border-radius:8px; padding:6px 12px;">←</button>
+        <b id="roomTitle">ROOM</b>
+        <div style="color:var(--neon); font-weight:bold;">WLD 1.25</div>
     </div>
-
     <div class="stats-grid">
-        <div class="stat-card"><small>รางวัล</small><br><b id="pot">0.0072</b></div>
+        <div class="stat-card"><small>รางวัล</small><br><b id="pot">0.0000</b></div>
         <div class="stat-card"><small>เวลา</small><br><b id="timer">รอ</b></div>
-        <div class="stat-card"><small>ผู้เล่น</small><br><b id="pCount">8</b></div>
+        <div class="stat-card"><small>ผู้เล่น</small><br><b id="pCount">0</b></div>
     </div>
 
-    <div class="slider-section">
-        <div class="pointer">▼</div>
-        <div class="avatar-track" id="track"></div>
+    <div class="board-container" id="board">
+        <div class="slot">👤</div><div class="slot">🤖</div><div class="slot">👤</div><div class="slot">🤖</div><div class="slot">👤</div>
+        <div class="slot">🤖</div><div class="slot">👤</div><div class="slot">🤖</div><div class="slot">👤</div><div class="slot">🤖</div>
     </div>
 
-    <div class="content-area">
-        <div style="font-size: 10px; color: #8b949e; margin-top: 5px;">ประวัติผู้ชนะ:</div>
-        <div class="history-bar" id="historyBar"></div>
-        <div class="chat-container" id="chatBox">
-            <div style="color:var(--neon); margin-bottom:5px;"><b>System:</b> ยินดีต้อนรับ! กด PLAY เพื่อเริ่มเล่น</div>
-        </div>
-    </div>
+    <div class="chat-container" id="chatBox"></div>
 
     <div class="action-area">
         <div class="chat-input-box">
-            <input type="text" id="chatInp" placeholder="พิมพ์ข้อความ..." autocomplete="off">
-            <small style="color:var(--neon); font-size:10px; margin-top:4px;">ส่งข้อความ</small>
+            <input type="text" id="chatInp" placeholder="พิมพ์คุย..." autocomplete="off">
+            <button onclick="sendMsg()" style="background:#30363d; border:none; color:white; padding:8px; border-radius:8px; font-size:0.75rem;">ส่ง</button>
         </div>
-        <button class="btn-play" id="playBtn" onclick="play()">PLAY<br><span style="font-size:0.6rem;">0.001</span></button>
+        <button class="btn-play" id="playBtn" onclick="play()">PLAY<br><span id="priceLabel" style="font-size:0.7rem;"></span></button>
     </div>
 </div>
 
 <script>
-    // ใส่ Logic การสุ่มและหมุนจากโค้ดเดิมของคุณได้เลยครับ
-    // ผมปรับแค่ CSS Layout ให้ปุ่มไม่หลุดจอ
-    function setupTrack() {
-        const track = document.getElementById('track');
-        for(let i=0; i<30; i++) {
-            const div = document.createElement('div');
-            div.className = 'avatar';
-            div.innerHTML = `<img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=${i}">`;
-            track.appendChild(div);
-        }
+    let currentPrice = 0.001;
+    let players = [];
+    let hasJoined = false;
+    let timerStarted = false;
+    let audioCtx;
+
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
     }
-    setupTrack();
+
+    function playSfx(f, type, d, v) {
+        if(!audioCtx) return;
+        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
+    }
+
+    function join(p) {
+        initAudio();
+        currentPrice = p;
+        document.getElementById('priceLabel').innerText = p;
+        document.getElementById('roomTitle').innerText = p + " WLD";
+        document.getElementById('lobby').classList.remove('active');
+        document.getElementById('game').classList.add('active');
+        addChat("System", "ยินดีต้อนรับ! ไฟจะวิ่งเมื่อหมดเวลา", "color:var(--neon)");
+    }
+
+    function play() {
+        if(hasJoined) return;
+        initAudio();
+        hasJoined = true;
+        document.getElementById('playBtn').disabled = true;
+        document.getElementById('playBtn').innerHTML = "JOINED";
+
+        players.push("You");
+        for(let i=0; i<4; i++) players.push("Bot_"+Math.floor(Math.random()*99));
+        
+        updateStats();
+        playSfx(800, 'sine', 0.1, 0.1);
+        if(!timerStarted) { timerStarted = true; startCountdown(); }
+    }
+
+    function updateStats() {
+        document.getElementById('pCount').innerText = players.length;
+        document.getElementById('pot').innerText = (players.length * currentPrice * 0.95).toFixed(4);
+    }
+
+    function startCountdown() {
+        let sec = 5;
+        const itv = setInterval(() => {
+            sec--;
+            playSfx(600, 'sine', 0.1, 0.1);
+            document.getElementById('timer').innerText = sec + "s";
+            if(sec <= 0) { clearInterval(itv); startChasing(); }
+        }, 1000);
+    }
+
+    function startChasing() {
+        const slots = document.querySelectorAll('.slot');
+        let currentIdx = 0;
+        let speed = 50; // ความเร็วเริ่มต้น (มิลลิวินาที)
+        let steps = 0;
+        const totalSteps = 30 + Math.floor(Math.random() * 10); // จำนวนก้าวทั้งหมดที่จะวิ่ง
+
+        function move() {
+            slots.forEach(s => s.classList.remove('active-chaser'));
+            currentIdx = (currentIdx + 1) % slots.length;
+            slots[currentIdx].classList.add('active-chaser');
+            playSfx(400, 'triangle', 0.05, 0.03);
+
+            steps++;
+            if (steps < totalSteps) {
+                // ค่อยๆ ลดความเร็วลงในช่วงท้าย
+                if (totalSteps - steps < 10) speed += 30;
+                else if (totalSteps - steps < 20) speed += 10;
+                setTimeout(move, speed);
+            } else {
+                finishGame(currentIdx);
+            }
+        }
+        move();
+    }
+
+    function finishGame(winSlotIdx) {
+        const slots = document.querySelectorAll('.slot');
+        slots[winSlotIdx].classList.add('winner-slot');
+        
+        playSfx(523, 'square', 0.5, 0.1);
+        document.getElementById('fireworks').style.display = 'flex';
+        
+        const winner = players[Math.floor(Math.random() * players.length)];
+        addChat("🏆 WINNER", winner + " ชนะรางวัล!", "color:#ffd700; font-weight:bold;");
+
+        setTimeout(reset, 4000);
+    }
+
+    function reset() {
+        hasJoined = false; timerStarted = false; players = [];
+        document.getElementById('fireworks').style.display = 'none';
+        document.getElementById('pCount').innerText = "0";
+        document.getElementById('pot').innerText = "0.0000";
+        document.getElementById('timer').innerText = "รอ";
+        const btn = document.getElementById('playBtn');
+        btn.disabled = false;
+        btn.innerHTML = `PLAY<br><span style="font-size:0.7rem;">${currentPrice}</span>`;
+        
+        document.querySelectorAll('.slot').forEach(s => {
+            s.classList.remove('active-chaser', 'winner-slot');
+        });
+        addChat("System", "เริ่มรอบใหม่แล้ว!", "color:var(--neon)");
+    }
+
+    function addChat(u, m, s='') {
+        const b = document.getElementById('chatBox');
+        b.innerHTML += `<div style="margin-bottom:6px;"><b style="${s}">${u}:</b> ${m}</div>`;
+        b.scrollTop = b.scrollHeight;
+    }
+
+    function sendMsg() {
+        const inp = document.getElementById('chatInp');
+        if(inp.value.trim()) { addChat("You", inp.value); inp.value = ""; }
+    }
 </script>
 </body>
 </html>
