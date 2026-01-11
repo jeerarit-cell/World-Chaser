@@ -3,78 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD SPIN MOBILE - UPDATED</title>
+    <title>WORLD SPIN MOBILE - TURBO</title>
     <style>
-        :root { --neon: #00ffaa; --bg: #0d1117; --card: #161b22; --border: #30363d; --text: #8b949e; }
-        
+        :root { 
+            --neon: #00ffaa; 
+            --bg: #0d1117; 
+            --card: #161b22; 
+            --border: #30363d; 
+            --text: #8b949e; 
+            --safe-bottom: env(safe-area-inset-bottom, 20px); /* จัดการพื้นที่ด้านล่างไอโฟน/แอนดรอยด์ */
+        }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         html, body { 
             position: fixed; overflow: hidden; width: 100%; height: 100%; 
-            margin: 0; padding: 0; background: var(--bg); color: white; font-family: -apple-system, sans-serif;
+            margin: 0; padding: 0; background: var(--bg); color: white; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
         }
 
-        .screen { 
-            display: none; height: 100vh; flex-direction: column; width: 100%; 
-            max-width: 500px; margin: 0 auto; position: relative; 
-        }
+        .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; }
         .active { display: flex; }
 
-        /* Stats & Header */
-        .top-nav { display: flex; justify-content: space-between; padding: 15px; background: #000; align-items: center; border-bottom: 1px solid var(--border); }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 10px; border-radius: 12px; text-align: center; }
-        .stat-card b { color: var(--neon); font-size: 0.9rem; }
+        /* UI Stats */
+        .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: #000; align-items: center; border-bottom: 1px solid var(--border); }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 12px; text-align: center; }
+        .stat-card b { color: var(--neon); font-size: 0.85rem; }
 
         /* Wheel Section */
-        .slider-section { position: relative; padding: 30px 0; overflow: hidden; background: rgba(0,0,0,0.5); }
-        .pointer { 
-            position: absolute; top: 0; left: 50%; transform: translateX(-50%); 
-            color: var(--neon); font-size: 30px; z-index: 10; filter: drop-shadow(0 0 5px var(--neon));
-        }
-        .avatar-track { display: flex; gap: 15px; width: max-content; padding-left: calc(50% - 30px); will-change: transform; }
+        .slider-section { position: relative; padding: 20px 0; overflow: hidden; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); }
+        .pointer { position: absolute; top: 0; left: 50%; transform: translateX(-50%); color: var(--neon); font-size: 24px; z-index: 10; filter: drop-shadow(0 0 5px var(--neon)); }
+        .avatar-track { display: flex; gap: 8px; width: max-content; padding-left: calc(50% - 25px); will-change: transform; }
+        .scrolling { animation: scrollLoop 20s linear infinite; }
+        @keyframes scrollLoop { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+        .avatar { width: 50px; height: 50px; background: #222; border: 2px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; overflow: hidden; }
+        .avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .avatar.winner-glow { border-color: #ffd700; box-shadow: 0 0 20px #ffd700; transform: scale(1.1); z-index: 5; }
+
+        /* Chat & History */
+        .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 10px; gap: 10px; }
+        .history-bar { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+        .history-item { min-width: 35px; height: 35px; border-radius: 50%; border: 1px solid #ffd700; background: #000; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
         
-        /* --- เพิ่ม Animation การสไลด์ก่อนเริ่มสุ่ม --- */
-        .scrolling { animation: scrollLoop 30s linear infinite; }
-        @keyframes scrollLoop { 
-            from { transform: translateX(0); } 
-            to { transform: translateX(-50%); } 
-        }
+        .chat-container { flex: 1; border: 1px solid var(--border); border-radius: 15px; background: rgba(0,0,0,0.4); padding: 10px; overflow-y: auto; font-size: 0.85rem; }
 
-        .avatar { 
-            width: 60px; height: 60px; background: #222; border: 2.5px solid var(--border); 
-            border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; 
-        }
-        .avatar.winner-glow { border-color: #ffd700; box-shadow: 0 0 30px #ffd700; transform: scale(1.15); z-index: 5; }
-
-        /* Chat System */
-        .chat-container { 
-            flex: 1; margin: 5px 15px; border: 2px solid #ffffff; border-radius: 15px; 
-            background: rgba(0,0,0,0.7); padding: 12px; overflow-y: auto; font-size: 0.9rem;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* --- ปรับความสูง Action Area ขึ้นมาอีก 5 มม. (ประมาณ 20px) --- */
+        /* Action Area - ปรับให้พอดีหน้าจอมือถือ */
         .action-area { 
-            padding: 15px 15px 35px 15px; /* เพิ่ม Padding Bottom เพื่อยกขึ้น */
-            display: flex; gap: 12px; background: var(--bg); border-top: 1px solid var(--border);
+            padding: 10px 15px calc(var(--safe-bottom) + 10px) 15px; 
+            display: flex; gap: 10px; background: #000; border-top: 1px solid var(--border); 
         }
-        .chat-input-box { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        input[type="text"] { 
-            background: #1c2128; border: 1px solid var(--border); color: white; 
-            padding: 12px; border-radius: 10px; outline: none; font-size: 16px;
-        }
-        .btn-play { 
-            background: linear-gradient(135deg, var(--neon), #00d2ff); 
-            border: none; border-radius: 18px; width: 110px; color: #000; 
-            font-weight: 900; font-size: 1rem; cursor: pointer; box-shadow: 0 0 15px rgba(0,255,170,0.4);
-        }
+        .chat-input-box { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+        input[type="text"] { background: #1c2128; border: 1px solid var(--border); color: white; padding: 10px; border-radius: 10px; outline: none; font-size: 14px; }
+        
+        .btn-play { background: linear-gradient(135deg, var(--neon), #00d2ff); border: none; border-radius: 15px; width: 90px; color: #000; font-weight: 900; font-size: 0.9rem; }
+        .btn-play:disabled { background: #30363d; color: #8b949e; }
 
-        @keyframes shake {
-            0%, 100% { transform: translate(0,0); }
-            25% { transform: translate(-3px, 3px); }
-            75% { transform: translate(3px, -3px); }
-        }
-        #fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; justify-content: center; align-items: center; font-size: 6rem; }
+        #fireworks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; display: none; justify-content: center; align-items: center; font-size: 5rem; }
     </style>
 </head>
 <body>
@@ -83,45 +67,55 @@
 
 <div id="lobby" class="screen active">
     <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px;">
-        <h1 style="color:var(--neon); font-size: 2.5rem; text-shadow: 0 0 10px var(--neon);">WORLD SPIN</h1>
-        <button onclick="join(0.001)" style="width:100%; padding:25px; background:var(--card); color:white; border:1px solid var(--border); border-radius:20px; display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <b>0.001 WLD</b> <span style="background:var(--neon); color:black; padding:8px 15px; border-radius:10px; font-weight:bold;">เข้าร่วม</span>
+        <h1 style="color:var(--neon); font-size: 2.2rem; text-shadow: 0 0 10px var(--neon); margin-bottom:40px;">WORLD SPIN</h1>
+        <button onclick="join(0.001)" style="width:100%; padding:20px; background:var(--card); color:white; border:1px solid var(--border); border-radius:15px; display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <span>0.001 WLD</span> <b style="background:var(--neon); color:black; padding:5px 12px; border-radius:8px;">JOIN</b>
         </button>
-        <button onclick="join(0.01)" style="width:100%; padding:25px; background:var(--card); color:white; border:1px solid var(--border); border-radius:20px; display:flex; justify-content:space-between; align-items:center;">
-            <b>0.01 WLD</b> <span style="background:var(--neon); color:black; padding:8px 15px; border-radius:10px; font-weight:bold;">เข้าร่วม</span>
+        <button onclick="join(0.01)" style="width:100%; padding:20px; background:var(--card); color:white; border:1px solid var(--border); border-radius:15px; display:flex; justify-content:space-between; align-items:center;">
+            <span>0.01 WLD</span> <b style="background:var(--neon); color:black; padding:5px 12px; border-radius:8px;">JOIN</b>
         </button>
     </div>
 </div>
 
 <div id="game" class="screen">
     <div class="top-nav">
-        <button onclick="location.reload()" style="background:none; border:1px solid var(--border); color:white; border-radius:8px; padding:6px 12px;">กลับ</button>
+        <button onclick="location.reload()" style="background:none; border:none; color:white; font-size:20px;">✕</button>
         <b id="roomTitle">ROOM</b>
-        <div style="color:var(--neon); font-weight:bold;">WLD 1.25</div>
+        <div style="color:var(--neon); font-size:14px;">Wallet: 1.25</div>
     </div>
+
     <div class="stats-grid">
         <div class="stat-card"><small>รางวัล</small><br><b id="pot">0.0000</b></div>
         <div class="stat-card"><small>เวลา</small><br><b id="timer">รอ</b></div>
         <div class="stat-card"><small>ผู้เล่น</small><br><b id="pCount">0</b></div>
     </div>
+
     <div class="slider-section">
         <div class="pointer">▼</div>
-        <div class="avatar-track scrolling" id="track"></div> </div>
-    <div class="chat-container" id="chatBox"></div>
-    <div class="action-area">
+        <div class="avatar-track scrolling" id="track"></div>
+    </div>
+
+    <div class="content-area">
+        <div style="font-size: 11px; color: var(--text);">ประวัติผู้ชนะ:</div>
+        <div class="history-bar" id="historyBar">
+            </div>
+        <div class="chat-container" id="chatBox"></div>
+    </div>
+
+    <div class="action-area" id="actionArea">
         <div class="chat-input-box">
-            <input type="text" id="chatInp" placeholder="คุยกันที่นี่..." autocomplete="off">
-            <button onclick="sendMsg()" style="background:#30363d; border:none; color:white; padding:10px; border-radius:10px; font-size:0.8rem;">ส่งข้อความ</button>
+            <input type="text" id="chatInp" placeholder="พิมพ์ข้อความ..." autocomplete="off">
+            <button onclick="sendMsg()" style="background:none; border:none; color:var(--neon); font-size:12px; text-align:left; padding:2px;">ส่งข้อความ</button>
         </div>
-        <button class="btn-play" id="playBtn" onclick="play()">PLAY<br><span id="priceLabel" style="font-size:0.7rem;"></span></button>
+        <button class="btn-play" id="playBtn" onclick="play()">PLAY<br><span id="priceLabel" style="font-size:0.6rem;"></span></button>
     </div>
 </div>
 
 <script>
     let currentPrice = 0.001;
     let players = [];
+    let history = [];
     let hasJoined = false;
-    let timerStarted = false;
     let audioCtx;
 
     function initAudio() {
@@ -142,10 +136,11 @@
     function setupTrack() {
         const track = document.getElementById('track');
         track.innerHTML = "";
-        for(let i=0; i<80; i++) { // เพิ่มจำนวนอวตารให้สไลด์ได้ยาวๆ
+        // สร้าง 100 ช่องอวตาร โดยใช้ DiceBear API ให้ดูสมจริง
+        for(let i=0; i<100; i++) {
             const div = document.createElement('div');
             div.className = 'avatar';
-            div.innerHTML = i % 2 === 0 ? "👤" : "🤖";
+            div.innerHTML = `<img src="https://api.dicebear.com/7.x/pixel-art/svg?seed=${i+Math.random()}">`;
             track.appendChild(div);
         }
     }
@@ -154,101 +149,102 @@
     function join(p) {
         initAudio();
         currentPrice = p;
-        document.getElementById('priceLabel').innerText = p;
-        document.getElementById('roomTitle').innerText = p + " WLD";
+        document.getElementById('priceLabel').innerText = p + " WLD";
+        document.getElementById('roomTitle').innerText = p + " WLD ROOM";
         document.getElementById('lobby').classList.remove('active');
         document.getElementById('game').classList.add('active');
-        addChat("System", "ยินดีต้อนรับสู่ World Spin!", "color:var(--neon)");
+        addChat("System", "ยินดีต้อนรับ! กด PLAY เพื่อเริ่มเล่น", "color:var(--neon)");
     }
 
     function play() {
         if(hasJoined) return;
-        initAudio();
         hasJoined = true;
-        const btn = document.getElementById('playBtn');
-        btn.disabled = true;
-        btn.innerHTML = "JOINED";
+        document.getElementById('playBtn').disabled = true;
+        document.getElementById('playBtn').innerText = "รอผล...";
 
-        players.push("You (0x71...)");
-        players.push("Bot_"+Math.floor(Math.random()*99));
-        players.push("Bot_"+Math.floor(Math.random()*99));
+        players = ["คุณ (You)"];
+        for(let i=0; i<7; i++) players.push("User_" + Math.floor(Math.random()*999));
         
         updateStats();
         playSfx(800, 'sine', 0.1, 0.1);
-        if(!timerStarted) { timerStarted = true; startCountdown(); }
+        startCountdown();
     }
 
     function updateStats() {
         document.getElementById('pCount').innerText = players.length;
-        document.getElementById('pot').innerText = (players.length * currentPrice * 0.95).toFixed(4);
+        document.getElementById('pot').innerText = (players.length * currentPrice * 0.9).toFixed(4);
     }
 
     function startCountdown() {
-        let sec = 10;
+        let sec = 3; 
         const itv = setInterval(() => {
-            sec--;
-            playSfx(600, 'sine', 0.1, 0.1);
             document.getElementById('timer').innerText = sec + "s";
             if(sec <= 0) { clearInterval(itv); finish(); }
+            sec--;
         }, 1000);
     }
 
     function finish() {
         const track = document.getElementById('track');
-        const spinTime = 2500;
-        const step = 75; // 60px width + 15px gap
+        const actionArea = document.getElementById('actionArea');
+        actionArea.style.pointerEvents = "none"; // กันกดซ้ำระหว่างหมุน
         
-        let sItv = setInterval(() => playSfx(200, 'triangle', 0.05, 0.05), 60);
-        
-        // หยุด Scrolling animation เดิมก่อนสุ่ม
         track.classList.remove('scrolling');
-        
-        const winIdx = Math.floor(Math.random()*15)+30;
+        const winIdx = 60 + Math.floor(Math.random()*10); // สุ่มจุดหยุด
+        const step = 58; 
         const finalOffset = winIdx * step;
 
-        track.style.transition = `transform ${spinTime}ms cubic-bezier(0.1, 0.7, 0.1, 1)`;
+        track.style.transition = `transform 2s cubic-bezier(0.15, 0, 0.15, 1)`;
         track.style.transform = `translateX(-${finalOffset}px)`;
 
-        setTimeout(() => {
-            clearInterval(sItv);
-            [523, 659, 783].forEach((f, i) => setTimeout(() => playSfx(f, 'square', 0.4, 0.1), i*100));
-            
-            const winner = players[Math.floor(Math.random()*players.length)];
-            document.getElementById('game').style.animation = "shake 0.3s ease-in-out";
-            document.getElementById('fireworks').style.display = 'flex';
-            addChat("🏆 WINNER", winner + " ชนะรางวัล!", "color:#ffd700; font-weight:bold;");
-            
-            const all = document.querySelectorAll('.avatar');
-            if(all[winIdx]) all[winIdx].classList.add('winner-glow');
+        // เสียงระหว่างหมุน
+        let tick = setInterval(() => playSfx(150, 'triangle', 0.05, 0.03), 100);
 
-            setTimeout(reset, 4000);
-        }, spinTime);
+        setTimeout(() => {
+            clearInterval(tick);
+            actionArea.style.pointerEvents = "auto";
+            const winner = players[Math.floor(Math.random()*players.length)];
+            
+            // แสดงผล
+            document.getElementById('fireworks').style.display = 'flex';
+            addChat("🏆 WINNER", winner + " รับรางวัลใหญ่!", "color:#ffd700; font-weight:bold;");
+            
+            const allAvatars = document.querySelectorAll('.avatar');
+            allAvatars[winIdx].classList.add('winner-glow');
+
+            // เพิ่มลงประวัติ
+            updateHistory(allAvatars[winIdx].innerHTML);
+
+            setTimeout(reset, 3000);
+        }, 2000);
+    }
+
+    function updateHistory(imgHtml) {
+        const bar = document.getElementById('historyBar');
+        const item = document.createElement('div');
+        item.className = 'history-item';
+        item.innerHTML = imgHtml;
+        bar.prepend(item);
+        if(bar.children.length > 8) bar.removeChild(bar.lastChild);
     }
 
     function reset() {
-        hasJoined = false; timerStarted = false; players = [];
-        document.getElementById('game').style.animation = "";
+        hasJoined = false;
         document.getElementById('fireworks').style.display = 'none';
-        document.getElementById('pCount').innerText = "0";
-        document.getElementById('pot').innerText = "0.0000";
         document.getElementById('timer').innerText = "รอ";
-        const btn = document.getElementById('playBtn');
-        btn.disabled = false;
-        btn.innerHTML = `PLAY<br><span style="font-size:0.7rem;">${currentPrice}</span>`;
+        document.getElementById('playBtn').disabled = false;
+        document.getElementById('playBtn').innerHTML = `PLAY<br><span style="font-size:0.6rem;">${currentPrice}</span>`;
         
         const track = document.getElementById('track');
         track.style.transition = "none";
         track.style.transform = "translateX(0)";
         setupTrack();
-        
-        // กลับมาสไลด์เบาๆ เหมือนเดิม
-        setTimeout(() => { track.classList.add('scrolling'); }, 50);
-        addChat("System", "รอบใหม่เริ่มแล้ว!", "color:var(--neon)");
+        setTimeout(() => track.classList.add('scrolling'), 50);
     }
 
     function addChat(u, m, s='') {
         const b = document.getElementById('chatBox');
-        b.innerHTML += `<div style="margin-bottom:8px;"><b style="${s}">${u}:</b> ${m}</div>`;
+        b.innerHTML += `<div style="margin-bottom:5px;"><b style="${s}">${u}:</b> ${m}</div>`;
         b.scrollTop = b.scrollHeight;
     }
 
