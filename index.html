@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WORLD SPIN - World Chain</title>
+    <title>WORLD SPIN - Star Edition</title>
     <style>
         body {
             background-color: #0d1117;
@@ -21,7 +21,6 @@
             font-size: 2.5rem;
             margin: 20px 0 5px;
             text-transform: uppercase;
-            letter-spacing: 2px;
         }
 
         .subtitle {
@@ -30,7 +29,7 @@
             margin-bottom: 40px;
         }
 
-        /* ส่วนของวงล้อและกังหัน */
+        /* พื้นที่วงล้อ */
         .wheel-container {
             width: 250px;
             height: 250px;
@@ -43,43 +42,52 @@
             margin-bottom: 50px;
         }
 
-        /* ตัวกังหันจำลอง */
-        .pinwheel {
-            width: 120px;
-            height: 120px;
-            position: relative;
-            animation: spin 2s linear infinite; /* หมุนตลอดเวลา */
+        /* รูปดาวตรงกลาง */
+        .star {
+            font-size: 60px;
+            color: #ffcf40;
+            text-shadow: 0 0 20px rgba(255, 207, 64, 0.8);
+            z-index: 10;
+            animation: star-spin 4s linear infinite;
         }
 
-        /* ใบพัดกังหัน (สร้างด้วย CSS) */
-        .pinwheel::before, .pinwheel::after {
-            content: '';
+        @keyframes star-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* จุดขาว 10 จุดที่หมุนรอบ */
+        .dots-orbit {
             position: absolute;
-            top: 50%;
-            left: 50%;
             width: 100%;
-            height: 20%;
-            background: linear-gradient(90deg, #00ffaa, transparent);
-            border-radius: 50px;
-            transform: translate(-50%, -50%);
+            height: 100%;
+            animation: orbit-spin 6s linear infinite;
         }
 
-        .pinwheel::after {
-            transform: translate(-50%, -50%) rotate(90deg);
-        }
-
-        /* จุดศูนย์กลางสว่างๆ แบบในรูป */
-        .wheel-center-glow {
+        .dot {
             position: absolute;
-            width: 15px;
-            height: 15px;
+            width: 6px;
+            height: 6px;
             background-color: white;
             border-radius: 50%;
-            box-shadow: 0 0 20px 5px rgba(255, 255, 255, 0.8);
-            z-index: 10;
+            top: 50%;
+            left: 50%;
+            box-shadow: 0 0 10px white;
         }
 
-        @keyframes spin {
+        /* คำนวณตำแหน่งจุดทั้ง 10 จุดให้กระจายเป็นวงกลม */
+        .dot:nth-child(1) { transform: rotate(0deg) translate(90px); }
+        .dot:nth-child(2) { transform: rotate(36deg) translate(90px); }
+        .dot:nth-child(3) { transform: rotate(72deg) translate(90px); }
+        .dot:nth-child(4) { transform: rotate(108deg) translate(90px); }
+        .dot:nth-child(5) { transform: rotate(144deg) translate(90px); }
+        .dot:nth-child(6) { transform: rotate(180deg) translate(90px); }
+        .dot:nth-child(7) { transform: rotate(216deg) translate(90px); }
+        .dot:nth-child(8) { transform: rotate(252deg) translate(90px); }
+        .dot:nth-child(9) { transform: rotate(288deg) translate(90px); }
+        .dot:nth-child(10) { transform: rotate(324deg) translate(90px); }
+
+        @keyframes orbit-spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
@@ -93,7 +101,7 @@
         .room-card {
             background-color: #161b22;
             border-radius: 16px;
-            padding: 20px;
+            padding: 18px 20px;
             margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
@@ -104,13 +112,13 @@
         .room-info h2 {
             margin: 0;
             color: #00ffaa;
-            font-size: 1.3rem;
+            font-size: 1.2rem;
         }
 
         .room-info p {
             margin: 4px 0 0;
             color: #8b949e;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
 
         .join-btn {
@@ -118,7 +126,7 @@
             border: none;
             border-radius: 10px;
             color: #000;
-            padding: 12px 30px;
+            padding: 10px 25px;
             font-weight: 800;
             cursor: pointer;
             transition: 0.2s;
@@ -136,14 +144,34 @@
     <div class="subtitle">วงล้อสุ่มผู้โชคดีบน World Chain</div>
 
     <div class="wheel-container">
-        <div class="wheel-center-glow"></div>
-        <div class="pinwheel"></div>
+        <div class="star">★</div>
+        
+        <div class="dots-orbit">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
     </div>
 
     <div class="room-list">
         <div class="room-card">
             <div class="room-info">
                 <h2>0.001 WLD</h2>
+                <p>ผู้เล่นในห้อง: 2 คน</p>
+            </div>
+            <button class="join-btn">JOIN</button>
+        </div>
+
+        <div class="room-card">
+            <div class="room-info">
+                <h2>0.01 WLD</h2>
                 <p>ผู้เล่นในห้อง: 4 คน</p>
             </div>
             <button class="join-btn">JOIN</button>
@@ -153,6 +181,14 @@
             <div class="room-info">
                 <h2>0.1 WLD</h2>
                 <p>ผู้เล่นในห้อง: 1 คน</p>
+            </div>
+            <button class="join-btn">JOIN</button>
+        </div>
+
+        <div class="room-card">
+            <div class="room-info">
+                <h2>1 WLD</h2>
+                <p>ผู้เล่นในห้อง: 0 คน</p>
             </div>
             <button class="join-btn">JOIN</button>
         </div>
