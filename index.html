@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - NO BOTS EDITION</title>
+    <title>WORLD CHASER - WORLD ID READY</title>
+    <script src="https://unpkg.com/@worldcoin/idkit-standalone"></script>
     <style>
         :root { 
             --neon: #FF9500; 
@@ -46,14 +47,14 @@
 
         .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 360px; }
         .btn-play-action { flex: 2; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; cursor: pointer; }
-        .btn-play-action:disabled { opacity: 0.5; cursor: not-allowed; filter: grayscale(1); }
+        .btn-play-action:disabled { opacity: 0.5; filter: grayscale(1); }
         .btn-menu-sub { flex: 0.7; background: var(--card); border: 1px solid var(--border); color: #ccc; border-radius: 10px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="news-ticker">
-    <div class="ticker-text" id="tickerText">🔥 WELCOME TO WORLD CHASER: รอผู้เล่นจริงเข้าร่วมและเริ่มล่ารางวัล!</div>
+    <div class="ticker-text" id="tickerText">🔥 WELCOME TO WORLD CHASER: เชื่อมต่อ World ID และเริ่มล่ารางวัลจริง!</div>
 </div>
 
 <div id="lobby" class="screen active">
@@ -70,7 +71,7 @@
             <div class="room-btn" onclick="selectRoom(1.0, this)"><b>1.0</b><span>WLD/ENTRY</span></div>
         </div>
 
-        <button onclick="joinGame()" style="width:100%; padding:18px; background:var(--neon); border:none; border-radius:15px; font-weight:900; color:#000;">JOIN ROOM</button>
+        <button onclick="joinGame()" style="width:100%; padding:18px; background:var(--neon); border:none; border-radius:15px; font-weight:900; color:#000;">VERIFY WORLD ID</button>
     </div>
 </div>
 
@@ -104,7 +105,7 @@
         </div>
         <div class="menu-section">
             <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY</button>
-            <button class="btn-menu-sub" onclick="alert('เร็วๆ นี้')">ประวัติ</button>
+            <button class="btn-menu-sub" onclick="alert('รอเชื่อมต่อ Smart Contract')">ประวัติ</button>
             <button class="btn-menu-sub" onclick="alert('เร็วๆ นี้')">อันดับ</button>
             <button class="btn-menu-sub" style="color:var(--neon)">EARN</button>
         </div>
@@ -140,17 +141,35 @@
         playSfx(600, 'sine', 0.1, 0.1);
     }
 
-    function joinGame() {
+    // ฟังก์ชันเชื่อมต่อ World ID จาก App ID ของคุณ
+    async function joinGame() {
         initAudio();
         const name = document.getElementById('userNameInp').value.trim();
-        currentPlayerName = name || "GUEST_" + Math.floor(Math.random()*999);
-        document.getElementById('headerPlayerName').innerText = currentPlayerName.toUpperCase();
-        document.getElementById('roomTag').innerText = "WLD " + ENTRY_FEE;
-        document.getElementById('btnPlay').innerHTML = `PLAY<br><span style="font-size:0.65rem; font-weight:normal;">${ENTRY_FEE} WLD</span>`;
-        document.getElementById('lobby').classList.remove('active');
-        document.getElementById('game').classList.add('active');
-        updateBoard();
-        playSfx(800, 'sine', 0.2, 0.1);
+        if (!name) { alert("กรุณาระบุชื่อผู้เล่น"); return; }
+
+        try {
+            // เรียกใช้ IDKit เพื่อยืนยันตัวตน
+            const result = await IDKit.verify({
+                app_id: "app_7a67630a2166eba727b9b283105535", // จากรูปที่คุณส่งมา
+                action: "join-game", // ชื่อ Action ที่ตั้งไว้ใน Portal
+                signal: name,
+            });
+
+            if (result) {
+                currentPlayerName = name;
+                document.getElementById('headerPlayerName').innerText = currentPlayerName.toUpperCase();
+                document.getElementById('roomTag').innerText = "WLD " + ENTRY_FEE;
+                document.getElementById('btnPlay').innerHTML = `PLAY<br><span style="font-size:0.65rem; font-weight:normal;">${ENTRY_FEE} WLD</span>`;
+                document.getElementById('lobby').classList.remove('active');
+                document.getElementById('game').classList.add('active');
+                updateBoard();
+                playSfx(800, 'sine', 0.2, 0.1);
+                addChat("SYSTEM", "ยืนยัน World ID สำเร็จ!", "color:#00ff00");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Verification ล้มเหลว กรุณาสแกนผ่าน World App");
+        }
     }
 
     function updateBoard() {
@@ -172,20 +191,15 @@
         initAudio();
         if(hasJoined) return;
         hasJoined = true;
-        
-        // เพิ่มตัวเองเข้าบอร์ด
         players.push(currentPlayerName); 
         updateBoard();
-        
-        // ปิดปุ่ม เพื่อรอคนอื่น (ไม่มีบอทแล้ว)
         document.getElementById('btnPlay').disabled = true;
         playSfx(400, 'sine', 0.1, 0.1);
         addChat("SYSTEM", "รอผู้เล่นคนอื่นเข้าร่วม...", "color:#888");
         
-        // หมายเหตุ: ในระบบจริง ขั้นตอนนี้จะรอข้อมูลจาก Backend
+        // ทดสอบระบบ: พิมพ์ addRemotePlayer("ชื่อ") ใน Console เพื่อเริ่มเกม
     }
 
-    // ฟังก์ชันสำหรับจำลอง/รับข้อมูลผู้เล่นคนอื่นจาก Server
     function addRemotePlayer(name) {
         if(players.length < MAX_PLAYERS) {
             players.push(name);
@@ -208,7 +222,7 @@
     function runGame() {
         const slots = document.querySelectorAll('.slot');
         let cur = 0, speed = 60, steps = 0;
-        const winIdx = Math.floor(Math.random() * players.length); // อนาคตรับค่าจาก Server
+        const winIdx = Math.floor(Math.random() * players.length);
         const total = 36 + winIdx;
         function move() {
             slots.forEach(s => s.classList.remove('active-chaser'));
