@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>WORLD CHASER - WORLD ID READY</title>
     <script src="https://unpkg.com/@worldcoin/idkit-standalone"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <style>
         :root { 
             --neon: #FF9500; 
@@ -49,6 +50,8 @@
         .btn-play-action { flex: 2; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; cursor: pointer; }
         .btn-play-action:disabled { opacity: 0.5; filter: grayscale(1); }
         .btn-menu-sub { flex: 0.7; background: var(--card); border: 1px solid var(--border); color: #ccc; border-radius: 10px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+        .status-pill { background: rgba(255,255,255,0.05); padding: 4px 8px; border-radius: 5px; font-size: 0.6rem; color: #777; }
+        .status-row { display: flex; gap: 5px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -105,7 +108,7 @@
         </div>
         <div class="menu-section">
             <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY</button>
-            <button class="btn-menu-sub" onclick="alert('รอเชื่อมต่อ Smart Contract')">ประวัติ</button>
+            <button class="btn-menu-sub" onclick="alert('เร็วๆ นี้')">ประวัติ</button>
             <button class="btn-menu-sub" onclick="alert('เร็วๆ นี้')">อันดับ</button>
             <button class="btn-menu-sub" style="color:var(--neon)">EARN</button>
         </div>
@@ -113,10 +116,59 @@
 </div>
 
 <script>
+    // --- 1. CONFIGURATION ---
+    const APP_ID = "app_7a67630a2166eba727b9b283105535";
+    const ACTION_ID = "join-game";
+    const RECIPIENT_WALLET = "0x1e2f0e1b67a4dc4a094e843fee2bce25ef643a97"; // กระเป๋าที่คุณตั้งไว้
+    const SERVER_URL = "https://your-socket-server.render.com"; // ต้องรัน Server จริงๆ ก่อน
+
+    let socket;
     let currentPlayerName = "GUEST", players = [], hasJoined = false, timerStarted = false;
     let round = 125, ENTRY_FEE = 0.001, audioCtx;
     const HOUSE_FEE = 0.15, MAX_PLAYERS = 12;
 
+    // --- 2. MULTIPLAYER (SOCKET) ---
+    function initSocket() {
+        try {
+            socket = io(SERVER_URL);
+            socket.on("connect", () => console.log("Connected to Server"));
+            socket.on("updatePlayers", (pList) => {
+                players = pList;
+                updateBoard();
+                document.getElementById('onlineCount').innerText = players.length;
+            });
+            socket.on("startSpin", (winnerIndex) => runGame(winnerIndex));
+            socket.on("chat", (data) => addChat(data.user, data.msg, data.style));
+        } catch(e) { console.log("Socket server not ready yet."); }
+    }
+
+    // --- 3. WEB3 PAYMENT ---
+    async function requestPayment() {
+        if (typeof window.ethereum === 'undefined') {
+            alert("กรุณาเปิดใน World App หรือติดตั้ง Wallet");
+            return false;
+        }
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+            const amountHex = "0x" + (ENTRY_FEE * 1e18).toString(16); // แปลง WLD เป็น Wei
+            
+            const tx = await window.ethereum.request({
+                method: 'eth_sendTransaction',
+                params: [{
+                    from: accounts[0],
+                    to: RECIPIENT_WALLET,
+                    value: amountHex,
+                    gas: '0x5208' // 21000
+                }],
+            });
+            return tx ? true : false;
+        } catch (e) {
+            alert("การชำระเงินล้มเหลว: " + e.message);
+            return false;
+        }
+    }
+
+    // --- 4. CORE FUNCTIONS ---
     function initAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -141,17 +193,15 @@
         playSfx(600, 'sine', 0.1, 0.1);
     }
 
-    // ฟังก์ชันเชื่อมต่อ World ID จาก App ID ของคุณ
     async function joinGame() {
         initAudio();
         const name = document.getElementById('userNameInp').value.trim();
         if (!name) { alert("กรุณาระบุชื่อผู้เล่น"); return; }
 
         try {
-            // เรียกใช้ IDKit เพื่อยืนยันตัวตน
             const result = await IDKit.verify({
-                app_id: "app_7a67630a2166eba727b9b283105535", // จากรูปที่คุณส่งมา
-                action: "join-game", // ชื่อ Action ที่ตั้งไว้ใน Portal
+                app_id: APP_ID,
+                action: ACTION_ID,
                 signal: name,
             });
 
@@ -162,13 +212,33 @@
                 document.getElementById('btnPlay').innerHTML = `PLAY<br><span style="font-size:0.65rem; font-weight:normal;">${ENTRY_FEE} WLD</span>`;
                 document.getElementById('lobby').classList.remove('active');
                 document.getElementById('game').classList.add('active');
+                initSocket();
                 updateBoard();
-                playSfx(800, 'sine', 0.2, 0.1);
-                addChat("SYSTEM", "ยืนยัน World ID สำเร็จ!", "color:#00ff00");
+                addChat("SYSTEM", "เชื่อมต่อ World ID สำเร็จ!", "color:#00ff00");
             }
         } catch (e) {
-            console.error(e);
-            alert("Verification ล้มเหลว กรุณาสแกนผ่าน World App");
+            alert("Verification ล้มเหลว");
+        }
+    }
+
+    async function play() {
+        initAudio();
+        if(hasJoined) return;
+
+        // เรียกเก็บเงินจริงก่อนเข้าเล่น
+        const paid = await requestPayment();
+        if(!paid) return;
+
+        hasJoined = true;
+        document.getElementById('btnPlay').disabled = true;
+        
+        if(socket) {
+            socket.emit("joinQueue", { name: currentPlayerName, fee: ENTRY_FEE });
+        } else {
+            // โหมดทดสอบถ้าไม่มี Server
+            players.push(currentPlayerName);
+            updateBoard();
+            addChat("SYSTEM", "จ่ายเงินสำเร็จ! (โหมด Offline)", "color:#888");
         }
     }
 
@@ -187,42 +257,9 @@
         document.getElementById('pCountTop').innerText = `${players.length}/12`;
     }
 
-    function play() {
-        initAudio();
-        if(hasJoined) return;
-        hasJoined = true;
-        players.push(currentPlayerName); 
-        updateBoard();
-        document.getElementById('btnPlay').disabled = true;
-        playSfx(400, 'sine', 0.1, 0.1);
-        addChat("SYSTEM", "รอผู้เล่นคนอื่นเข้าร่วม...", "color:#888");
-        
-        // ทดสอบระบบ: พิมพ์ addRemotePlayer("ชื่อ") ใน Console เพื่อเริ่มเกม
-    }
-
-    function addRemotePlayer(name) {
-        if(players.length < MAX_PLAYERS) {
-            players.push(name);
-            updateBoard();
-            playSfx(1000, 'sine', 0.03, 0.01); 
-            if(players.length >= 2 && !timerStarted) startCountdown();
-        }
-    }
-
-    function startCountdown() {
-        if(timerStarted) return;
-        timerStarted = true; let sec = 15;
-        const cItv = setInterval(() => {
-            sec--; document.getElementById('timer').innerText = sec + "s";
-            if(sec <= 5 && sec > 0) playSfx(600, 'sine', 0.1, 0.05);
-            if(sec <= 0) { clearInterval(cItv); document.getElementById('timer').innerText = "LIVE"; runGame(); }
-        }, 1000);
-    }
-
-    function runGame() {
+    function runGame(winIdx) {
         const slots = document.querySelectorAll('.slot');
         let cur = 0, speed = 60, steps = 0;
-        const winIdx = Math.floor(Math.random() * players.length);
         const total = 36 + winIdx;
         function move() {
             slots.forEach(s => s.classList.remove('active-chaser'));
@@ -242,14 +279,14 @@
         const winner = players[idx];
         const amount = parseFloat(document.getElementById('prizeDisplay').innerText);
         playSfx(880, 'sine', 0.5, 0.1);
-        document.getElementById('tickerText').innerText = `🎊 ROUND #${round} WINNER: ${winner} WON ${amount.toFixed(4)} WLD!`;
+        document.getElementById('tickerText').innerText = `🎊 WINNER: ${winner} WON ${amount.toFixed(4)} WLD!`;
         addChat("🏆 SYSTEM", `${winner} ชนะรับ ${amount.toFixed(4)} WLD`, "color:#000; background:var(--neon); font-weight:bold;");
         setTimeout(reset, 5000);
     }
 
     function reset() {
         round++; document.getElementById('roundNum').innerText = "#" + round;
-        players = []; hasJoined = false; timerStarted = false;
+        players = []; hasJoined = false;
         document.getElementById('timer').innerText = "WAIT"; updateBoard();
         document.getElementById('btnPlay').disabled = false;
     }
@@ -262,7 +299,10 @@
 
     function sendMsg() {
         const i = document.getElementById('chatInp');
-        if(i.value.trim()) { addChat(currentPlayerName, i.value, "color:var(--neon)"); i.value = ""; }
+        if(i.value.trim() && socket) {
+            socket.emit("chat", { user: currentPlayerName, msg: i.value });
+            i.value = "";
+        }
     }
 </script>
 </body>
