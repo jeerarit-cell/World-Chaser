@@ -1,192 +1,305 @@
+
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - SMART CONTRACT READY</title>
-    
-    <script src="https://unpkg.com/@worldcoin/idkit-standalone"></script>
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
-
+    <title>WORLD CHASER - FIXED SOUND</title>
     <style>
-        :root { --neon: #FF9500; --neon-hot: #FF5E00; --bg: #0a0a0c; --card: #1a1a1e; --border: #2d2d33; }
+        :root { 
+            --neon: #FF9500; 
+            --neon-hot: #FF5E00;
+            --bg: #0a0a0c; 
+            --card: #1a1a1e; 
+            --border: #2d2d33; 
+        }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         html, body { position: fixed; overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: white; font-family: -apple-system, sans-serif; }
-        .news-ticker { background: #000; color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon-hot); overflow: hidden; }
-        .ticker-text { display: inline-block; animation: ticker 25s linear infinite; padding-left: 100%; white-space: nowrap; }
+
+        /* Ticker */
+        .news-ticker { background: #000; color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon-hot); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
+        .ticker-text { display: inline-block; animation: ticker 25s linear infinite; padding-left: 100%; }
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
+
         .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; background: radial-gradient(circle at top, #2b1a0a 0%, #0a0a0c 100%); position: relative; }
         .active { display: flex; }
+
+        /* Lobby Room Selection */
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
         .room-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #555; cursor: pointer; text-align: center; }
         .room-btn b { display: block; font-size: 1.2rem; }
-        .room-btn.selected { border-color: var(--neon); background: rgba(255,149,0,0.15); color: var(--neon); }
-        .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(0,0,0,0.8); align-items: center; border-bottom: 1px solid var(--border); }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 15px; }
+        .room-btn span { font-size: 0.6rem; letter-spacing: 1px; }
+        .room-btn.selected { border-color: var(--neon); background: rgba(255,149,0,0.15); color: var(--neon); box-shadow: 0 0 15px rgba(255,149,0,0.1); }
+
+        /* Navigation & Stats */
+        .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(0,0,0,0.8); align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 15px; flex-shrink: 0; }
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; font-size: 0.65rem; color: #777; }
-        .stat-card b { color: var(--neon); font-size: 0.85rem; display: block; }
-        .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
-        .slot { aspect-ratio: 1/1; background: #0e0e10; border: 1px solid #1f1f23; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #333; transition: 0.3s; overflow: hidden; }
+        .stat-card b { color: var(--neon); font-size: 0.85rem; display: block; margin-top: 2px; }
+
+        /* Board 2x6 */
+        .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; flex-shrink: 0; }
+        .slot { aspect-ratio: 1/1; background: #0e0e10; border: 1px solid #1f1f23; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #333; transition: 0.3s; }
         .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 12px var(--neon-hot); background: rgba(255, 149, 0, 0.2); color: white !important; font-weight: bold; }
-        .main-content { display: flex; padding: 0 15px 10px 15px; gap: 10px; }
+
+        /* Main Game Layout */
+        .main-content { display: flex; padding: 0 15px 10px 15px; gap: 10px; align-items: flex-start; }
         .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 6px; }
+        .status-row { display: flex; gap: 6px; }
+        .status-pill { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 5px; text-align: center; font-size: 0.6rem; color: #666; }
+
+        /* Fixed Heights */
         .chat-section { height: 320px; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; }
-        #chatBox { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.8rem; }
+        #chatBox { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.8rem; scroll-behavior: smooth; }
         .chat-input-row { padding: 8px 12px; background: #000; border-top: 1px solid var(--border); }
-        .chat-input-row input { width: 100%; background: transparent; border: none; color: var(--neon); }
+        .chat-input-row input { width: 100%; background: transparent; border: none; color: var(--neon); font-size: 13px; }
+
         .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 360px; }
-        .btn-play-action { flex: 2; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; }
+        .btn-play-action { flex: 2; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; cursor: pointer; }
+        .btn-menu-sub { flex: 0.7; background: var(--card); border: 1px solid var(--border); color: #ccc; border-radius: 10px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+
+        /* Overlay */
+        .overlay-panel { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 500; padding: 20px; flex-direction: column; }
     </style>
 </head>
 <body>
 
 <div class="news-ticker">
-    <div class="ticker-text" id="tickerText">🔥 WORLD CHASER: เชื่อมต่อ World ID และฝากเงินเข้า Smart Contract เพื่อเริ่มเกม!</div>
+    <div class="ticker-text" id="tickerText">🔥 WELCOME TO WORLD CHASER: เลือกห้องและเริ่มล่ารางวัลได้ทันที!</div>
 </div>
 
 <div id="lobby" class="screen active">
     <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px;">
-        <h1 style="color:#fff; font-size: 2.4rem; margin: 0;">WORLD CHASER</h1>
-        <input type="text" id="userNameInp" placeholder="ชื่อผู้เล่น..." maxlength="12" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:white; margin:20px 0; text-align:center;">
+        <h1 style="color:#fff; font-size: 2.4rem; margin: 0;">WORLD</h1>
+        <h1 style="color:var(--neon); font-size: 2.4rem; margin: -10px 0 20px 0;">CHASER</h1>
+        
+        <input type="text" id="userNameInp" placeholder="ระบุชื่อผู้เล่น..." maxlength="12" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:white; margin-bottom:10px; text-align:center;">
+
         <div class="room-grid">
-            <div class="room-btn selected" onclick="selectRoom(0.001, this)"><b>0.001</b><span>WLD</span></div>
-            <div class="room-btn" onclick="selectRoom(0.01, this)"><b>0.01</b><span>WLD</span></div>
+            <div class="room-btn selected" onclick="selectRoom(0.001, this)"><b>0.001</b><span>WLD/ENTRY</span></div>
+            <div class="room-btn" onclick="selectRoom(0.01, this)"><b>0.01</b><span>WLD/ENTRY</span></div>
+            <div class="room-btn" onclick="selectRoom(0.1, this)"><b>0.1</b><span>WLD/ENTRY</span></div>
+            <div class="room-btn" onclick="selectRoom(1.0, this)"><b>1.0</b><span>WLD/ENTRY</span></div>
         </div>
-        <button onclick="joinGame()" style="width:100%; padding:18px; background:var(--neon); border:none; border-radius:15px; font-weight:900; color:#000;">VERIFY WORLD ID</button>
+
+        <button onclick="joinGame()" style="width:100%; padding:18px; background:var(--neon); border:none; border-radius:15px; font-weight:900; color:#000;">JOIN ROOM</button>
     </div>
 </div>
 
 <div id="game" class="screen">
+    <div id="historyPanel" class="overlay-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <b style="color:var(--neon)">HISTORY</b>
+            <button onclick="closeOverlay('historyPanel')" style="background:var(--card); color:white; padding:8px 15px; border-radius:8px;">ปิด</button>
+        </div>
+        <div id="historyContent" style="flex:1; overflow-y:auto;"></div>
+    </div>
+
+    <div id="leaderboardPanel" class="overlay-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <b style="color:var(--neon)">LEADERBOARD</b>
+            <button onclick="closeOverlay('leaderboardPanel')" style="background:var(--card); color:white; padding:8px 15px; border-radius:8px;">ปิด</button>
+        </div>
+        <div id="leaderboardContent" style="flex:1; overflow-y:auto;"></div>
+    </div>
+
+    <div id="earnPanel" class="overlay-panel" style="justify-content:center; align-items:center; text-align:center;">
+        <h1 style="color:var(--neon)">EARN</h1>
+        <p style="color:#555">Coming Soon</p>
+        <button onclick="closeOverlay('earnPanel')" style="background:var(--card); color:white; padding:12px 40px; border-radius:10px;">ย้อนกลับ</button>
+    </div>
+
     <div class="top-nav">
+        <button onclick="location.reload()" style="background:none; border:1px solid var(--border); color:white; padding:4px 10px;">←</button>
         <b id="headerPlayerName">PLAYER</b>
         <div id="roomTag" style="color:var(--neon); font-weight:bold;">WLD 0.001</div>
     </div>
+
     <div class="stats-grid">
         <div class="stat-card">รางวัล (WLD)<br><b id="prizeDisplay">0.0000</b></div>
         <div class="stat-card">เวลา<br><b id="timer">WAIT</b></div>
         <div class="stat-card">ผู้เล่น<br><b id="pCountTop">0/12</b></div>
     </div>
+
     <div class="board-container" id="board"></div>
+
     <div class="main-content">
         <div class="left-panel">
+            <div class="status-row">
+                <div class="status-pill">ROUND <b id="roundNum" style="color:var(--neon)">#125</b></div>
+                <div class="status-pill">ONLINE <b id="onlineCount" style="color:var(--neon)">17</b></div>
+            </div>
             <div class="chat-section">
                 <div id="chatBox"></div>
-                <div class="chat-input-row"><input type="text" id="chatInp" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter') sendMsg()"></div>
+                <div class="chat-input-row">
+                    <input type="text" id="chatInp" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter') sendMsg()">
+                </div>
             </div>
         </div>
         <div class="menu-section">
             <button class="btn-play-action" id="btnPlay" onclick="play()">PLAY</button>
+            <button class="btn-menu-sub" onclick="openOverlay('historyPanel')">ประวัติ</button>
+            <button class="btn-menu-sub" onclick="openOverlay('leaderboardPanel')">อันดับ</button>
+            <button class="btn-menu-sub" onclick="openOverlay('earnPanel')" style="color:var(--neon)">EARN</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- 2. CONFIGURATION ---
-    const APP_ID = "app_7a67630a2166eba727b9b283105535";
-    const ACTION_ID = "join-game";
-    const SERVER_URL = "https://your-socket-server.render.com"; 
-    const CONTRACT_ADDRESS = "0xE2d2e88CadDeE4508152972CA8183b654311b144";
-    const CONTRACT_ABI = [
-        "function depositEntry() external payable",
-        "function getBalance() public view returns (uint256)"
-    ];
+    let currentPlayerName = "GUEST", players = [], hasJoined = false, timerStarted = false;
+    let round = 125, gameHistory = [], leaderData = {}, ENTRY_FEE = 0.001, audioCtx;
+    const HOUSE_FEE = 0.15, MAX_PLAYERS = 12;
 
-    let socket, provider, signer, userWallet;
-    let currentPlayerName = "GUEST", players = [], hasJoined = false;
-    let ENTRY_FEE = 0.001, audioCtx;
-
-    // --- 3. WEB3 & PAYMENT ---
-    async function initWeb3() {
-        if (window.ethereum) {
-            provider = new ethers.BrowserProvider(window.ethereum);
-            signer = await provider.getSigner();
-            userWallet = await signer.getAddress();
-            return true;
-        }
-        alert("กรุณาติดตั้ง MetaMask หรือเปิดใน World App");
-        return false;
+    // ฟังก์ชันปลุกเสียง
+    function initAudio() {
+        if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    async function requestPayment() {
-        try {
-            if (!signer) await initWeb3();
-            const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-            const amountInWei = ethers.parseUnits(ENTRY_FEE.toString(), 18);
-            
-            addChat("SYSTEM", "ยืนยันการฝากเงินในกระเป๋า...", "color:#FF9500");
-            const tx = await contract.depositEntry({ value: amountInWei });
-            await tx.wait();
-            
-            addChat("SYSTEM", "ฝากเงินเข้าพูลสำเร็จ!", "color:#00FF00");
-            return true;
-        } catch (e) {
-            addChat("ERROR", "การฝากเงินล้มเหลว", "color:red");
-            return false;
-        }
+    // ฟังก์ชันเล่นเสียงเดิม (Oscillator)
+    function playSfx(f, type, d, v) {
+        initAudio();
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+        g.gain.setValueAtTime(v, audioCtx.currentTime);
+        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(); o.stop(audioCtx.currentTime + d);
     }
 
-    // --- 4. GAME FLOW ---
-    async function joinGame() {
+    function selectRoom(fee, btn) {
+        initAudio(); // ปลุกเสียงเมื่อเลือกห้อง
+        ENTRY_FEE = fee;
+        document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        playSfx(600, 'sine', 0.1, 0.1);
+    }
+
+    function openOverlay(id) {
+        initAudio();
+        document.getElementById(id).style.display = 'flex';
+        if(id === 'leaderboardPanel') renderLeaderboard();
+        if(id === 'historyPanel') renderHistory();
+    }
+    function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
+
+    function joinGame() {
+        initAudio(); // ปลุกเสียงเมื่อเข้าร่วม
         const name = document.getElementById('userNameInp').value.trim();
-        if (!name) return alert("ระบุชื่อผู้เล่น");
-        if (!(await initWeb3())) return;
-
-        try {
-            const result = await IDKit.verify({
-                app_id: APP_ID,
-                action: ACTION_ID,
-                signal: userWallet, 
-            });
-
-            if (result) {
-                currentPlayerName = name;
-                document.getElementById('headerPlayerName').innerText = currentPlayerName.toUpperCase();
-                document.getElementById('lobby').classList.remove('active');
-                document.getElementById('game').classList.add('active');
-                initSocket();
-            }
-        } catch (e) { alert("Verification ล้มเหลว"); }
-    }
-
-    async function play() {
-        if(hasJoined) return;
-        const paid = await requestPayment();
-        if(paid) {
-            hasJoined = true;
-            document.getElementById('btnPlay').disabled = true;
-            if(socket) socket.emit("joinQueue", { name: currentPlayerName, wallet: userWallet, fee: ENTRY_FEE });
-        }
-    }
-
-    // --- 5. UTILS ---
-    function initSocket() {
-        socket = io(SERVER_URL);
-        socket.on("updatePlayers", (pList) => { players = pList; updateBoard(); });
-        socket.on("startSpin", (winIdx) => runGame(winIdx));
+        currentPlayerName = name || "USER_" + Math.floor(Math.random()*999);
+        document.getElementById('headerPlayerName').innerText = currentPlayerName.toUpperCase();
+        document.getElementById('roomTag').innerText = "WLD " + ENTRY_FEE;
+        document.getElementById('btnPlay').innerHTML = `PLAY<br><span style="font-size:0.65rem; font-weight:normal;">${ENTRY_FEE} WLD</span>`;
+        document.getElementById('lobby').classList.remove('active');
+        document.getElementById('game').classList.add('active');
+        updateBoard();
+        playSfx(800, 'sine', 0.2, 0.1);
     }
 
     function updateBoard() {
         const b = document.getElementById('board'); b.innerHTML = "";
-        for(let i=0; i < 12; i++){
+        for(let i=0; i < MAX_PLAYERS; i++){
             const s = document.createElement('div'); s.className = 'slot';
-            if(players[i]) { s.innerText = players[i].name.substring(0,5); s.style.borderColor = "var(--neon)"; }
+            if(players[i]) {
+                s.innerText = players[i].substring(0, 5).toUpperCase();
+                s.style.color = "var(--neon)"; s.style.borderColor = "var(--neon)";
+            }
             b.appendChild(s);
         }
+        const prize = (players.length >= 2) ? ((players.length * ENTRY_FEE) * (1-HOUSE_FEE)).toFixed(4) : "0.0000";
+        document.getElementById('prizeDisplay').innerText = prize;
         document.getElementById('pCountTop').innerText = `${players.length}/12`;
+    }
+
+    function play() {
+        initAudio(); // ปลุกเสียงเมื่อกดเล่น
+        if(hasJoined) return;
+        hasJoined = true;
+        players.push(currentPlayerName); updateBoard();
+        document.getElementById('btnPlay').disabled = true; document.getElementById('btnPlay').style.opacity = "0.5";
+        playSfx(400, 'sine', 0.1, 0.1);
+        
+        let itv = setInterval(() => {
+            if(players.length < MAX_PLAYERS) {
+                players.push("BOT_" + Math.floor(Math.random()*99));
+                updateBoard();
+                playSfx(1000, 'sine', 0.03, 0.01); // เสียงบอทเข้า
+                if(players.length >= 2 && !timerStarted) startCountdown();
+            } else clearInterval(itv);
+        }, 800);
+    }
+
+    function startCountdown() {
+        timerStarted = true; let sec = 15;
+        const cItv = setInterval(() => {
+            sec--; document.getElementById('timer').innerText = sec + "s";
+            if(sec <= 5 && sec > 0) playSfx(600, 'sine', 0.1, 0.05); // เสียงนับถอยหลัง
+            if(sec <= 0) { clearInterval(cItv); document.getElementById('timer').innerText = "LIVE"; runGame(); }
+        }, 1000);
+    }
+
+    function runGame() {
+        const slots = document.querySelectorAll('.slot');
+        let cur = 0, speed = 60, steps = 0;
+        const winIdx = Math.floor(Math.random() * players.length);
+        const total = 36 + winIdx;
+        function move() {
+            slots.forEach(s => s.classList.remove('active-chaser'));
+            cur = (cur + 1) % MAX_PLAYERS;
+            slots[cur].classList.add('active-chaser');
+            playSfx(300 + (steps*3), 'triangle', 0.05, 0.05); // เสียงตอนหมุน
+            steps++;
+            if(steps < total || cur !== winIdx) {
+                if(total - steps < 10) speed += 40;
+                setTimeout(move, speed);
+            } else finish(cur);
+        }
+        move();
+    }
+
+    function finish(idx) {
+        const winner = players[idx];
+        const amount = parseFloat(document.getElementById('prizeDisplay').innerText);
+        gameHistory.unshift({ round: round, winner: winner, amount: amount.toFixed(4) });
+        leaderData[winner] = (leaderData[winner] || 0) + amount;
+        
+        playSfx(880, 'sine', 0.5, 0.1); // เสียงชนะ
+        document.getElementById('tickerText').innerText = `🎊 ROUND #${round} WINNER: ${winner} WON ${amount.toFixed(4)} WLD!`;
+        addChat("🏆 SYSTEM", `${winner} ชนะรับ ${amount.toFixed(4)} WLD`, "color:#000; background:var(--neon); font-weight:bold; padding:0 4px; border-radius:4px;");
+        setTimeout(reset, 5000);
+    }
+
+    function renderHistory() {
+        const h = document.getElementById('historyContent');
+        h.innerHTML = gameHistory.map(i => `<div style="padding:12px; border-bottom:1px solid #1a1a1e;">รอบ #${i.round} | <b>${i.winner}</b> <span style="color:var(--neon); float:right;">${i.amount} WLD</span></div>`).join('') || "ไม่มีประวัติ";
+    }
+
+    function renderLeaderboard() {
+        const l = document.getElementById('leaderboardContent');
+        const sorted = Object.entries(leaderData).sort((a,b) => b[1] - a[1]).slice(0, 100);
+        l.innerHTML = sorted.map((i, idx) => `<div style="padding:12px; border-bottom:1px solid #1a1a1e;">${idx+1}. <b>${i[0]}</b> <span style="color:var(--neon); float:right;">${i[1].toFixed(4)} WLD</span></div>`).join('') || "ไม่มีข้อมูล";
+    }
+
+    function reset() {
+        round++; document.getElementById('roundNum').innerText = "#" + round;
+        players = []; hasJoined = false; timerStarted = false;
+        document.getElementById('timer').innerText = "WAIT"; updateBoard();
+        document.getElementById('btnPlay').disabled = false; document.getElementById('btnPlay').style.opacity = "1";
     }
 
     function addChat(u, m, s='') {
         const b = document.getElementById('chatBox');
-        b.innerHTML += `<div><b style="${s}">${u}:</b> <span>${m}</span></div>`;
+        b.innerHTML += `<div style="margin-bottom:6px; font-size:0.75rem;"><b style="${s}">${u}:</b> <span style="color:#ddd">${m}</span></div>`;
         b.scrollTop = b.scrollHeight;
     }
 
-    function selectRoom(f, btn) {
-        ENTRY_FEE = f;
-        document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
+    function sendMsg() {
+        initAudio();
+        const i = document.getElementById('chatInp');
+        if(i.value.trim()) { addChat(currentPlayerName, i.value, "color:var(--neon)"); i.value = ""; }
     }
 </script>
 </body>
 </html>
+
