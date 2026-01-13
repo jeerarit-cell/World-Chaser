@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - FIXED SOUND</title>
+    <title>WORLD CHASER - OPTIMIZED</title>
     <style>
         :root { 
             --neon: #FF9500; 
@@ -37,9 +37,24 @@
         .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; font-size: 0.65rem; color: #777; }
         .stat-card b { color: var(--neon); font-size: 0.85rem; display: block; margin-top: 2px; }
 
-        /* Board 2x6 */
+        /* Board 2x6 - ปรับปรุงรองรับชื่อยาว */
         .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; flex-shrink: 0; }
-        .slot { aspect-ratio: 1/1; background: #0e0e10; border: 1px solid #1f1f23; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #333; transition: 0.3s; }
+        .slot { 
+            aspect-ratio: 1/1; 
+            background: #0e0e10; 
+            border: 1px solid #1f1f23; 
+            border-radius: 6px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 0.6rem; 
+            color: #333; 
+            transition: 0.3s;
+            overflow: hidden;
+            padding: 2px;
+            text-align: center;
+            word-break: break-all;
+        }
         .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 12px var(--neon-hot); background: rgba(255, 149, 0, 0.2); color: white !important; font-weight: bold; }
 
         /* Main Game Layout */
@@ -150,13 +165,11 @@
     let round = 125, gameHistory = [], leaderData = {}, ENTRY_FEE = 0.001, audioCtx;
     const HOUSE_FEE = 0.15, MAX_PLAYERS = 12;
 
-    // ฟังก์ชันปลุกเสียง
     function initAudio() {
         if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    // ฟังก์ชันเล่นเสียงเดิม (Oscillator)
     function playSfx(f, type, d, v) {
         initAudio();
         const o = audioCtx.createOscillator();
@@ -169,7 +182,7 @@
     }
 
     function selectRoom(fee, btn) {
-        initAudio(); // ปลุกเสียงเมื่อเลือกห้อง
+        initAudio();
         ENTRY_FEE = fee;
         document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
@@ -185,11 +198,11 @@
     function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
 
     function joinGame() {
-        initAudio(); // ปลุกเสียงเมื่อเข้าร่วม
+        initAudio();
         const name = document.getElementById('userNameInp').value.trim();
         currentPlayerName = name || "USER_" + Math.floor(Math.random()*999);
-        document.getElementById('headerPlayerName').innerText = currentPlayerName.toUpperCase();
-        document.getElementById('roomTag').innerText = "WLD " + ENTRY_FEE;
+        document.getElementById('headerPlayerName').textContent = currentPlayerName.toUpperCase();
+        document.getElementById('roomTag').textContent = "WLD " + ENTRY_FEE;
         document.getElementById('btnPlay').innerHTML = `PLAY<br><span style="font-size:0.65rem; font-weight:normal;">${ENTRY_FEE} WLD</span>`;
         document.getElementById('lobby').classList.remove('active');
         document.getElementById('game').classList.add('active');
@@ -197,75 +210,106 @@
         playSfx(800, 'sine', 0.2, 0.1);
     }
 
+    // --- ส่วนที่ปรับปรุงใหม่ ---
+
+    function shortenName(name) {
+        return name.length > 7 ? name.substring(0, 6) + ".." : name;
+    }
+
     function updateBoard() {
         const b = document.getElementById('board'); b.innerHTML = "";
         for(let i=0; i < MAX_PLAYERS; i++){
             const s = document.createElement('div'); s.className = 'slot';
             if(players[i]) {
-                s.innerText = players[i].substring(0, 5).toUpperCase();
+                s.textContent = shortenName(players[i].toUpperCase());
                 s.style.color = "var(--neon)"; s.style.borderColor = "var(--neon)";
             }
             b.appendChild(s);
         }
         const prize = (players.length >= 2) ? ((players.length * ENTRY_FEE) * (1-HOUSE_FEE)).toFixed(4) : "0.0000";
-        document.getElementById('prizeDisplay').innerText = prize;
-        document.getElementById('pCountTop').innerText = `${players.length}/12`;
+        document.getElementById('prizeDisplay').textContent = prize;
+        document.getElementById('pCountTop').textContent = `${players.length}/12`;
     }
 
     function play() {
-        initAudio(); // ปลุกเสียงเมื่อกดเล่น
+        initAudio(); 
         if(hasJoined) return;
         hasJoined = true;
-        players.push(currentPlayerName); updateBoard();
-        document.getElementById('btnPlay').disabled = true; document.getElementById('btnPlay').style.opacity = "0.5";
+
+        players.push(currentPlayerName); 
+        updateBoard();
+        
+        const btn = document.getElementById('btnPlay');
+        btn.disabled = true; 
+        btn.style.opacity = "0.5";
         playSfx(400, 'sine', 0.1, 0.1);
         
+        let botCount = 0;
+        const maxBots = Math.floor(Math.random() * 5) + 3; 
+        
         let itv = setInterval(() => {
-            if(players.length < MAX_PLAYERS) {
-                players.push("BOT_" + Math.floor(Math.random()*99));
+            if(players.length < MAX_PLAYERS && botCount < maxBots) {
+                const botNames = ["Richie", "Lucky777", "CryptoKing", "MoonBoy", "WLD_Hunter"];
+                const randomBot = botNames[Math.floor(Math.random()*botNames.length)] + "_" + Math.floor(Math.random()*99);
+                
+                players.push(randomBot);
+                botCount++;
                 updateBoard();
-                playSfx(1000, 'sine', 0.03, 0.01); // เสียงบอทเข้า
+                playSfx(1000, 'sine', 0.03, 0.01); 
+                
                 if(players.length >= 2 && !timerStarted) startCountdown();
-            } else clearInterval(itv);
-        }, 800);
+            } else {
+                clearInterval(itv);
+            }
+        }, Math.random() * 1500 + 500);
     }
 
     function startCountdown() {
         timerStarted = true; let sec = 15;
         const cItv = setInterval(() => {
-            sec--; document.getElementById('timer').innerText = sec + "s";
-            if(sec <= 5 && sec > 0) playSfx(600, 'sine', 0.1, 0.05); // เสียงนับถอยหลัง
-            if(sec <= 0) { clearInterval(cItv); document.getElementById('timer').innerText = "LIVE"; runGame(); }
+            sec--; document.getElementById('timer').textContent = sec + "s";
+            if(sec <= 5 && sec > 0) playSfx(600, 'sine', 0.1, 0.05);
+            if(sec <= 0) { clearInterval(cItv); document.getElementById('timer').textContent = "LIVE"; runGame(); }
         }, 1000);
     }
 
     function runGame() {
         const slots = document.querySelectorAll('.slot');
         let cur = 0, speed = 60, steps = 0;
+        
         const winIdx = Math.floor(Math.random() * players.length);
-        const total = 36 + winIdx;
+        const totalSteps = (MAX_PLAYERS * 3) + winIdx; 
+
         function move() {
             slots.forEach(s => s.classList.remove('active-chaser'));
             cur = (cur + 1) % MAX_PLAYERS;
             slots[cur].classList.add('active-chaser');
-            playSfx(300 + (steps*3), 'triangle', 0.05, 0.05); // เสียงตอนหมุน
+            
+            playSfx(300 + (steps * 5), 'triangle', 0.05, 0.03);
+            
             steps++;
-            if(steps < total || cur !== winIdx) {
-                if(total - steps < 10) speed += 40;
+            if(steps < totalSteps) {
+                if(totalSteps - steps < 10) speed += 35; 
                 setTimeout(move, speed);
-            } else finish(cur);
+            } else {
+                if(!players[cur] && steps < 50) {
+                    setTimeout(move, speed);
+                } else {
+                    finish(cur);
+                }
+            }
         }
         move();
     }
 
     function finish(idx) {
         const winner = players[idx];
-        const amount = parseFloat(document.getElementById('prizeDisplay').innerText);
+        const amount = parseFloat(document.getElementById('prizeDisplay').textContent);
         gameHistory.unshift({ round: round, winner: winner, amount: amount.toFixed(4) });
         leaderData[winner] = (leaderData[winner] || 0) + amount;
         
-        playSfx(880, 'sine', 0.5, 0.1); // เสียงชนะ
-        document.getElementById('tickerText').innerText = `🎊 ROUND #${round} WINNER: ${winner} WON ${amount.toFixed(4)} WLD!`;
+        playSfx(880, 'sine', 0.5, 0.1); 
+        document.getElementById('tickerText').textContent = `🎊 ROUND #${round} WINNER: ${winner} WON ${amount.toFixed(4)} WLD!`;
         addChat("🏆 SYSTEM", `${winner} ชนะรับ ${amount.toFixed(4)} WLD`, "color:#000; background:var(--neon); font-weight:bold; padding:0 4px; border-radius:4px;");
         setTimeout(reset, 5000);
     }
@@ -282,10 +326,11 @@
     }
 
     function reset() {
-        round++; document.getElementById('roundNum').innerText = "#" + round;
+        round++; document.getElementById('roundNum').textContent = "#" + round;
         players = []; hasJoined = false; timerStarted = false;
-        document.getElementById('timer').innerText = "WAIT"; updateBoard();
-        document.getElementById('btnPlay').disabled = false; document.getElementById('btnPlay').style.opacity = "1";
+        document.getElementById('timer').textContent = "WAIT"; updateBoard();
+        const btn = document.getElementById('btnPlay');
+        btn.disabled = false; btn.style.opacity = "1";
     }
 
     function addChat(u, m, s='') {
