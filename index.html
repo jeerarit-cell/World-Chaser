@@ -1,103 +1,123 @@
-
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - OPTIMIZED</title>
+    <title>WORLD CHASER - WIND EDITION</title>
     <style>
         :root { 
-            --neon: #FF9500; 
-            --neon-hot: #FF5E00;
-            --bg: #0a0a0c; 
-            --card: #1a1a1e; 
-            --border: #2d2d33; 
+            --neon: #00ffd1; 
+            --neon-hot: #0088ff;
+            --bg: #050b18; 
+            --card: rgba(255, 255, 255, 0.07); 
+            --border: rgba(255, 255, 255, 0.12); 
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
-        html, body { position: fixed; overflow: hidden; width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: white; font-family: -apple-system, sans-serif; }
+        
+        html, body { 
+            width: 100%; height: 100%; margin: 0; padding: 0; 
+            background: var(--bg); color: white; 
+            font-family: -apple-system, sans-serif; 
+            overflow: hidden; position: fixed;
+        }
 
-        /* Ticker */
-        .news-ticker { background: #000; color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon-hot); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
+        /* เอฟเฟกต์สายลมเคลื่อนไหว */
+        body::before {
+            content: "";
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 50% -20%, #004466 0%, #050b18 80%);
+        }
+
+        body::after {
+            content: "";
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background-image: linear-gradient(135deg, transparent 45%, rgba(0, 255, 209, 0.08) 50%, transparent 55%);
+            background-size: 300% 300%;
+            animation: windMove 8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes windMove {
+            0% { background-position: 0% 0%; opacity: 0.4; }
+            50% { background-position: 100% 100%; opacity: 0.8; }
+            100% { background-position: 0% 0%; opacity: 0.4; }
+        }
+
+        .news-ticker { background: rgba(0,0,0,0.5); color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
         .ticker-text { display: inline-block; animation: ticker 25s linear infinite; padding-left: 100%; }
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
 
-        .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; background: radial-gradient(circle at top, #2b1a0a 0%, #0a0a0c 100%); position: relative; }
+        .screen { 
+            display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; 
+            margin: 0 auto; background: rgba(5, 11, 24, 0.65); backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); position: relative; 
+            border-left: 1px solid var(--border); border-right: 1px solid var(--border);
+        }
         .active { display: flex; }
 
-        /* Lobby Room Selection */
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
-        .room-btn { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #555; cursor: pointer; text-align: center; }
+        .room-btn { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #888; cursor: pointer; text-align: center; transition: 0.2s; }
         .room-btn b { display: block; font-size: 1.2rem; }
         .room-btn span { font-size: 0.6rem; letter-spacing: 1px; }
-        .room-btn.selected { border-color: var(--neon); background: rgba(255,149,0,0.15); color: var(--neon); box-shadow: 0 0 15px rgba(255,149,0,0.1); }
+        .room-btn.selected { border-color: var(--neon); background: rgba(0, 255, 209, 0.15); color: var(--neon); box-shadow: 0 0 15px rgba(0, 255, 209, 0.2); }
 
-        /* Navigation & Stats */
-        .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(0,0,0,0.8); align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(0,0,0,0.3); align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 15px; flex-shrink: 0; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; font-size: 0.65rem; color: #777; }
+        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; font-size: 0.65rem; color: #aaa; }
         .stat-card b { color: var(--neon); font-size: 0.85rem; display: block; margin-top: 2px; }
 
-        /* Board 2x6 - ปรับปรุงรองรับชื่อยาว */
-        .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; flex-shrink: 0; }
+        .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; flex-shrink: 0; perspective: 500px; }
         .slot { 
-            aspect-ratio: 1/1; 
-            background: #0e0e10; 
-            border: 1px solid #1f1f23; 
-            border-radius: 6px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 0.6rem; 
-            color: #333; 
-            transition: 0.3s;
-            overflow: hidden;
-            padding: 2px;
-            text-align: center;
-            word-break: break-all;
+            aspect-ratio: 1/1; background: rgba(0,0,0,0.3); border: 1px solid var(--border); 
+            border-radius: 6px; display: flex; align-items: center; justify-content: center; 
+            font-size: 0.6rem; color: #555; transition: all 0.2s ease; overflow: hidden;
+            text-align: center; word-break: break-all; position: relative; padding: 2px;
         }
-        .slot.active-chaser { border-color: var(--neon); box-shadow: 0 0 12px var(--neon-hot); background: rgba(255, 149, 0, 0.2); color: white !important; font-weight: bold; }
+        .slot.active-chaser { 
+            border-color: #fff; background: var(--neon); color: #000 !important; 
+            font-weight: bold; transform: scale(1.1); box-shadow: 0 0 20px var(--neon); z-index: 10;
+        }
+        @keyframes winnerFlash { from { background: var(--neon); } to { background: #fff; transform: scale(1.15); } }
+        .slot.winner-slot { animation: winnerFlash 0.2s infinite alternate; z-index: 20; color: #000 !important; }
 
-        /* Main Game Layout */
         .main-content { display: flex; padding: 0 15px 10px 15px; gap: 10px; align-items: flex-start; }
         .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 6px; }
         .status-row { display: flex; gap: 6px; }
-        .status-pill { flex: 1; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 5px; text-align: center; font-size: 0.6rem; color: #666; }
-
-        /* Fixed Heights */
-        .chat-section { height: 320px; border: 2px solid #ffffff; border-radius: 18px; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; overflow: hidden; }
+        .status-pill { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 5px; text-align: center; font-size: 0.6rem; color: #888; }
+        
+        .chat-section { height: 320px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; }
         #chatBox { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.8rem; scroll-behavior: smooth; }
-        .chat-input-row { padding: 8px 12px; background: #000; border-top: 1px solid var(--border); }
+        .chat-input-row { padding: 8px 12px; background: rgba(0,0,0,0.4); border-top: 1px solid var(--border); }
         .chat-input-row input { width: 100%; background: transparent; border: none; color: var(--neon); font-size: 13px; }
 
         .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 360px; }
-        .btn-play-action { flex: 2; background: linear-gradient(145deg, #ff9500, #ff5e00); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; cursor: pointer; }
+        .btn-play-action { flex: 2; background: linear-gradient(145deg, var(--neon), var(--neon-hot)); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; cursor: pointer; transition: 0.2s; }
+        .btn-play-action:active { transform: scale(0.95); }
         .btn-menu-sub { flex: 0.7; background: var(--card); border: 1px solid var(--border); color: #ccc; border-radius: 10px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
-
-        /* Overlay */
+        
         .overlay-panel { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 500; padding: 20px; flex-direction: column; }
     </style>
 </head>
 <body>
 
 <div class="news-ticker">
-    <div class="ticker-text" id="tickerText">🔥 WELCOME TO WORLD CHASER: เลือกห้องและเริ่มล่ารางวัลได้ทันที!</div>
+    <div class="ticker-text" id="tickerText">✨ WELCOME TO WORLD CHASER: สัมผัสพลังแห่งสายลมและล่ารางวัล WLD ได้ทันที!</div>
 </div>
 
 <div id="lobby" class="screen active">
     <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px;">
-        <h1 style="color:#fff; font-size: 2.4rem; margin: 0;">WORLD</h1>
-        <h1 style="color:var(--neon); font-size: 2.4rem; margin: -10px 0 20px 0;">CHASER</h1>
-        
+        <h1 style="color:#fff; font-size: 2.4rem; margin: 0; letter-spacing: 4px;">WORLD</h1>
+        <h1 style="color:var(--neon); font-size: 2.4rem; margin: -10px 0 20px 0; text-shadow: 0 0 20px rgba(0,255,209,0.5);">CHASER</h1>
         <input type="text" id="userNameInp" placeholder="ระบุชื่อผู้เล่น..." maxlength="12" style="width:100%; padding:15px; border-radius:12px; border:1px solid var(--border); background:rgba(255,255,255,0.05); color:white; margin-bottom:10px; text-align:center;">
-
         <div class="room-grid">
             <div class="room-btn selected" onclick="selectRoom(0.001, this)"><b>0.001</b><span>WLD/ENTRY</span></div>
             <div class="room-btn" onclick="selectRoom(0.01, this)"><b>0.01</b><span>WLD/ENTRY</span></div>
             <div class="room-btn" onclick="selectRoom(0.1, this)"><b>0.1</b><span>WLD/ENTRY</span></div>
             <div class="room-btn" onclick="selectRoom(1.0, this)"><b>1.0</b><span>WLD/ENTRY</span></div>
         </div>
-
-        <button onclick="joinGame()" style="width:100%; padding:18px; background:var(--neon); border:none; border-radius:15px; font-weight:900; color:#000;">JOIN ROOM</button>
+        <button onclick="joinGame()" style="width:100%; padding:18px; background:var(--neon); border:none; border-radius:15px; font-weight:900; color:#000; box-shadow: 0 5px 15px rgba(0,255,209,0.3);">JOIN ROOM</button>
     </div>
 </div>
 
@@ -171,14 +191,16 @@
     }
 
     function playSfx(f, type, d, v) {
-        initAudio();
-        const o = audioCtx.createOscillator();
-        const g = audioCtx.createGain();
-        o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        g.gain.setValueAtTime(v, audioCtx.currentTime);
-        g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination);
-        o.start(); o.stop(audioCtx.currentTime + d);
+        try {
+            initAudio();
+            const o = audioCtx.createOscillator();
+            const g = audioCtx.createGain();
+            o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(v, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(); o.stop(audioCtx.currentTime + d);
+        } catch(e) {}
     }
 
     function selectRoom(fee, btn) {
@@ -210,8 +232,6 @@
         playSfx(800, 'sine', 0.2, 0.1);
     }
 
-    // --- ส่วนที่ปรับปรุงใหม่ ---
-
     function shortenName(name) {
         return name.length > 7 ? name.substring(0, 6) + ".." : name;
     }
@@ -235,79 +255,66 @@
         initAudio(); 
         if(hasJoined) return;
         hasJoined = true;
-
         players.push(currentPlayerName); 
         updateBoard();
-        
         const btn = document.getElementById('btnPlay');
-        btn.disabled = true; 
-        btn.style.opacity = "0.5";
+        btn.disabled = true; btn.style.opacity = "0.5";
         playSfx(400, 'sine', 0.1, 0.1);
-        
         let botCount = 0;
         const maxBots = Math.floor(Math.random() * 5) + 3; 
-        
         let itv = setInterval(() => {
             if(players.length < MAX_PLAYERS && botCount < maxBots) {
-                const botNames = ["Richie", "Lucky777", "CryptoKing", "MoonBoy", "WLD_Hunter"];
+                const botNames = ["Richie", "Lucky777", "CryptoKing", "MoonBoy", "WLD_Hunter", "Satoshi", "Whale"];
                 const randomBot = botNames[Math.floor(Math.random()*botNames.length)] + "_" + Math.floor(Math.random()*99);
-                
                 players.push(randomBot);
                 botCount++;
                 updateBoard();
                 playSfx(1000, 'sine', 0.03, 0.01); 
-                
                 if(players.length >= 2 && !timerStarted) startCountdown();
             } else {
                 clearInterval(itv);
             }
-        }, Math.random() * 1500 + 500);
+        }, Math.random() * 1000 + 400);
     }
 
     function startCountdown() {
-        timerStarted = true; let sec = 15;
+        timerStarted = true; let sec = 10;
         const cItv = setInterval(() => {
             sec--; document.getElementById('timer').textContent = sec + "s";
-            if(sec <= 5 && sec > 0) playSfx(600, 'sine', 0.1, 0.05);
+            if(sec <= 3 && sec > 0) playSfx(600, 'sine', 0.1, 0.05);
             if(sec <= 0) { clearInterval(cItv); document.getElementById('timer').textContent = "LIVE"; runGame(); }
         }, 1000);
     }
 
     function runGame() {
         const slots = document.querySelectorAll('.slot');
-        let cur = 0, speed = 60, steps = 0;
-        
+        let cur = 0, speed = 50, steps = 0;
         const winIdx = Math.floor(Math.random() * players.length);
-        const totalSteps = (MAX_PLAYERS * 3) + winIdx; 
-
+        const totalSteps = (MAX_PLAYERS * 4) + winIdx; 
         function move() {
             slots.forEach(s => s.classList.remove('active-chaser'));
             cur = (cur + 1) % MAX_PLAYERS;
             slots[cur].classList.add('active-chaser');
-            
-            playSfx(300 + (steps * 5), 'triangle', 0.05, 0.03);
-            
+            playSfx(300 + (steps * 4), 'triangle', 0.05, 0.03);
             steps++;
             if(steps < totalSteps) {
-                if(totalSteps - steps < 10) speed += 35; 
+                if(totalSteps - steps < 15) speed += 25;
+                if(totalSteps - steps < 5) speed += 60;
                 setTimeout(move, speed);
             } else {
-                if(!players[cur] && steps < 50) {
-                    setTimeout(move, speed);
-                } else {
-                    finish(cur);
-                }
+                finish(cur);
             }
         }
         move();
     }
 
     function finish(idx) {
+        const slots = document.querySelectorAll('.slot');
         const winner = players[idx];
         const amount = parseFloat(document.getElementById('prizeDisplay').textContent);
+        slots[idx].classList.add('winner-slot');
         gameHistory.unshift({ round: round, winner: winner, amount: amount.toFixed(4) });
         leaderData[winner] = (leaderData[winner] || 0) + amount;
-        
         playSfx(880, 'sine', 0.5, 0.1); 
         document.getElementById('tickerText').textContent = `🎊 ROUND #${round} WINNER: ${winner} WON ${amount.toFixed(4)} WLD!`;
         addChat("🏆 SYSTEM", `${winner} ชนะรับ ${amount.toFixed(4)} WLD`, "color:#000; background:var(--neon); font-weight:bold; padding:0 4px; border-radius:4px;");
@@ -321,7 +328,7 @@
 
     function renderLeaderboard() {
         const l = document.getElementById('leaderboardContent');
-        const sorted = Object.entries(leaderData).sort((a,b) => b[1] - a[1]).slice(0, 100);
+        const sorted = Object.entries(leaderData).sort((a,b) => b[1] - a[1]).slice(0, 50);
         l.innerHTML = sorted.map((i, idx) => `<div style="padding:12px; border-bottom:1px solid #1a1a1e;">${idx+1}. <b>${i[0]}</b> <span style="color:var(--neon); float:right;">${i[1].toFixed(4)} WLD</span></div>`).join('') || "ไม่มีข้อมูล";
     }
 
@@ -345,6 +352,6 @@
         if(i.value.trim()) { addChat(currentPlayerName, i.value, "color:var(--neon)"); i.value = ""; }
     }
 </script>
+
 </body>
 </html>
-
