@@ -7,81 +7,68 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// ตั้งค่าให้แสดงไฟล์ในโฟลเดอร์ public
 app.use(express.static(path.join(__dirname, 'public')));
 
-let rooms = {
-    "0.001": { players: [], isRunning: false, round: 125 },
-    "0.01": { players: [], isRunning: false, round: 1 },
-    "0.1": { players: [], isRunning: false, round: 1 },
-    "1.0": { players: [], isRunning: false, round: 1 }
+// สร้างสถานะแยกแต่ละห้อง
+const rooms = {
+    '0.001': { players: [], timer: 10, isLive: false, round: 100 },
+    '0.01':  { players: [], timer: 10, isLive: false, round: 100 },
+    '0.1':   { players: [], timer: 10, isLive: false, round: 100 },
+    '1.0':   { players: [], timer: 10, isLive: false, round: 100 }
 };
 
 io.on('connection', (socket) => {
-    console.log('User connected:', socket.id);
+    socket.on('join_room', ({ fee, name }) => {
+        const roomKey = fee.toString();
+        if (!rooms[roomKey]) return;
 
-    socket.on('join-game', (data) => {
-        const room = rooms[data.fee];
-        if (!room) return;
+        // เข้าสู่ห้อง (Socket.io Room)
+        socket.join(roomKey);
+        
+        // เช็คว่าคนนี้อยู่ในรายชื่อผู้เล่นหรือยัง
+        if (!rooms[roomKey].players.find(p => p.id === socket.id)) {
+            rooms[roomKey].players.push({ id: socket.id, name: name });
+        }
 
-        // เพิ่มผู้เล่น (ในอนาคตจะเปลี่ยนเป็นการดึงจาก World ID)
-        const newPlayer = { id: socket.id, name: data.name };
-        room.players.push(newPlayer);
+        // ส่งข้อมูลผู้เล่นในห้องนั้นๆ ให้ทุกคนในห้องเห็น
+        io.to(roomKey).emit('update_players', rooms[roomKey].players);
 
-        // แจ้งทุกคนในห้องว่ามีคนเข้าเพิ่ม
-        io.emit('update-room', {
-            fee: data.fee,
-            players: room.players.map(p => p.name),
-            prize: (room.players.length * data.fee * 0.85).toFixed(4)
-        });
-
-        // ถ้าครบ 2 คน และยังไม่เริ่มเกม ให้เริ่มนับถอยหลัง
-        if (room.players.length >= 2 && !room.isRunning) {
-            startCountdown(data.fee);
+        // ถ้าครบ 2 คน และยังไม่เริ่มนับถอยหลัง
+        if (rooms[roomKey].players.length >= 2 && !rooms[roomKey].isLive) {
+            startCountdown(roomKey);
         }
     });
 
     socket.on('disconnect', () => {
-        // จัดการเมื่อคนหลุด (Optional: ลบออกจาก Array)
+        // ลบผู้เล่นออกเมื่อหลุดการเชื่อมต่อ (Optional)
     });
 });
 
-function startCountdown(fee) {
-    const room = rooms[fee];
-    room.isRunning = true;
-    let count = 10;
+function startCountdown(roomKey) {
+    let room = rooms[roomKey];
+    room.isLive = true;
+    room.timer = 10;
 
-    let timer = setInterval(() => {
-        io.emit('timer-tick', { fee, count });
-        if (count <= 0) {
-            clearInterval(timer);
-            calculateWinner(fee);
+    const itv = setInterval(() => {
+        room.timer--;
+        io.to(roomKey).emit('timer_update', room.timer);
+
+        if (room.timer <= 0) {
+            clearInterval(itv);
+            const winnerIdx = Math.floor(Math.random() * room.players.length);
+            const winner = room.players[winnerIdx];
+            
+            io.to(roomKey).emit('game_result', { winnerIdx, winner });
+
+            // Reset ห้องหลังจากจบเกม 5 วินาที
+            setTimeout(() => {
+                room.players = [];
+                room.isLive = false;
+                room.round++;
+                io.to(roomKey).emit('reset_game', { round: room.round });
+            }, 5000);
         }
-        count--;
     }, 1000);
-}
-
-function calculateWinner(fee) {
-    const room = rooms[fee];
-    const winnerIdx = Math.floor(Math.random() * room.players.length);
-    const prize = (room.players.length * fee * 0.85).toFixed(4);
-    
-    // ส่งผลให้ทุกคน
-    io.emit('game-result', {
-        fee: fee,
-        winnerIndex: winnerIdx,
-        winnerName: room.players[winnerIdx].name,
-        prize: prize,
-        round: room.round
-    });
-
-    // Reset ห้องหลังจบเกม 10 วินาที
-    setTimeout(() => {
-        room.players = [];
-        room.isRunning = false;
-        room.round++;
-        io.emit('update-room', { fee, players: [], prize: "0.0000" });
-    }, 10000);
 }
 
 const PORT = process.env.PORT || 3000;
