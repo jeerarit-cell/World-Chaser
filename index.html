@@ -1,82 +1,77 @@
+/*แถบโชว์สถานะ*/
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - WIND EDITION</title>
+    <title>WORLD CHASER </title>
     <style>
         :root { 
             --neon: #ff9500; 
             --neon-hot: #00e5ff;
-            --bg: #2d2d33; 
-            --card: rgba(255, 255, 255, 0.07); 
-            --border: rgba(255, 255, 255, 0.1); 
+            --bg: #2d2d2d; 
+            --card: rgba(255, 255, 255, 0.5); 
+            --border: rgba(255, 255, 255, 0.5); 
         }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; outline: none; }
         
-        html, body { 
-            width: 100%; height: 100%; margin: 0; padding: 0; 
-            background: var(--bg); color: white; 
-            font-family: -apple-system, sans-serif; 
-            overflow: hidden; position: fixed;
-        }
+        html,  body { 
+    width: 100%; height: 100%; margin: 0; padding: 0; 
+    background-color: #050b18; 
+    
+    /* นำลิงก์รูปใหม่จาก GitHub มาวางตรงนี้ */
+    background-image: url('https://github.com/user-attachments/assets/2919ee1f-6eb5-4139-ae6c-72aeaa83c89f'); 
+    
+    background-size: cover; /* ให้ภาพเต็มจอ */
+    background-position: center; /* เน้นกลางภาพ */
+    background-repeat: no-repeat;
+    background-attachment: fixed; /* ล็อกภาพให้นิ่งที่สุด */
+    
+    color: white; 
+    font-family: -apple-system, sans-serif; 
+    overflow: hidden; 
+    position: fixed;
+}
 
-        /* เอฟเฟกต์สายลมเคลื่อนไหว */
-        body::before {
-            content: "";
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -2;
-            background: radial-gradient(circle at 50% -20%, #004466 0%, #050b18 80%);
-        }
-
-        body::after {
-            content: "";
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background-image: linear-gradient(135deg, transparent 45%, rgba(0, 255, 209, 0.08) 50%, transparent 55%);
-            background-size: 300% 300%;
-            animation: windMove 8s ease-in-out infinite;
-            pointer-events: none;
-        }
-
-        @keyframes windMove {
-            0% { background-position: 0% 0%; opacity: 0.4; }
-            50% { background-position: 100% 100%; opacity: 0.8; }
-            100% { background-position: 0% 0%; opacity: 0.4; }
-        }
-
-        .news-ticker { background: rgba(0,0,0,0.5); color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
+/* ปรับ Overlay ให้ดูพรีเมียมขึ้นเพื่อให้เข้ากับรูปใหม่ */
+.screen { 
+    display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; 
+    margin: 0 auto;
+   /* ปรับความใสและเงาให้ดูมีมิติ */
+    background: rgba(10, 15, 28, 0.5); 
+    backdrop-filter: blur(20px) brightness(%) saturate(140%);
+    -webkit-backdrop-filter: blur(20px) brightness(80%) saturate(140%);
+    
+    position: relative; 
+    border-left: 1px solid rgba(255,255,255,0.5); 
+    border-right: 1px solid rgba(255,255,255,0.5);
+}
+    
+      .news-ticker { background: rgba(0,0,0,1); color: var(--neon); padding: 7px 0; font-size: 0.75rem; border-bottom: 1px solid var(--neon); white-space: nowrap; overflow: hidden; flex-shrink: 0; }
         .ticker-text { display: inline-block; animation: ticker 25s linear infinite; padding-left: 100%; }
         @keyframes ticker { 0% { transform: translate(0, 0); } 100% { transform: translate(-100%, 0); } }
-
-        .screen { 
-            display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; 
-            margin: 0 auto; background: rgba(5, 11, 24, 0.65); backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px); position: relative; 
-            border-left: 1px solid var(--border); border-right: 1px solid var(--border);
-        }
         .active { display: flex; }
 
         .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
-        .room-btn { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #888; cursor: pointer; text-align: center; transition: 0.2s; }
+        .room-btn { background: var(--card); background: rgba(0, 255, 209, 0.3); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #99; cursor: pointer; text-align: center; transition: 0.2s; }
         .room-btn b { display: block; font-size: 1.2rem; }
         .room-btn span { font-size: 0.6rem; letter-spacing: 1px; }
-        .room-btn.selected { border-color: var(--neon); background: rgba(0, 255, 209, 0.15); color: var(--neon); box-shadow: 0 0 15px rgba(0, 255, 209, 0.2); }
+        .room-btn.selected { border-color: var(--neon); background: rgba(0, 255, 209, 1); color: var(--neon); box-shadow: 0 0 15px rgba(0, 255, 209, 1); }
 
-        .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(0,0,0,0.3); align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+        .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(0,0,0,0.4); align-items: center; border-bottom: 1px solid var(--border); flex-shrink: 0; }
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 15px; flex-shrink: 0; }
-        .stat-card { background: var(--card); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; font-size: 0.65rem; color: #aaa; }
+        .stat-card { background: var(--card); background: rgba(50, 70, 209, 0.6); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; font-size: 0.65rem;rgba(0,0,0,1); }/*แถบโชว์สถานะ*/
         .stat-card b { color: var(--neon); font-size: 0.85rem; display: block; margin-top: 2px; }
 
         .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; flex-shrink: 0; perspective: 500px; }
         .slot { 
-            aspect-ratio: 1/1; background: rgba(0,0,0,0.3); border: 1px solid var(--border); 
+            aspect-ratio: 1/1; background: rgba(100,200,220,0.1); border: 1px solid rgba(200,150,50,1); 
             border-radius: 6px; display: flex; align-items: center; justify-content: center; 
             font-size: 0.6rem; color: #555; transition: all 0.2s ease; overflow: hidden;
             text-align: center; word-break: break-all; position: relative; padding: 2px;
         }
         .slot.active-chaser { 
-            border-color: #fff; background: var(--neon); color: #000 !important; 
+            border-color: #fff; background: var(--neon); color: #99 !important; 
             font-weight: bold; transform: scale(1.1); box-shadow: 0 0 20px var(--neon); z-index: 10;
         }
         @keyframes winnerFlash { from { background: var(--neon); } to { background: #fff; transform: scale(1.15); } }
@@ -85,9 +80,9 @@
         .main-content { display: flex; padding: 0 15px 10px 15px; gap: 10px; align-items: flex-start; }
         .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 6px; }
         .status-row { display: flex; gap: 6px; }
-        .status-pill { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 5px; text-align: center; font-size: 0.6rem; color: #888; }
+        .status-pill { flex: 1; background: var(--card);background: rgba(5, 55, 209, 0.5); border: 1px solid var(--border); border-radius: 8px; padding: 5px; text-align: center; font-size: 0.7rem; color: #99; }/*แถบห้อง ออนไลน*/
         
-        .chat-section { height: 320px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.2); display: flex; flex-direction: column; overflow: hidden; }
+        .chat-section { height: 320px; border: 1px solid var(--border); border-radius: 12px; background: rgba(50,50,50,1); display: flex; flex-direction: column; overflow: hidden; }
         #chatBox { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.8rem; scroll-behavior: smooth; }
         .chat-input-row { padding: 8px 12px; background: rgba(0,0,0,0.4); border-top: 1px solid var(--border); }
         .chat-input-row input { width: 100%; background: transparent; border: none; color: var(--neon); font-size: 13px; }
@@ -95,7 +90,7 @@
         .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 360px; }
         .btn-play-action { flex: 2; background: linear-gradient(145deg, var(--neon), var(--neon-hot)); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; cursor: pointer; transition: 0.2s; }
         .btn-play-action:active { transform: scale(0.95); }
-        .btn-menu-sub { flex: 0.7; background: var(--card); border: 1px solid var(--border); color: #ccc; border-radius: 10px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
+        .btn-menu-sub { flex: 0.7; background: var(--card);background: rgba(5, 55, 209, 0.5); border: 1px solid var(--border); color: #ccc; border-radius: 10px; font-size: 0.7rem; font-weight: bold; cursor: pointer; }/*แถบประวัฅิ*/
         
         .overlay-panel { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: var(--bg); z-index: 500; padding: 20px; flex-direction: column; }
     </style>
@@ -355,3 +350,4 @@
 
 </body>
 </html>
+
