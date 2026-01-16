@@ -209,41 +209,59 @@
     }
     function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
 
-    function joinGame() {
-        initAudio();
-        const name = document.getElementById('userNameInp').value.trim();
-        currentPlayerName = name || "USER_" + Math.floor(Math.random()*999);
-        document.getElementById('headerPlayerName').textContent = currentPlayerName.toUpperCase();
-        document.getElementById('roomTag').textContent = "WLD " + ENTRY_FEE;
-        document.getElementById('btnPlay').innerHTML = `PLAY<br><span style="font-size:0.65rem; font-weight:normal;">${ENTRY_FEE} WLD</span>`;
-        document.getElementById('lobby').classList.remove('active');
-        document.getElementById('game').classList.add('active');
-        updateBoard();
-        playSfx(800, 'sine', 0.2, 0.1);
-    }
+   function joinGame() {
+    initAudio();
+    const name = document.getElementById('userNameInp').value.trim();
+    currentPlayerName = name || "USER_" + Math.floor(Math.random()*999);
+    
+    // บอก Server ว่าฉันขอเข้าห้อง (สถานะ Lobby)
+    socket.emit('join_room', { fee: ENTRY_FEE, name: currentPlayerName });
 
-    function play() {
-        initAudio();
-        if(hasJoined) return;
-        socket.emit('join_room', { fee: ENTRY_FEE, name: currentPlayerName });
-        hasJoined = true;
-        document.getElementById('btnPlay').disabled = true;
-    }
+    document.getElementById('headerPlayerName').textContent = currentPlayerName.toUpperCase();
+    document.getElementById('roomTag').textContent = "WLD " + ENTRY_FEE;
+    document.getElementById('btnPlay').innerHTML = `PLAY<br><span style="font-size:0.65rem; font-weight:normal;">${ENTRY_FEE} WLD</span>`;
+    document.getElementById('lobby').classList.remove('active');
+    document.getElementById('game').classList.add('active');
+    playSfx(800, 'sine', 0.2, 0.1);
+}
+
+  function play() {
+    initAudio();
+    if(hasJoined) return;
+    
+    // บอก Server ว่าฉันจะเล่นแล้วนะ (ล็อกชื่อเข้าวงล้อ)
+    socket.emit('player_confirm_play', { fee: ENTRY_FEE });
+    
+    hasJoined = true;
+    document.getElementById('btnPlay').disabled = true;
+    document.getElementById('btnPlay').style.opacity = "0.5";
+    document.getElementById('btnPlay').innerText = "READY";
+}
 
     function updateBoard() {
-        const b = document.getElementById('board'); b.innerHTML = "";
-        for(let i=0; i < MAX_PLAYERS; i++){
-            const s = document.createElement('div'); s.className = 'slot';
-            if(players[i]) {
-                s.textContent = players[i].length > 7 ? players[i].substring(0,6)+".." : players[i].toUpperCase();
-                s.style.color = "rgba(0, 255, 209, 1)"; s.style.borderColor = "rgba(0, 255, 209, 1)"; 
-            }
-            b.appendChild(s);
+    const b = document.getElementById('board'); 
+    b.innerHTML = "";
+    
+    // กรองเอาเฉพาะคนที่ Ready มาโชว์ในวงล้อ
+    const readyPlayers = players.filter(p => p.isReady);
+
+    for(let i=0; i < MAX_PLAYERS; i++){
+        const s = document.createElement('div'); 
+        s.className = 'slot';
+        if(readyPlayers[i]) {
+            const name = readyPlayers[i].name;
+            s.textContent = name.length > 7 ? name.substring(0,6)+".." : name.toUpperCase();
+            s.style.color = "rgba(0, 255, 209, 1)"; 
+            s.style.borderColor = "rgba(0, 255, 209, 1)"; 
         }
-        const prize = (players.length >= 2) ? ((players.length * ENTRY_FEE) * (1-HOUSE_FEE)).toFixed(4) : "0.0000";
-        document.getElementById('prizeDisplay').textContent = prize;
-        document.getElementById('pCountTop').textContent = `${players.length}/12`;
+        b.appendChild(s);
     }
+    
+    const prize = (readyPlayers.length >= 2) ? ((readyPlayers.length * ENTRY_FEE) * (0.85)).toFixed(4) : "0.0000";
+    document.getElementById('prizeDisplay').textContent = prize;
+    document.getElementById('pCountTop').textContent = `${readyPlayers.length}/12`;
+    document.getElementById('onlineCount').textContent = players.length; // คนทั้งหมดรวมคนส่อง
+}
 
     function runGameFromServer(winIdx) {
         const slots = document.querySelectorAll('.slot');
@@ -316,10 +334,14 @@
     }
 
     // --- ส่วนดักฟังจาก Server ---
+   socket.on('rooms_update', (stats) => {
+    // โค้ดสำหรับอัปเดตจำนวนคนบนปุ่มที่หน้า Lobby (ถ้ามี ID รองรับ)
+    console.log("Room Stats:", stats);
+});
     socket.on('update_players', (serverPlayers) => {
-        players = serverPlayers.map(p => p.name);
-        updateBoard(); 
-    });
+    players = serverPlayers; // เก็บไว้ทั้งก้อน [{name, isReady}, ...]
+    updateBoard(); 
+});
 
     socket.on('timer_update', (sec) => {
         document.getElementById('timer').textContent = sec + "s";
