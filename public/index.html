@@ -310,14 +310,20 @@
     }
 
     function reset() {
-        document.querySelectorAll('.slot').forEach(s => {
-            s.classList.remove('active-chaser', 'winner-slot');
-        });
-        hasJoined = false;
-        document.getElementById('timer').textContent = "WAIT";
-        const btn = document.getElementById('btnPlay');
-        btn.disabled = false; btn.style.opacity = "1";
-    }
+    // 1. ล้างคลาส Animation ต่างๆ บนกระดาน
+    document.querySelectorAll('.slot').forEach(s => {
+        s.classList.remove('active-chaser', 'winner-slot');
+    });
+
+    // 2. ปลดล็อกปุ่ม PLAY ให้กลับมาพร้อมกดใหม่
+    hasJoined = false; 
+    const btn = document.getElementById('btnPlay');
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    btn.innerHTML = `PLAY<br><span style="font-size:0.65rem; font-weight:normal;">${ENTRY_FEE} WLD</span>`;
+    
+    document.getElementById('timer').textContent = "WAIT";
+}
 
     function addChat(u, m, s='') {
         const b = document.getElementById('chatBox');
