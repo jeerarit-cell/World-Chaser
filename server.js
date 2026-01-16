@@ -118,16 +118,25 @@ function startCountdown(roomKey) {
                 });
             }
 
-            // รอ 8 วินาทีแล้วล้างกระดาน (Reset ทั้งคนอยู่และคนหลุด)
-            setTimeout(() => {
-                room.players = [];
-                room.isLive = false;
-                room.round++;
-                io.to(roomKey).emit('reset_game', { round: room.round });
-                updateAndBroadcast(roomKey);
-            }, 8000);
-        }
-    }, 1000);
+           // ภายในฟังก์ชัน startCountdown ตรงส่วน setTimeout (8 วินาที)
+setTimeout(() => {
+    // แทนที่จะสั่ง room.players = []; (ซึ่งจะทำให้คนออนไลน์เหลือ 0)
+    // ให้เปลี่ยนเป็นรีเซ็ตค่า isReady ของทุกคนที่ยังอยู่ในห้องแทน
+    room.players.forEach(player => {
+        player.isReady = false; 
+    });
+
+    room.isLive = false;
+    room.round++;
+
+    // ส่งสัญญาณบอกทุกคนให้เตรียมตัวเล่นรอบใหม่
+    io.to(roomKey).emit('reset_game', { round: room.round });
+    
+    // อัปเดตรายชื่อและสถานะห้องใหม่ (คนจะยังอยู่ครบ แต่สถานะ Ready จะหายไป)
+    updateAndBroadcast(roomKey);
+    
+    console.log(`รีเซ็ตสถานะห้อง ${roomKey} เรียบร้อย (คนยังอยู่ในห้องต่อ)`);
+}, 8000);
 }
 
 const PORT = process.env.PORT || 3000;
