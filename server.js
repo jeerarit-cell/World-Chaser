@@ -1,148 +1,140 @@
+require('dotenv').config();
 const express = require('express');
-const http = require('http');
 const { Server } = require('socket.io');
-const path = require('path');
 const mongoose = require('mongoose');
+const { ethers } = require('ethers');
+const cors = require('cors');
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
-const mongoURI = process.env.MONGO_URI; // <--- วางตรงนี้ (ดึงค่าจาก Render)
+app.use(cors());
+const server = require('http').createServer(app);
+const io = new Server(server, { cors: { origin: "*" } });
 
-mongoose.connect(mongoURI)
-    .then(() => console.log('✅ Connected to MongoDB'))
-    .catch(err => console.error('❌ MongoDB Connection Error:', err))
+// --- ฐานข้อมูล MongoDB ---
+const userSchema = new mongoose.Schema({
+    wallet: { type: String, required: true, unique: true },
+    username: String,
+    lastSeen: { type: Date, default: Date.now }
+});
+
 const historySchema = new mongoose.Schema({
     room: String,
-    round: Number,
+    players: [String],
     winner: String,
+    winnerWallet: String,
     prize: Number,
-    time: { type: Date, default: Date.now }
+    txHash: String,
+    createdAt: { type: Date, default: Date.now, expires: 604800 } // ลบเองใน 7 วัน
 });
+
+const User = mongoose.model('User', userSchema);
 const History = mongoose.model('History', historySchema);
 
-app.use(express.static(path.join(__dirname, 'public')));
+// --- ตั้งค่า Blockchain (World Chain) ---
+const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+const adminWallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+const WLD_ABI = ["function transfer(address to, uint256 amount) public returns (bool)"];
+const wldContract = new ethers.Contract(process.env.WLD_TOKEN_ADDRESS, WLD_ABI, adminWallet);
 
-// ข้อมูลสถานะของทั้ง 4 ห้อง
+// --- สถานะห้องเกม ---
 const rooms = {
-    '0.001': { players: [], timer: 10, isLive: false, round: 125 },
-    '0.01':  { players: [], timer: 10, isLive: false, round: 125 },
-    '0.1':   { players: [], timer: 10, isLive: false, round: 125 },
-    '1.0':   { players: [], timer: 10, isLive: false, round: 125 }
+    "0.001": { players: [], status: "waiting", countdown: 10, timer: null },
+    "0.01":  { players: [], status: "waiting", countdown: 10, timer: null },
+    "0.1":   { players: [], status: "waiting", countdown: 10, timer: null },
+    "1.0":   { players: [], status: "waiting", countdown: 10, timer: null }
 };
 
-io.on('connection', (socket) => {
-    // 1. เข้า Lobby (สถานะ: มาส่อง)
-    socket.on('join_room', ({ fee, name }) => {
-        const roomKey = fee.toString();
-        if (!rooms[roomKey]) return;
+mongoose.connect(process.env.MONGO_URI).then(() => console.log("✅ MongoDB Connected"));
 
-        socket.join(roomKey);
-        
-        // เช็กคนซ้ำ ถ้าไม่มีให้เพิ่มเข้าแบบ isReady: false
-        if (!rooms[roomKey].players.find(p => p.id === socket.id)) {
-            rooms[roomKey].players.push({ 
-                id: socket.id, 
-                name: name, 
-                isReady: false 
+io.on('connection', (socket) => {
+    // ดึงชื่อและกระเป๋าออโต้จากหน้าบ้าน
+    socket.on('auth_user', async ({ wallet, username }) => {
+        const user = await User.findOneAndUpdate(
+            { wallet }, { username, lastSeen: Date.now() }, { upsert: true, new: true }
+        );
+        socket.emit('user_ready', user);
+    });
+
+    socket.on('join_room', async ({ room, wallet }) => {
+        socket.join(room);
+        const user = await User.findOne({ wallet });
+        if (!user) return;
+
+        const currentRoom = rooms[room];
+        if (!currentRoom.players.find(p => p.wallet === wallet)) {
+            currentRoom.players.push({ 
+                wallet, 
+                username: user.username, 
+                isReady: false, 
+                socketId: socket.id 
             });
         }
-        updateAndBroadcast(roomKey);
+        io.to(room).emit('update_players', currentRoom.players);
     });
 
-    // 2. กดปุ่ม PLAY (สถานะ: ยืนยันการเล่น)
-    socket.on('player_confirm_play', ({ fee }) => {
-        const roomKey = fee.toString();
-        const room = rooms[roomKey];
-        if (!room) return;
-
-        const player = room.players.find(p => p.id === socket.id);
+    socket.on('player_paid', async ({ room, wallet, txHash }) => {
+        const currentRoom = rooms[room];
+        const player = currentRoom.players.find(p => p.wallet === wallet);
+        
         if (player && !player.isReady) {
-            player.isReady = true; // ล็อกสถานะ หลุดแล้วชื่อไม่หาย
+            player.isReady = true;
+            player.txHash = txHash;
             
-            updateAndBroadcast(roomKey);
-
-            // เงื่อนไขเริ่มเกม: คน Ready >= 2 และห้องยังไม่ Live
-            const readyPlayers = room.players.filter(p => p.isReady);
-            if (readyPlayers.length >= 2 && !room.isLive) {
-                startCountdown(roomKey);
+            const readyPlayers = currentRoom.players.filter(p => p.isReady);
+            if (readyPlayers.length >= 2 && currentRoom.status === "waiting") {
+                startCountdown(room);
             }
         }
-    });
-
-    socket.on('send_chat', ({ fee, user, msg }) => {
-        io.to(fee.toString()).emit('receive_chat', { user, msg });
-    });
-
-    // 3. จัดการคนหลุด (Disconnect) ตามเงื่อนไขคุณ
-    socket.on('disconnecting', () => {
-        socket.rooms.forEach(roomKey => {
-            const room = rooms[roomKey];
-            if (room) {
-                const player = room.players.find(p => p.id === socket.id);
-                // ถ้ายังไม่กด PLAY (isReady: false) ให้ลบชื่อออกทันที
-                if (player && !player.isReady) {
-                    room.players = room.players.filter(p => p.id !== socket.id);
-                    updateAndBroadcast(roomKey);
-                }
-                // ถ้ากด PLAY แล้ว (isReady: true) ไม่ต้องทำอะไร ปล่อยชื่อค้างไว้จนจบเกม
-            }
-        });
+        io.to(room).emit('update_players', currentRoom.players);
     });
 });
 
-function updateAndBroadcast(roomKey) {
-    // ส่งข้อมูลผู้เล่นทั้งหมดในห้องนั้น
-    io.to(roomKey).emit('update_players', rooms[roomKey].players);
-    
-    // ส่งสรุปจำนวนคนทุกห้องให้ทุกคน (สำหรับหน้า Lobby)
-    const stats = {};
-    for (const key in rooms) {
-        stats[key] = {
-            total: rooms[key].players.length,
-            ready: rooms[key].players.filter(p => p.isReady).length,
-            isLive: rooms[key].isLive
-        };
-    }
-    io.emit('rooms_update', stats);
-}
-
 function startCountdown(roomKey) {
-    let room = rooms[roomKey];
-    room.isLive = true;
-    room.timer = 10;
+    const room = rooms[roomKey];
+    if (room.timer) return;
+    room.status = "counting";
 
-    const interval = setInterval(() => {
-        room.timer--;
-        io.to(roomKey).emit('timer_update', room.timer);
-
-        if (room.timer <= 0) {
-            clearInterval(interval);
-
-            // สุ่มเฉพาะคนที่ Ready
-            const readyPlayers = room.players.filter(p => p.isReady);
-            if (readyPlayers.length >= 2) {
-                const winnerIdx = Math.floor(Math.random() * readyPlayers.length);
-                const winner = readyPlayers[winnerIdx];
-
-                // ค้นหา Index จริงในกระดานของ Client (ส่งเฉพาะคน Ready ไปสุ่ม)
-                io.to(roomKey).emit('game_result', { 
-                    winnerIdx: winnerIdx, // สุ่มจากลำดับคน Ready
-                    winner: winner 
-                });
-            }
-
-           // ภายในฟังก์ชัน startCountdown ตรงส่วน setTimeout (8 วินาที)
-setTimeout(() => {
-                room.players = isReady;
-                room.isLive = false;
-                room.round++;
-                io.to(roomKey).emit('reset_game', { round: room.round });
-                updateAndBroadcast(roomKey);
-            }, 8000);
+    room.timer = setInterval(() => {
+        room.countdown--;
+        io.to(roomKey).emit('timer_update', room.countdown);
+        if (room.countdown <= 0) {
+            clearInterval(room.timer);
+            room.timer = null;
+            runGameLogic(roomKey);
         }
     }, 1000);
 }
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+async function runGameLogic(roomKey) {
+    const room = rooms[roomKey];
+    const contestants = room.players.filter(p => p.isReady);
+    if (contestants.length < 2) {
+        room.status = "waiting";
+        room.countdown = 10;
+        return;
+    }
+
+    const winner = contestants[Math.floor(Math.random() * contestants.length)];
+    const totalPool = parseFloat(roomKey) * contestants.length;
+    const prizeAmount = totalPool * 0.85;
+
+    io.to(roomKey).emit('game_result', { winner: winner.username, wallet: winner.wallet, prize: prizeAmount });
+
+    try {
+        const tx = await wldContract.transfer(winner.wallet, ethers.parseUnits(prizeAmount.toFixed(8), 18));
+        await History.create({
+            room: roomKey, players: contestants.map(p => p.wallet),
+            winner: winner.username, winnerWallet: winner.wallet,
+            prize: prizeAmount, txHash: tx.hash
+        });
+    } catch (err) { console.error("Payout Error:", err); }
+
+    setTimeout(() => {
+        room.players = room.players.filter(p => !p.isReady);
+        room.status = "waiting";
+        room.countdown = 10;
+        io.to(roomKey).emit('update_players', room.players);
+    }, 5000);
+}
+
+server.listen(process.env.PORT || 3000, () => console.log("🚀 Server running"));
