@@ -4,11 +4,19 @@ const { Server } = require('socket.io');
 const mongoose = require('mongoose');
 const { ethers } = require('ethers');
 const cors = require('cors');
+const path = require('path'); // เพิ่มตัวจัดการ Path
 
 const app = express();
 app.use(cors());
+app.use(express.static(__dirname)); // ✅ เพิ่มบรรทัดนี้เพื่อให้ Server รู้จักไฟล์ index.html
+
 const server = require('http').createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
+
+// --- ส่วนส่งหน้าเว็บให้คนเล่น ---
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
 
 // --- ฐานข้อมูล MongoDB ---
 const userSchema = new mongoose.Schema({
@@ -24,13 +32,13 @@ const historySchema = new mongoose.Schema({
     winnerWallet: String,
     prize: Number,
     txHash: String,
-    createdAt: { type: Date, default: Date.now, expires: 604800 } // ลบเองใน 7 วัน
+    createdAt: { type: Date, default: Date.now, expires: 604800 }
 });
 
 const User = mongoose.model('User', userSchema);
 const History = mongoose.model('History', historySchema);
 
-// --- ตั้งค่า Blockchain (World Chain) ---
+// --- ตั้งค่า Blockchain ---
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const adminWallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 const WLD_ABI = ["function transfer(address to, uint256 amount) public returns (bool)"];
@@ -47,7 +55,6 @@ const rooms = {
 mongoose.connect(process.env.MONGO_URI).then(() => console.log("✅ MongoDB Connected"));
 
 io.on('connection', (socket) => {
-    // ดึงชื่อและกระเป๋าออโต้จากหน้าบ้าน
     socket.on('auth_user', async ({ wallet, username }) => {
         const user = await User.findOneAndUpdate(
             { wallet }, { username, lastSeen: Date.now() }, { upsert: true, new: true }
@@ -59,15 +66,9 @@ io.on('connection', (socket) => {
         socket.join(room);
         const user = await User.findOne({ wallet });
         if (!user) return;
-
         const currentRoom = rooms[room];
         if (!currentRoom.players.find(p => p.wallet === wallet)) {
-            currentRoom.players.push({ 
-                wallet, 
-                username: user.username, 
-                isReady: false, 
-                socketId: socket.id 
-            });
+            currentRoom.players.push({ wallet, username: user.username, isReady: false, socketId: socket.id });
         }
         io.to(room).emit('update_players', currentRoom.players);
     });
@@ -75,11 +76,9 @@ io.on('connection', (socket) => {
     socket.on('player_paid', async ({ room, wallet, txHash }) => {
         const currentRoom = rooms[room];
         const player = currentRoom.players.find(p => p.wallet === wallet);
-        
         if (player && !player.isReady) {
             player.isReady = true;
             player.txHash = txHash;
-            
             const readyPlayers = currentRoom.players.filter(p => p.isReady);
             if (readyPlayers.length >= 2 && currentRoom.status === "waiting") {
                 startCountdown(room);
@@ -93,7 +92,6 @@ function startCountdown(roomKey) {
     const room = rooms[roomKey];
     if (room.timer) return;
     room.status = "counting";
-
     room.timer = setInterval(() => {
         room.countdown--;
         io.to(roomKey).emit('timer_update', room.countdown);
@@ -113,7 +111,6 @@ async function runGameLogic(roomKey) {
         room.countdown = 10;
         return;
     }
-
     const winner = contestants[Math.floor(Math.random() * contestants.length)];
     const totalPool = parseFloat(roomKey) * contestants.length;
     const prizeAmount = totalPool * 0.85;
