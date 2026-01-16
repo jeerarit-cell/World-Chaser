@@ -2,10 +2,24 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+const mongoURI = process.env.MONGO_URI; // <--- วางตรงนี้ (ดึงค่าจาก Render)
+
+mongoose.connect(mongoURI)
+    .then(() => console.log('✅ Connected to MongoDB'))
+    .catch(err => console.error('❌ MongoDB Connection Error:', err))
+const historySchema = new mongoose.Schema({
+    room: String,
+    round: Number,
+    winner: String,
+    prize: Number,
+    time: { type: Date, default: Date.now }
+});
+const History = mongoose.model('History', historySchema);
 
 app.use(express.static(path.join(__dirname, 'public')));
 
