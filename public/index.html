@@ -6,7 +6,7 @@
     <title>WORLD CHASER - ONLINE</title>
     
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
-    <script src="https://unpkg.com/@worldcoin/miniapp-js-sdk@0.0.10/dist/index.js"></script>
+    <script src="https://unpkg.com/@worldcoin/mini-app-sdk-js@0.11.0/dist/index.js"></script>
 
     <style>
         /* --- งานดีไซน์เดิมของคุณ (คงไว้ทั้งหมด) --- */
@@ -35,6 +35,243 @@
         .main-content { display: flex; padding: 0 15px 10px 15px; gap: 10px; align-items: flex-start; }
         .left-panel { flex: 1.6; display: flex; flex-direction: column; gap: 6px; }
         .status-row { display: flex; gap: 6px; }
+        .status-pill { flex: 1; background: rgba(5, 55, 209, 0.5); border: 1px solid var(--border); border-radius: 8px; padding: 5px; text-align: center; font-size: 0.7rem; }
+        .chat-section { height: 320px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; }
+        #chatBox { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.8rem; }
+        .chat-input-row { padding: 8px 12px; background: rgba(0,0,0,0.4); border-top: 1px solid var(--border); }
+        .chat-input-row input { width: 100%; background: transparent; border: none; color: var(--neon); font-size: 13px; }
+        .menu-section { flex: 1; display: flex; flex-direction: column; gap: 8px; height: 360px; }
+        .btn-play-action { flex: 2; background: linear-gradient(145deg, var(--neon), var(--neon-hot)); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; cursor: pointer; transition: 0.2s; }
+        .btn-play-action:disabled { opacity: 0.5; filter: grayscale(1); }
+        .btn-menu-sub { flex: 0.7; background: rgba(5, 55, 209, 0.5); border: 1px solid var(--border); color: #ccc; border-radius: 10px; font-size: 0.7rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="news-ticker">
+    <div class="ticker-text" id="tickerText">✨ ยินดีต้อนรับสู่ WORLD CHASER: เชื่อมต่อกระเป๋า WLD และเริ่มเกมได้ทันที!</div>
+</div>
+
+<div id="lobby" class="screen active">
+    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px;">
+        <h1 style="color:#fff; font-size: 2.4rem; margin: 0; letter-spacing: 4px;">WORLD</h1>
+        <h1 style="color:var(--neon); font-size: 2.4rem; margin: -10px 0 20px 0; text-shadow: 0 0 20px rgba(0,255,209,0.5);">CHASER</h1>
+        <div id="worldStatus" style="font-size:0.7rem; color:#888; margin-bottom:15px;">กำลังเชื่อมต่อ World ID...</div>
+        
+        <div class="room-grid">
+            <div class="room-btn selected" onclick="selectRoom(0.001, this)"><b>0.001</b><span>WLD/ENTRY</span></div>
+            <div class="room-btn" onclick="selectRoom(0.01, this)"><b>0.01</b><span>WLD/ENTRY</span></div>
+            <div class="room-btn" onclick="selectRoom(0.1, this)"><b>0.1</b><span>WLD/ENTRY</span></div>
+            <div class="room-btn" onclick="selectRoom(1.0, this)"><b>1.0</b><span>WLD/ENTRY</span></div>
+        </div>
+        
+        <button id="btnJoin" onclick="joinGame()" style="width:100%; padding:18px; background:var(--neon); border:none; border-radius:15px; font-weight:900; color:#000;">JOIN ROOM</button>
+    </div>
+</div>
+
+<div id="game" class="screen">
+    <div class="top-nav">
+        <button onclick="location.reload()" style="background:none; border:1px solid var(--border); color:white;">←</button>
+        <b id="headerPlayerName">PLAYER</b>
+        <div id="roomTag" style="color:var(--neon); font-weight:bold;">WLD 0.001</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">รางวัลสะสม<br><b id="prizeDisplay">0.0000</b></div>
+        <div class="stat-card">เวลา<br><b id="timer">WAIT</b></div>
+        <div class="stat-card">ในห้อง<br><b id="pCountTop">0/12</b></div>
+    </div>
+
+    <div class="board-container" id="board"></div>
+
+    <div class="main-content">
+        <div class="left-panel">
+            <div class="status-row">
+                <div class="status-pill">ROUND <b id="roundNum" style="color:var(--neon)">-</b></div>
+                <div class="status-pill">ONLINE <b id="onlineCount" style="color:var(--neon)">0</b></div>
+            </div>
+            <div class="chat-section">
+                <div id="chatBox"></div>
+                <div class="chat-input-row">
+                    <input type="text" id="chatInp" placeholder="พิมพ์ข้อความ..." onkeydown="if(event.key==='Enter') sendMsg()">
+                </div>
+            </div>
+        </div>
+        <div class="menu-section">
+            <button class="btn-play-action" id="btnPlay" onclick="handlePayment()">PAY TO PLAY</button>
+            <button class="btn-menu-sub" onclick="alert('แสดงประวัติเร็วๆ นี้')">ประวัติ</button>
+            <button class="btn-menu-sub" onclick="alert('แสดงอันดับเร็วๆ นี้')">อันดับ</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // การเชื่อมต่อ Socket.io
+    const socket = io("https://world-chaser.onrender.com"); 
+
+    // เลขกระเป๋า Admin
+    const ADMIN_WALLET = "0xe20a539852fa7ea1dc943683edb89b6b95ec54a8";
+
+    let userName = "GUEST", userWallet = "";
+    let currentRoomFee = 0.001;
+    let playersInRoom = [];
+    let audioCtx;
+
+    // ระบบเชื่อมต่อ World ID (แก้ไขชื่อ SDK ให้ถูกต้อง)
+    async function initSDK() {
+        try {
+            const { MiniAppSDK } = window.worldcoinMiniAppSdk; // แก้เป็น MiniAppSdk (A ใหญ่)
+            const sdk = new MiniAppSDK();
+            const profile = await sdk.getProfile();
+            userName = profile.name || "User_" + profile.wallet_address.substring(2,6);
+            userWallet = profile.wallet_address;
+            document.getElementById('worldStatus').textContent = "World ID: " + userName;
+            
+            socket.emit('auth_user', { wallet: userWallet, username: userName });
+        } catch (e) {
+            console.log("SDK Error:", e);
+            document.getElementById('worldStatus').textContent = "Browser Mode (พร้อมทดสอบ)";
+        }
+    }
+    initSDK();
+
+    socket.on('update_players', (serverPlayers) => {
+        playersInRoom = serverPlayers;
+        updateUI();
+    });
+
+    socket.on('online_count', (count) => {
+        document.getElementById('onlineCount').textContent = count;
+    });
+
+    socket.on('timer_update', (sec) => {
+        document.getElementById('timer').textContent = sec + "s";
+        if(sec <= 3) playSfx(600, 'sine', 0.1, 0.05);
+    });
+
+    socket.on('game_result', (data) => {
+        const winIdx = playersInRoom.findIndex(p => p.wallet === data.winner.wallet);
+        runGameAnimation(winIdx, data);
+    });
+
+    async function handlePayment() {
+        initAudio();
+        const btn = document.getElementById('btnPlay');
+        btn.disabled = true;
+        
+        try {
+            const { MiniAppSDK } = window.worldcoinMiniAppSdk;
+            const sdk = new MiniAppSDK();
+            
+            const payResult = await sdk.pay({
+                to: ADMIN_WALLET,
+                amount: currentRoomFee.toString(),
+                token: "WLD",
+                description: `Entry Room ${currentRoomFee}`
+            });
+
+            if(payResult.hash) {
+                socket.emit('player_paid', {
+                    wallet: userWallet,
+                    txHash: payResult.hash,
+                    room: currentRoomFee.toString()
+                });
+                addChat("SYSTEM", "จ่ายเงินสำเร็จ! รอตรวจสอบ...", "color:var(--neon)");
+            }
+        } catch (err) {
+            alert("Payment Cancelled");
+            btn.disabled = false;
+        }
+    }
+
+    function selectRoom(fee, btn) {
+        currentRoomFee = fee;
+        document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        playSfx(600, 'sine', 0.1, 0.1);
+    }
+
+    function joinGame() {
+        initAudio();
+        socket.emit('join_room', currentRoomFee.toString());
+        document.getElementById('headerPlayerName').textContent = userName.toUpperCase();
+        document.getElementById('roomTag').textContent = "WLD " + currentRoomFee;
+        document.getElementById('lobby').classList.remove('active');
+        document.getElementById('game').classList.add('active');
+    }
+
+    function updateUI() {
+        const board = document.getElementById('board');
+        board.innerHTML = "";
+        for(let i=0; i<12; i++) {
+            const slot = document.createElement('div');
+            slot.className = 'slot';
+            const p = playersInRoom[i];
+            if(p) {
+                slot.textContent = p.username.substring(0,7);
+                if(p.ready) {
+                    slot.style.borderColor = "var(--neon)";
+                    slot.style.background = "rgba(255, 149, 0, 0.2)";
+                }
+            }
+            board.appendChild(slot);
+        }
+        document.getElementById('pCountTop').textContent = `${playersInRoom.length}/12`;
+        const prize = (playersInRoom.length * currentRoomFee * 0.85).toFixed(4);
+        document.getElementById('prizeDisplay').textContent = prize;
+    }
+
+    function runGameAnimation(winIdx, data) {
+        const slots = document.querySelectorAll('.slot');
+        let cur = 0, steps = 0;
+        const totalSteps = (12 * 3) + (winIdx === -1 ? 0 : winIdx);
+
+        function move() {
+            slots.forEach(s => s.classList.remove('active-chaser'));
+            cur = (cur + 1) % 12;
+            if(slots[cur]) slots[cur].classList.add('active-chaser');
+            playSfx(300 + (steps * 5), 'triangle', 0.05, 0.03);
+            steps++;
+
+            if(steps < totalSteps) {
+                setTimeout(move, 50 + (steps * 2));
+            } else {
+                if(winIdx !== -1 && slots[winIdx]) slots[winIdx].classList.add('winner-slot');
+                document.getElementById('tickerText').textContent = `🏆 WINNER: ${data.winner.username} WON ${data.prize} WLD!`;
+                setTimeout(() => location.reload(), 8000);
+            }
+        }
+        move();
+    }
+
+    function initAudio() { if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    function playSfx(f, type, d, v) {
+        try {
+            if(!audioCtx) return;
+            const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+            o.type = type; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+            g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + d);
+            o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d);
+        } catch(e){}
+    }
+    function addChat(u, m, s='') {
+        const b = document.getElementById('chatBox');
+        if(b) {
+            b.innerHTML += `<div style="margin-bottom:6px;"><b style="${s}">${u}:</b> <span>${m}</span></div>`;
+            b.scrollTop = b.scrollHeight;
+        }
+    }
+    function sendMsg() {
+        const i = document.getElementById('chatInp');
+        if(i.value.trim()) { socket.emit('send_chat', i.value); i.value = ""; }
+    }
+    socket.on('new_chat', (data) => {
+        addChat(data.user, data.msg, data.style);
+    });
+</script>
+
+</body>
+</html>        .status-row { display: flex; gap: 6px; }
         .status-pill { flex: 1; background: rgba(5, 55, 209, 0.5); border: 1px solid var(--border); border-radius: 8px; padding: 5px; text-align: center; font-size: 0.7rem; }
         .chat-section { height: 320px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.5); display: flex; flex-direction: column; overflow: hidden; }
         #chatBox { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.8rem; }
