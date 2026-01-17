@@ -108,7 +108,7 @@
     
     let userName = "GUEST", userWallet = "", currentRoomFee = 0.001, playersInRoom = [], audioCtx;
 
-    // --- 🔊 ระบบแชทอัตโนมัติ (NEW!) ---
+    // --- 🔊 ระบบแชทอัตโนมัติ ---
     function addSystemChat(msg, type = 'info') {
         const b = document.getElementById('chatBox');
         let color = type === 'win' ? 'var(--neon)' : '#00e5ff';
@@ -119,7 +119,7 @@
         b.scrollTop = b.scrollHeight;
     }
 
-    // --- ระบบวาด 12 ช่องคงที่ ---
+    // --- ระบบวาด 12 ช่อง ---
     function updateBoard() {
         const board = document.getElementById('board');
         board.innerHTML = "";
@@ -143,63 +143,44 @@
     }
 
     // --- Socket Events ---
-    socket.on('connect', () => { console.log("Connected to Server"); });
-
-    socket.on('update_players', (data) => {
-        playersInRoom = data;
-        updateBoard();
-    });
-
-    socket.on('player_joined_chat', (name) => {
-        addSystemChat(`${name} ได้เข้าสู่ห้องล่ารางวัลแล้ว!`, 'info');
-        if(name === userName) {
-            setTimeout(() => addSystemChat("กดปุ่ม [PLAY] เพื่อจ่ายค่าธรรมเนียมและเตรียมตัวเริ่มเกม", 'info'), 1000);
-        }
-    });
-
-    socket.on('timer_update', (sec) => {
-        document.getElementById('timer').textContent = sec + "s";
-    });
-
-    socket.on('game_result', (data) => {
-        runAnimation(data);
-        addSystemChat(`ยินดีด้วย! ${data.winner} ชนะรางวัล ${data.prize} WLD`, 'win');
-    });
-
+    socket.on('update_players', (data) => { playersInRoom = data; updateBoard(); });
+    socket.on('timer_update', (sec) => { document.getElementById('timer').textContent = sec + "s"; });
+    socket.on('game_result', (data) => { runAnimation(data); addSystemChat(`ยินดีด้วย! ${data.winner} ชนะรางวัล ${data.prize} WLD`, 'win'); });
     socket.on('online_count', (count) => { document.getElementById('onlineCount').textContent = count; });
 
-    // --- ฟังก์ชันหลัก ---
-  async function initSDK() {
-    try {
-        // 1. Initialize MiniKit
-        window.MiniKit.install();
+    // --- 🛠️ ฟังก์ชัน SDK ใหม่ (MiniKit) ---
+    async function initSDK() {
+        try {
+            // 1. ติดตั้ง MiniKit
+            window.MiniKit.install();
 
-        // 2. ตรวจสอบว่าเปิดใน World App หรือไม่
-        if (!window.MiniKit.isInstalled()) {
-            document.getElementById('worldStatus').textContent = "กรุณาเปิดใน World App";
-            return;
+            // 2. ตรวจสอบสถานะการติดตั้งใน World App
+            if (!window.MiniKit.isInstalled()) {
+                document.getElementById('worldStatus').textContent = "เปิดใน World App เท่านั้น";
+                return;
+            }
+
+            // 3. ดึง Wallet (MiniKit จะให้ค่า walletAddress มาเลย)
+            userWallet = window.MiniKit.walletAddress;
+            
+            if (userWallet) {
+                userName = "User_" + userWallet.substring(2, 6);
+                document.getElementById('worldStatus').textContent = "เชื่อมต่อสำเร็จ: " + userName;
+                document.getElementById('headerPlayerName').textContent = userName.toUpperCase();
+                
+                // ส่งข้อมูลไป Server
+                socket.emit('auth_user', { wallet: userWallet, username: userName });
+            } else {
+                document.getElementById('worldStatus').textContent = "กรุณาเชื่อมต่อ Wallet ใน World App";
+            }
+        } catch (e) {
+            console.error("SDK Initialization Error:", e);
+            document.getElementById('worldStatus').textContent = "เกิดข้อผิดพลาดในการโหลด SDK";
         }
-
-        // 3. ดึงข้อมูล Wallet (World App จะส่งมาให้โดยอัตโนมัติ)
-        userWallet = window.MiniKit.walletAddress;
-        
-        // หมายเหตุ: การดึงชื่อ Profile ตรงๆ อาจต้องใช้การ Verify 
-        // ในที่นี้เราจะตั้งชื่อจาก Wallet ไปก่อนเพื่อความเร็ว
-        userName = "User_" + userWallet.substring(2, 6);
-        
-        document.getElementById('worldStatus').textContent = "เชื่อมต่อแล้ว: " + userName;
-        document.getElementById('headerPlayerName').textContent = userName.toUpperCase();
-
-        // ส่งข้อมูลให้ Server ของคุณ
-        socket.emit('auth_user', { wallet: userWallet, username: userName });
-        
-    } catch (e) {
-        console.error("SDK Error:", e);
     }
-}
 
-// เรียกใช้งานตอนโหลดหน้าเว็บ
-window.onload = initSDK;
+    // เรียกใช้ตอนโหลดหน้า
+    window.onload = initSDK;
 
     function selectRoom(fee, btn) {
         currentRoomFee = fee;
@@ -208,62 +189,49 @@ window.onload = initSDK;
     }
 
     function joinGame() {
+        if(!userWallet) return alert("รอการเชื่อมต่อ World ID...");
         initAudio();
         socket.emit('join_room', { room: currentRoomFee.toString(), wallet: userWallet });
-        document.getElementById('headerPlayerName').textContent = userName.toUpperCase();
         document.getElementById('roomTag').textContent = "WLD " + currentRoomFee;
         document.getElementById('lobby').classList.remove('active');
         document.getElementById('game').classList.add('active');
         updateBoard();
     }
 
-   async function handlePayment() {
-    if (!window.MiniKit.isInstalled()) return;
+    // --- 💸 ระบบจ่ายเงินใหม่ (MiniKit Pay) ---
+    async function handlePayment() {
+        if (!window.MiniKit.isInstalled()) return;
+        initAudio();
+        
+        try {
+            const payload = {
+                reference: "chaser_" + Date.now(),
+                to: ADMIN_WALLET,
+                tokens: [{ symbol: "WLD", amount: currentRoomFee.toString() }],
+                description: "ร่วมสนุก WORLD CHASER"
+            };
 
-    try {
-        const payload = {
-            reference: "game_entry_" + Date.now(), // ID อ้างอิงธุรกรรม
-            to: ADMIN_WALLET,
-            tokens: [
-                {
-                    symbol: "WLD", // เปลี่ยนเป็น USDC ได้ถ้าต้องการ
-                    amount: currentRoomFee.toString(),
-                },
-            ],
-            description: "World Chaser Entry Fee",
-        };
+            const { finalPayload } = await window.MiniKit.commands.pay(payload);
 
-        // เรียกหน้าต่างชำระเงินของ World App
-        const { finalPayload } = await window.MiniKit.commands.pay(payload);
-
-        if (finalPayload.status === "success") {
-            // ส่ง Transaction Hash ไปให้ Server ตรวจสอบ
-            socket.emit('player_paid', { 
-                room: currentRoomFee.toString(), 
-                wallet: userWallet, 
-                txHash: finalPayload.transaction_id 
-            });
-            addSystemChat("ชำระเงินสำเร็จ! กำลังเข้าสู่การล่า...", 'win');
+            if (finalPayload.status === "success") {
+                socket.emit('player_paid', { 
+                    room: currentRoomFee.toString(), 
+                    wallet: userWallet, 
+                    txHash: finalPayload.transaction_id 
+                });
+                addSystemChat("จ่ายเงินสำเร็จ! รอเริ่มรอบถัดไป...", 'win');
+            }
+        } catch (e) {
+            console.error("Payment Failed", e);
+            addSystemChat("การชำระเงินไม่สำเร็จ", 'info');
         }
-    } catch (e) {
-        console.error("Payment Error", e);
-        alert("การชำระเงินถูกยกเลิก");
     }
-}
-
-    function sendMsg() {
-        const i = document.getElementById('chatInp');
-        if(i.value.trim()) { socket.emit('send_chat', { room: currentRoomFee.toString(), msg: i.value, user: userName }); i.value = ""; }
-    }
-    socket.on('new_chat', (d) => {
-        const b = document.getElementById('chatBox');
-        b.innerHTML += `<div><b style="color:var(--neon)">${d.user}:</b> <span style="color:#eee">${d.msg}</span></div>`;
-        b.scrollTop = b.scrollHeight;
-    });
 
     function runAnimation(data) {
         const slots = document.querySelectorAll('.slot');
         const winIdx = playersInRoom.findIndex(p => p && p.wallet === data.wallet);
+        if(winIdx === -1) return;
+        
         let cur = 0, steps = 0, total = (12 * 3) + winIdx;
         function move() {
             slots.forEach(s => s.classList.remove('active-chaser'));
