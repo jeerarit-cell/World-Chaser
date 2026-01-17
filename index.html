@@ -3,166 +3,200 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>WORLD CHASER - ULTIMATE</title>
+    <title>WORLD CHASER - ULTIMATE CASINO</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@worldcoin/minikit-js@latest/dist/minikit.js"></script>
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
     <style>
-        /* --- CSS เดิม (คงไว้เพื่อความสวยงาม) --- */
-        :root { --neon: #ff9500; --neon-hot: #00e5ff; --bg: #050b18; --border: rgba(255, 255, 255, 0.3); }
+        :root { --neon: #ff9500; --neon-blue: #00e5ff; --bg-overlay: rgba(5, 11, 24, 0.85); }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { width: 100%; height: 100%; margin: 0; padding: 0; background: var(--bg); color: white; font-family: -apple-system, sans-serif; overflow: hidden; position: fixed; }
-        .screen { display: none; height: 100vh; flex-direction: column; width: 100%; max-width: 500px; margin: 0 auto; background: rgba(10, 15, 28, 0.6); backdrop-filter: blur(20px); position: relative; border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+        
+        body, html { 
+            margin: 0; padding: 0; width: 100%; height: 100%; 
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: url('https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070') no-repeat center center fixed;
+            background-size: cover; color: white; overflow: hidden;
+        }
+
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-overlay); backdrop-filter: blur(8px); }
+
+        .container { position: relative; z-index: 10; max-width: 500px; margin: 0 auto; height: 100vh; display: flex; flex-direction: column; }
+
+        /* --- หน้า Lobby (เลือกห้อง) --- */
+        .screen { display: none; flex-direction: column; height: 100%; padding: 20px; }
         .active { display: flex; }
-        .overlay-panel { display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(5, 11, 24, 0.98); z-index: 500; padding: 20px; flex-direction: column; backdrop-filter: blur(25px); }
-        .room-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; width: 100%; margin: 15px 0; }
-        .room-btn { background: rgba(0, 255, 209, 0.1); border: 1px solid var(--border); border-radius: 12px; padding: 12px; color: #fff; cursor: pointer; text-align: center; }
-        .room-btn.selected { border-color: var(--neon); background: rgba(255, 149, 0, 0.3); box-shadow: 0 0 15px var(--neon); }
-        .top-nav { display: flex; justify-content: space-between; padding: 10px 15px; background: rgba(0,0,0,0.5); align-items: center; border-bottom: 1px solid var(--border); }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 10px 15px; }
-        .stat-card { background: rgba(50, 70, 209, 0.3); border: 1px solid var(--border); padding: 8px; border-radius: 10px; text-align: center; font-size: 0.65rem; }
-        .stat-card b { color: var(--neon); font-size: 0.85rem; display: block; }
-        .board-container { padding: 0 15px 10px 15px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
-        .slot { aspect-ratio: 1/1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 0.55rem; color: #fff; text-align: center; }
-        .slot.active-chaser { border-color: #fff; background: var(--neon); color: #000; font-weight: bold; transform: scale(1.1); box-shadow: 0 0 20px var(--neon); z-index: 10; }
-        .chat-section { height: 320px; border: 1px solid var(--border); border-radius: 12px; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; overflow: hidden; }
-        #chatBox { flex: 1; padding: 10px; overflow-y: auto; font-size: 0.75rem; }
-        .btn-play-action { flex: 2; background: linear-gradient(145deg, var(--neon), var(--neon-hot)); border: none; color: #000; border-radius: 15px; font-size: 1.2rem; font-weight: 900; }
+
+        .room-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 30px; }
+        .room-card { 
+            background: rgba(255,255,255,0.1); border: 2px solid var(--border); border-radius: 15px; padding: 20px; 
+            text-align: center; cursor: pointer; transition: 0.3s; 
+        }
+        .room-card:active { transform: scale(0.95); background: var(--neon); color: black; }
+        .room-card.selected { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); }
+
+        /* --- หน้า Game (บอร์ด 12 ช่อง) --- */
+        .board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; background: rgba(0,0,0,0.4); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .slot { 
+            aspect-ratio: 1/1; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); 
+            border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            font-size: 0.6rem; text-align: center; transition: all 0.1s; 
+        }
+        
+        /* ไฟวิ่ง */
+        .slot.chasing { background: var(--neon); color: black; box-shadow: 0 0 25px var(--neon); border-color: white; transform: scale(1.1); z-index: 5; }
+        .slot.winner { animation: flash 0.3s infinite alternate; color: black; font-weight: bold; }
+        @keyframes flash { from { background: #fff; } to { background: var(--neon); } }
+
+        .btn-pay { width: 100%; padding: 18px; margin-top: 20px; border: none; border-radius: 15px; background: linear-gradient(90deg, var(--neon), #ff5e00); color: white; font-size: 1.2rem; font-weight: bold; box-shadow: 0 4px 15px rgba(255,149,0,0.3); }
+        
+        #timer { font-size: 2.5rem; font-weight: 900; text-align: center; color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); margin: 10px 0; }
     </style>
 </head>
 <body>
 
-<div id="lobby" class="screen active">
-    <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:30px;">
-        <h1 style="color:#fff; font-size: 2.4rem; margin: 0;">WORLD CHASER</h1>
-        <div id="worldStatus" style="font-size:0.8rem; color:var(--neon); margin: 15px 0;">สถานะ: กำลังรอ World ID...</div>
-        <div class="room-grid">
-            <div class="room-btn selected" onclick="selectRoom(0.001, this)"><b>0.001</b><span>WLD</span></div>
-            <div class="room-btn" onclick="selectRoom(0.01, this)"><b>0.01</b><span>WLD</span></div>
-            <div class="room-btn" onclick="selectRoom(0.1, this)"><b>0.1</b><span>WLD</span></div>
-            <div class="room-btn" onclick="selectRoom(1.0, this)"><b>1.0</b><span>WLD</span></div>
-        </div>
-        <button id="btnJoin" onclick="joinGame()" style="width:100%; padding:18px; background:var(--neon); border:none; border-radius:15px; font-weight:900;">เข้าสู่ห้องเกม</button>
-    </div>
-</div>
+<div class="overlay"></div>
 
-<div id="game" class="screen">
-    <div class="top-nav">
-        <b id="headerPlayerName">PLAYER</b>
-        <div id="roomTag" style="color:var(--neon);">WLD 0.001</div>
-    </div>
-    <div class="stats-grid">
-        <div class="stat-card">รางวัล (WLD)<br><b id="prizeDisplay">0.0000</b></div>
-        <div class="stat-card">นับถอยหลัง<br><b id="timer">WAIT</b></div>
-        <div class="stat-card">ผู้เล่น<br><b id="pCountTop">0/12</b></div>
-    </div>
-    <div class="board-container" id="board"></div>
-    <div style="display:flex; padding:15px; gap:10px;">
-        <div class="chat-section" style="flex:1.5;">
-            <div id="chatBox"></div>
+<div class="container">
+    <div id="lobby" class="screen active">
+        <h1 style="text-align:center; color:var(--neon); margin-top:50px;">WORLD CHASER</h1>
+        <p id="statusTxt" style="text-align:center; font-size:0.8rem; opacity:0.7;">กำลังเชื่อมต่อ World ID...</p>
+        
+        <div class="room-grid">
+            <div class="room-card" onclick="selectRoom('0.001')"><h3>0.001</h3><p>WLD</p></div>
+            <div class="room-card" onclick="selectRoom('0.01')"><h3>0.01</h3><p>WLD</p></div>
+            <div class="room-card" onclick="selectRoom('0.1')"><h3>0.1</h3><p>WLD</p></div>
+            <div class="room-card" onclick="selectRoom('1.0')"><h3>1.0</h3><p>WLD</p></div>
         </div>
-        <button class="btn-play-action" id="btnPlay" onclick="handlePayment()">PLAY</button>
+        <button class="btn-pay" style="margin-top:auto; margin-bottom:40px;" onclick="enterRoom()">เข้าสู่ห้องที่เลือก</button>
+    </div>
+
+    <div id="game" class="screen">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <button onclick="location.reload()" style="background:none; border:none; color:white;">⬅ กลับ</button>
+            <span id="currentRoomDisplay">ROOM: 0.001 WLD</span>
+        </div>
+        
+        <div id="timer">WAITING</div>
+
+        <div class="board" id="board">
+            </div>
+
+        <div style="text-align:center; margin:15px 0;">
+            <small>รางวัลในพูล: <span id="poolAmt">0.00</span> WLD</small>
+        </div>
+
+        <button class="btn-pay" id="payBtn" onclick="payEntry()">PLAY (ยืนยันจ่ายเงิน)</button>
+        <div id="log" style="font-size:0.7rem; color:#aaa; margin-top:10px; height:60px; overflow:hidden;"></div>
     </div>
 </div>
 
 <script>
-    const socket = io("https://world-chaser.onrender.com");
-    const ADMIN_WALLET = "0xe20a539852fa7ea1dc943683edb89b6b95ec54a8";
-    let userWallet = "", userName = "GUEST", currentRoomFee = 0.001, playersInRoom = [];
+    const socket = io();
+    let myWallet = "", myName = "", selectedRoom = "0.001", roomPlayers = [];
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    // --- 1. ฟังก์ชัน Init SDK (ตัวแก้ค้าง) ---
-    async function initSDK() {
-        try {
-            // ติดตั้ง MiniKit
-            window.MiniKit.install();
-            
-            // รอสักครู่เพื่อให้ SDK พร้อม
-            setTimeout(() => {
-                if (window.MiniKit.isInstalled()) {
-                    // MiniKit สมัยใหม่จะดึง Wallet ได้จากตัวแปรนี้
-                    userWallet = window.MiniKit.walletAddress || "";
-                    if(userWallet) {
-                        userName = "User_" + userWallet.substring(2, 6);
-                        document.getElementById('worldStatus').textContent = "เชื่อมต่อสำเร็จ: " + userName;
-                        socket.emit('auth_user', { wallet: userWallet, username: userName });
-                    } else {
-                        document.getElementById('worldStatus').textContent = "กรุณาตรวจสอบ Wallet ใน World App";
-                    }
-                } else {
-                    document.getElementById('worldStatus').textContent = "กรุณาเปิดใน World App";
-                }
-            }, 500);
-        } catch (e) {
-            console.error("SDK Error:", e);
+    // 1. เริ่มต้นระบบ
+    async function init() {
+        window.MiniKit.install();
+        await new Promise(r => setTimeout(r, 1500));
+        if (window.MiniKit.walletAddress) {
+            myWallet = window.MiniKit.walletAddress;
+            myName = "Player_" + myWallet.substring(2, 6);
+            document.getElementById('statusTxt').textContent = "ID: " + myName;
+            socket.emit('auth_user', { wallet: myWallet, username: myName });
         }
     }
+    window.onload = init;
 
-    window.onload = initSDK;
-
-    // --- 2. ระบบชำระเงิน (MiniKit Pay) ---
-    async function handlePayment() {
-        try {
-            const payload = {
-                reference: "game_" + Date.now(),
-                to: ADMIN_WALLET,
-                tokens: [{ symbol: "WLD", amount: currentRoomFee.toString() }],
-                description: "World Chaser Game Entry"
-            };
-
-            // คำสั่งใหม่ของ MiniKit
-            const { finalPayload } = await window.MiniKit.commands.pay(payload);
-
-            if (finalPayload.status === "success") {
-                socket.emit('player_paid', { 
-                    room: currentRoomFee.toString(), 
-                    wallet: userWallet, 
-                    txHash: finalPayload.transaction_id 
-                });
-            }
-        } catch (e) {
-            console.log("Payment Canceled");
-        }
+    // 2. จัดการหน้าจอและห้อง
+    function selectRoom(amt) {
+        selectedRoom = amt;
+        document.querySelectorAll('.room-card').forEach(c => c.classList.remove('selected'));
+        event.currentTarget.classList.add('selected');
     }
 
-    // --- Logic เกมอื่นๆ ---
-    function selectRoom(fee, btn) {
-        currentRoomFee = fee;
-        document.querySelectorAll('.room-btn').forEach(b => b.classList.remove('selected'));
-        btn.classList.add('selected');
-    }
-
-    function joinGame() {
-        if(!userWallet) return alert("รอสักครู่ กำลังเชื่อมต่อ...");
-        socket.emit('join_room', { room: currentRoomFee.toString(), wallet: userWallet });
+    function enterRoom() {
         document.getElementById('lobby').classList.remove('active');
         document.getElementById('game').classList.add('active');
-        document.getElementById('headerPlayerName').textContent = userName;
+        document.getElementById('currentRoomDisplay').textContent = `ROOM: ${selectedRoom} WLD`;
+        socket.emit('join_room', { room: selectedRoom, wallet: myWallet });
+        renderBoard();
     }
 
-    socket.on('update_players', (data) => {
-        playersInRoom = data;
-        const board = document.getElementById('board');
-        board.innerHTML = "";
-        for(let i=0; i<12; i++) {
-            const slot = document.createElement('div');
-            slot.className = 'slot';
-            if(playersInRoom[i]) {
-                slot.textContent = playersInRoom[i].username;
-                if(playersInRoom[i].isReady) slot.style.borderColor = "var(--neon)";
+    // 3. จ่ายเงินผ่าน MiniKit
+    async function payEntry() {
+        try {
+            const payload = {
+                reference: "chase_" + Date.now(),
+                to: "0xe20a539852fa7ea1dc943683edb89b6b95ec54a8", // กระเป๋าแอดมินคุณ
+                tokens: [{ symbol: "WLD", amount: selectedRoom }],
+                description: `เข้าเล่นห้อง ${selectedRoom}`
+            };
+            const { finalPayload } = await window.MiniKit.commands.pay(payload);
+            if (finalPayload.status === "success") {
+                socket.emit('player_paid', { room: selectedRoom, wallet: myWallet, txHash: finalPayload.transaction_id });
+                addLog("✅ จ่ายเงินสำเร็จ! รอคนอื่นร่วมสนุก...");
             }
-            board.appendChild(slot);
-        }
-        document.getElementById('pCountTop').textContent = playersInRoom.length + "/12";
-    });
+        } catch (e) { addLog("❌ ยกเลิกการจ่ายเงิน"); }
+    }
 
-    socket.on('timer_update', (sec) => { document.getElementById('timer').textContent = sec + "s"; });
-    
-    socket.on('game_result', (data) => {
-        const chat = document.getElementById('chatBox');
-        chat.innerHTML += `<div>🏆 ผู้ชนะ: ${data.winner} (${data.prize} WLD)</div>`;
-        chat.scrollTop = chat.scrollHeight;
-    });
+    // 4. บอร์ดและแอนิเมชัน
+    function renderBoard() {
+        const b = document.getElementById('board');
+        b.innerHTML = "";
+        for(let i=0; i<12; i++) {
+            const s = document.createElement('div');
+            s.className = 'slot';
+            if(roomPlayers[i]) {
+                s.innerHTML = `<b>${roomPlayers[i].username}</b><br>${roomPlayers[i].isReady ? '✅' : '⏳'}`;
+                if(roomPlayers[i].isReady) s.style.borderColor = "var(--neon)";
+            } else {
+                s.innerHTML = `<span style="opacity:0.3">ว่าง</span>`;
+            }
+            b.appendChild(s);
+        }
+    }
+
+    function runWinAnim(data) {
+        const slots = document.querySelectorAll('.slot');
+        let current = 0;
+        let totalSteps = 24 + roomPlayers.findIndex(p => p.wallet === data.wallet);
+        let speed = 60;
+
+        function step() {
+            slots.forEach(s => s.classList.remove('chasing'));
+            const idx = current % 12;
+            slots[idx].classList.add('chasing');
+            playTick();
+            
+            current++;
+            if (current < totalSteps) {
+                if(totalSteps - current < 8) speed += 40;
+                setTimeout(step, speed);
+            } else {
+                slots[idx].classList.add('winner');
+                addLog(`🏆 ยินดีด้วย! ${data.winner} ชนะรางวัล`);
+            }
+        }
+        step();
+    }
+
+    // 5. เสียงและ Log
+    function playTick() {
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        osc.connect(g); g.connect(audioCtx.destination);
+        osc.frequency.value = 1200; g.gain.value = 0.05;
+        osc.start(); osc.stop(audioCtx.currentTime + 0.03);
+    }
+
+    function addLog(m) { document.getElementById('log').innerHTML = `> ${m}<br>` + document.getElementById('log').innerHTML; }
+
+    // 6. Socket Events
+    socket.on('update_players', (data) => { roomPlayers = data; renderBoard(); });
+    socket.on('timer_update', (t) => { document.getElementById('timer').textContent = t + "s"; });
+    socket.on('game_result', (data) => { runWinAnim(data); });
 </script>
 </body>
 </html>
