@@ -169,18 +169,27 @@
     socket.on('online_count', (count) => { document.getElementById('onlineCount').textContent = count; });
 
     // --- ฟังก์ชันหลัก ---
-    async function initSDK() {
-        try {
-            const { MiniAppSDK } = window.worldcoinMiniAppSdk;
-            const sdk = new MiniAppSDK();
-            const profile = await sdk.getProfile();
-            userName = profile.name || "User_" + profile.wallet_address.substring(2,6);
-            userWallet = profile.wallet_address;
-            document.getElementById('worldStatus').textContent = "World ID: " + userName;
-            socket.emit('auth_user', { wallet: userWallet, username: userName });
-        } catch (e) { document.getElementById('worldStatus').textContent = "Browser Mode"; }
+   async function initSDK() {
+    try {
+        const { MiniAppSDK } = window.worldcoinMiniAppSdk;
+        // ก๊อบปี้ App ID จาก URL ในรูปแรกของคุณมาใส่ตรงนี้
+        const sdk = new MiniAppSDK({
+            app_id: "app_7a67630a2166eb8b191d7fc4123781ee" 
+        });
+        
+        const profile = await sdk.getProfile();
+        // ถ้าเชื่อมต่อสำเร็จ userName จะไม่ใช่ GUEST อีกต่อไป
+        userName = profile.name || "User_" + profile.wallet_address.substring(2,6);
+        userWallet = profile.wallet_address;
+        
+        document.getElementById('worldStatus').textContent = "Connected: " + userName;
+        socket.emit('auth_user', { wallet: userWallet, username: userName });
+        updateBoard();
+    } catch (e) { 
+        console.error("SDK Error:", e);
+        document.getElementById('worldStatus').textContent = "Please open in World App";
     }
-    initSDK();
+}
 
     function selectRoom(fee, btn) {
         currentRoomFee = fee;
