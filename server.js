@@ -74,6 +74,100 @@ io.on('connection', (socket) => {
     });
 
     socket.on('player_paid', async ({ room, wallet, txHash }) => {
+    const currentRoom = rooms[room];
+    
+    try {
+        // 1. รอให้ Transaction ยืนยันบน Chain อย่างน้อย 1 Block
+        const receipt = await provider.waitForTransaction(txHash, 1);
+        
+        // 2. ตรวจสอบสถานะว่าสำเร็จ (1 = success, 0 = failed)
+        if (receipt.status === 1) {
+            
+            // 3. ตรวจสอบ Log ของการโอนเงิน (Transfer event)
+            // เราใช้ interface ของ WLD มาช่วยถอดรหัส
+            const iface = new ethers.Interface(WLD_ABI);
+            
+            let isVerified = false;
+            receipt.logs.forEach((log) => {
+                try {
+                    const parsedLog = iface.parseLog(log);
+                    // เช็คว่าเป็นรายการโอน (Transfer) และเข้ากระเป๋าเรา (to) ครบตามจำนวน (amount) หรือไม่
+                    if (
+                        parsedLog.name === "transfer" &&
+                        parsedLog.args.to.toLowerCase() === process.env.ADMIN_WALLET_ADDRESS.toLowerCase() &&
+                        ethers.formatUnits(parsedLog.args.value, 18) === room // room คือค่าธรรมเนียม เช่น "0.001"
+                    ) {
+                        isVerified = true;
+                    }
+                } catch (e) { /* ข้าม Log ที่ไม่ใช่การโอน */ }
+            });
+
+            if (isVerified) {
+                const player = currentRoom.players.find(p => p.wallet === wallet);
+                if (player && !player.isReady) {
+                    player.isReady = true;
+                    player.txHash = txHash;
+                    
+                    const readyPlayers = currentRoom.players.filter(p => p.isReady);
+                    if (readyPlayers.length >= 2 && currentRoom.status === "waiting") {
+                        startCountdown(room);
+                    }
+                }
+                io.to(room).emit('update_players', currentRoom.players);
+            }
+        }
+    } catch (err) {
+        console.error("WLD Verification Failed:", err);
+    }
+});
+
+function startCountdown(roomKey) {
+    const room = rooms[roomKey];
+    if (room.timer) return;
+    room.status = "counting";
+    room.timer = setInterval(() => {
+        room.countdown--;
+        io.to(roomKey).emit('timer_update', room.countdown);
+        if (room.countdown <= 0) {
+            clearInterval(room.timer);
+            room.timer = null;
+            runGameLogic(roomKey);
+        }
+    }, 1000);
+}
+
+async function runGameLogic(roomKey) {
+    const room = rooms[roomKey];
+    const contestants = room.players.filter(p => p.isReady);
+    if (contestants.length < 2) {
+        room.status = "waiting";
+        room.countdown = 10;
+        return;
+    }
+    const winner = contestants[Math.floor(Math.random() * contestants.length)];
+    const totalPool = parseFloat(roomKey) * contestants.length;
+    const prizeAmount = totalPool * 0.85;
+
+    io.to(roomKey).emit('game_result', { winner: winner.username, wallet: winner.wallet, prize: prizeAmount });
+
+    try {
+        const tx = await wldContract.transfer(winner.wallet, ethers.parseUnits(prizeAmount.toFixed(8), 18));
+        await History.create({
+            room: roomKey, players: contestants.map(p => p.wallet),
+            winner: winner.username, winnerWallet: winner.wallet,
+            prize: prizeAmount, txHash: tx.hash
+        });
+    } catch (err) { console.error("Payout Error:", err); }
+
+    setTimeout(() => {
+        room.players = room.players.filter(p => !p.isReady);
+        room.status = "waiting";
+        room.countdown = 10;
+        io.to(roomKey).emit('update_players', room.players);
+    }, 5000);
+}
+
+server.listen(process.env.PORT || 3000, () => console.log("🚀 Server running"));    socket.on('player_paid', async ({ room, wallet, txHash }) => {
         const currentRoom = rooms[room];
         const player = currentRoom.players.find(p => p.wallet === wallet);
         if (player && !player.isReady) {
