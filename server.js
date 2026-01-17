@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config(); 
 const express = require('express');
 const { Server } = require('socket.io');
 const mongoose = require('mongoose');
@@ -13,12 +13,11 @@ app.use(express.static(__dirname));
 const server = require('http').createServer(app);
 const io = new Server(server, { cors: { origin: "*" } });
 
-// --- ส่วนส่งหน้าเว็บ ---
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// --- ฐานข้อมูล MongoDB ---
+// --- MongoDB & Schemas ---
 const userSchema = new mongoose.Schema({
     wallet: { type: String, required: true, unique: true },
     username: String,
@@ -38,7 +37,7 @@ const historySchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const History = mongoose.model('History', historySchema);
 
-// --- ตั้งค่า Blockchain ---
+// --- Blockchain Config ---
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const adminWallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 const WLD_ABI = [
@@ -47,7 +46,6 @@ const WLD_ABI = [
 ];
 const wldContract = new ethers.Contract(process.env.WLD_TOKEN_ADDRESS, WLD_ABI, adminWallet);
 
-// --- สถานะห้องเกม ---
 const rooms = {
     "0.001": { players: [], status: "waiting", countdown: 10, timer: null },
     "0.01":  { players: [], status: "waiting", countdown: 10, timer: null },
@@ -60,10 +58,12 @@ mongoose.connect(process.env.MONGO_URI).then(() => console.log("✅ MongoDB Conn
 // --- Socket.io Logic ---
 io.on('connection', (socket) => {
     socket.on('auth_user', async ({ wallet, username }) => {
-        const user = await User.findOneAndUpdate(
-            { wallet }, { username, lastSeen: Date.now() }, { upsert: true, new: true }
-        );
-        socket.emit('user_ready', user);
+        try {
+            const user = await User.findOneAndUpdate(
+                { wallet }, { username, lastSeen: Date.now() }, { upsert: true, new: true }
+            );
+            socket.emit('user_ready', user);
+        } catch (e) { console.error("Auth Error:", e); }
     });
 
     socket.on('join_room', async ({ room, wallet }) => {
@@ -80,9 +80,8 @@ io.on('connection', (socket) => {
     socket.on('player_paid', async ({ room, wallet, txHash }) => {
         const currentRoom = rooms[room];
         try {
-            // ตรวจสอบ Transaction จริงบน World Chain
             const receipt = await provider.waitForTransaction(txHash, 1);
-            if (receipt.status === 1) {
+            if (receipt && receipt.status === 1) {
                 const iface = new ethers.Interface(WLD_ABI);
                 let isVerified = false;
                 
@@ -91,8 +90,7 @@ io.on('connection', (socket) => {
                         const parsedLog = iface.parseLog(log);
                         if (
                             parsedLog.name === "Transfer" &&
-                            parsedLog.args.to.toLowerCase() === process.env.ADMIN_WALLET_ADDRESS.toLowerCase() &&
-                            ethers.formatUnits(parsedLog.args.value, 18) === room
+                            parsedLog.args.to.toLowerCase() === process.env.ADMIN_WALLET_ADDRESS.toLowerCase()
                         ) {
                             isVerified = true;
                         }
@@ -103,18 +101,14 @@ io.on('connection', (socket) => {
                     const player = currentRoom.players.find(p => p.wallet === wallet);
                     if (player && !player.isReady) {
                         player.isReady = true;
-                        player.txHash = txHash;
-                        const readyPlayers = currentRoom.players.filter(p => p.isReady);
-                        if (readyPlayers.length >= 2 && currentRoom.status === "waiting") {
+                        if (currentRoom.players.filter(p => p.isReady).length >= 2 && currentRoom.status === "waiting") {
                             startCountdown(room);
                         }
                     }
                     io.to(room).emit('update_players', currentRoom.players);
                 }
             }
-        } catch (err) {
-            console.error("WLD Verification Failed:", err);
-        }
+        } catch (err) { console.error("Verification Error:", err); }
     });
 });
 
@@ -136,43 +130,26 @@ function startCountdown(roomKey) {
 async function runGameLogic(roomKey) {
     const room = rooms[roomKey];
     const contestants = room.players.filter(p => p.isReady);
-    
-    if (contestants.length < 2) {
-        room.status = "waiting";
-        room.countdown = 10;
-        return;
-    }
+    if (contestants.length < 2) { room.status = "waiting"; room.countdown = 10; return; }
 
     const winner = contestants[Math.floor(Math.random() * contestants.length)];
-    const totalPool = parseFloat(roomKey) * contestants.length;
-    const prizeAmount = totalPool * 0.85;
+    const prizeAmount = (parseFloat(roomKey) * contestants.length) * 0.85;
 
     io.to(roomKey).emit('game_result', { winner: winner.username, wallet: winner.wallet, prize: prizeAmount });
 
     try {
-        const tx = await wldContract.transfer(winner.wallet, ethers.parseUnits(prizeAmount.toFixed(8), 18));
-        const receipt = await tx.wait(); // รอการยืนยันบล็อกเชน
-
-        if (receipt.status === 1) {
-            await History.create({
-                room: roomKey, 
-                players: contestants.map(p => p.wallet),
-                winner: winner.username, 
-                winnerWallet: winner.wallet,
-                prize: prizeAmount, 
-                txHash: tx.hash
-            });
-        }
-    } catch (err) {
-        console.error("Payout Error:", err);
-    }
+        // ปรับทศนิยมให้ปลอดภัยก่อนส่ง
+        const safePrize = Math.floor(prizeAmount * 1000000) / 1000000;
+        const tx = await wldContract.transfer(winner.wallet, ethers.parseUnits(safePrize.toString(), 18));
+        await tx.wait();
+        await History.create({ room: roomKey, winner: winner.username, prize: safePrize, txHash: tx.hash });
+    } catch (err) { console.error("Payout Failed:", err); }
 
     setTimeout(() => {
         room.players = room.players.filter(p => !p.isReady);
-        room.status = "waiting";
-        room.countdown = 10;
+        room.status = "waiting"; room.countdown = 10;
         io.to(roomKey).emit('update_players', room.players);
-    }, 10000); // ตั้งไว้ 10 วินาทีตามที่แนะนำครับ
+    }, 10000);
 }
 
 server.listen(process.env.PORT || 3000, () => console.log("🚀 Server running correctly"));
